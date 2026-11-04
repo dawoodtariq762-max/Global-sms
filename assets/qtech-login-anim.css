@@ -1,0 +1,253 @@
+/* ==========================================================================
+   GLOBAL SMS — LOGIN DESIGN v2 "Clean Centered"
+   assets/qtech-login-anim.css  (shared by login.html + 4 portal logins)
+
+   - Card is ALWAYS centered (desktop + mobile), single clean light card
+     on a deep navy background with two soft drifting glows.
+   - Only transform/opacity animate; everything gated on html.qtech-anim-on.
+   - Class contract unchanged: body.gx-login / body.gx-portal-login,
+     .shell (login.html) or .card (portal logins).
+   ========================================================================== */
+
+/* ---------- page ---------- */
+html body.gx-light:is(.gx-login,.gx-portal-login){
+  min-height:100vh; min-height:100dvh;
+  margin:0 !important;
+  padding:max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)) !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  background:
+    radial-gradient(900px 520px at 15% -10%, rgba(21,94,239,.45) 0%, rgba(21,94,239,0) 60%),
+    radial-gradient(800px 520px at 100% 110%, rgba(0,190,178,.32) 0%, rgba(0,190,178,0) 60%),
+    linear-gradient(165deg,#0a1126 0%,#0d1733 55%,#080d1d 100%) !important;
+  background-attachment:fixed !important;
+  color:#0f172a; color-scheme:light;
+  font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;
+  overflow-x:hidden;
+}
+
+/* ---------- background layer (built by JS) ---------- */
+.qtech-login-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.qtech-login-bg > span{position:absolute;display:block;border-radius:50%;will-change:transform;}
+.qlb-a{width:60vmax;height:60vmax;left:-18vmax;top:-22vmax;
+  background:radial-gradient(circle,rgba(21,94,239,.40) 0%,rgba(21,94,239,.12) 45%,rgba(21,94,239,0) 70%);}
+.qlb-b{width:52vmax;height:52vmax;right:-18vmax;bottom:-22vmax;
+  background:radial-gradient(circle,rgba(0,200,180,.30) 0%,rgba(0,200,180,.10) 45%,rgba(0,200,180,0) 70%);}
+.qtech-anim-on .qlb-a{animation:lgDriftA 40s ease-in-out infinite;}
+.qtech-anim-on .qlb-b{animation:lgDriftB 48s ease-in-out infinite;}
+@keyframes lgDriftA{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(6vw,5vh,0) scale(1.1)}}
+@keyframes lgDriftB{0%,100%{transform:translate3d(0,0,0) scale(1.05)}50%{transform:translate3d(-7vw,-5vh,0) scale(1)}}
+
+/* ---------- the card ---------- */
+html body.gx-light.gx-login .shell,
+html body.gx-light.gx-portal-login > .card{
+  position:relative; z-index:1;
+  display:block !important; grid-template-columns:none !important;
+  width:100% !important; max-width:420px !important; min-height:0 !important;
+  margin:0 auto !important;
+  padding:34px 30px 26px !important;
+  background:#fff !important;
+  border:1px solid rgba(255,255,255,.7) !important;
+  border-radius:24px !important;
+  overflow:visible !important;
+  color:#0f172a !important;
+  -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  box-shadow:0 30px 80px rgba(2,6,23,.55), 0 0 0 1px rgba(255,255,255,.05) !important;
+}
+html body.gx-light.gx-login .login-panel{background:transparent !important;padding:0 !important;}
+.qtech-anim-on :is(.shell,.card){animation:lgIn .6s cubic-bezier(.16,.84,.3,1) both;}
+@keyframes lgIn{from{opacity:0;transform:translate3d(0,18px,0) scale(.98)}to{opacity:1;transform:none}}
+
+/* ---------- logo ---------- */
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.brand,.logo){
+  display:flex !important; justify-content:center; align-items:center;
+  width:auto !important; height:auto !important; margin:0 auto 14px !important;
+  padding:0 !important; border:0 !important; border-radius:0 !important;
+  background:none !important; box-shadow:none !important; overflow:visible !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.brand img,.logo img){
+  display:block; height:58px !important; width:auto !important; max-width:100% !important;
+  object-fit:contain !important; border-radius:0 !important;
+  mix-blend-mode:normal !important; -webkit-mask-image:none !important; mask-image:none !important;
+  filter:none !important; background:transparent !important;
+}
+
+/* ---------- type ---------- */
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.login-head h2,.title,.card h1,h1){
+  color:#0f172a !important; -webkit-text-fill-color:#0f172a !important; background:none !important;
+  font-size:25px !important; font-weight:800 !important; letter-spacing:-.03em !important;
+  text-align:center; margin:4px 0 4px !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.eyebrow,.login-head .eyebrow){
+  color:#155eef !important; text-shadow:none !important; text-align:center;
+  font-size:11px !important; letter-spacing:.16em !important; font-weight:800 !important; margin-bottom:6px !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.sub,.login-head p){
+  color:#64748b !important; text-align:center; font-size:13.5px !important; margin:0 0 20px !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) .login-head{margin-bottom:20px !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) .login-head p{margin-bottom:0 !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.hint,.footer){
+  color:#64748b !important; text-align:center; font-size:12px !important; margin-top:18px !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.field label,.card label,.checkbox,.row-between){
+  color:#334155 !important; font-weight:700;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) .field{margin-bottom:15px !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) .field label,
+html body.gx-light.gx-portal-login .card label{display:block; font-size:13px !important; margin:0 0 7px !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) .row-between a{color:#155eef !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) .row-between a:hover{text-decoration:underline;}
+
+/* ---------- inputs ---------- */
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.shell,.card) input:not([type=checkbox]){
+  width:100%; height:48px !important; min-height:48px !important;
+  padding:0 14px !important;
+  background:#f8fafc !important; color:#0f172a !important;
+  border:1.5px solid #e2e8f0 !important; border-radius:14px !important;
+  font-size:15px !important; box-shadow:none !important; outline:none;
+  transition:border-color .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+html body.gx-light.gx-login .input-wrap input:not([type=checkbox]){padding-left:44px !important;}
+html body.gx-light.gx-login .input-wrap input.pass-input{padding-right:70px !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) input::placeholder{color:#94a3b8 !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.shell,.card) input:not([type=checkbox]):focus{
+  background:#fff !important; border-color:#155eef !important;
+  box-shadow:0 0 0 4px rgba(21,94,239,.14) !important;
+}
+html body.gx-light.gx-login .input-wrap > svg{stroke:#94a3b8 !important;transition:stroke .18s ease;}
+html body.gx-light.gx-login .input-wrap:focus-within > svg{stroke:#155eef !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) input:-webkit-autofill,
+html body.gx-light:is(.gx-login,.gx-portal-login) input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#0f172a !important;
+  -webkit-box-shadow:0 0 0 1000px #f1f5f9 inset !important; box-shadow:0 0 0 1000px #f1f5f9 inset !important;
+  caret-color:#0f172a !important;
+}
+html body.gx-light.gx-login .checkbox input{width:18px !important;height:18px !important;min-height:0 !important;accent-color:#155eef;}
+
+/* show/hide + captcha */
+html body.gx-light:is(.gx-login,.gx-portal-login) .toggle-pass{
+  background:#eaf1ff !important; color:#0b43be !important; border:0 !important; box-shadow:none !important;
+  transition:background .15s ease !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) .toggle-pass:hover{background:#dbe7ff !important;}
+html body.gx-light.gx-login .captcha-row{grid-template-columns:128px minmax(0,1fr) !important;gap:10px !important;}
+html body.gx-light.gx-login .captcha-box{
+  height:48px !important; padding:0 8px !important;
+  background:#eaf1ff !important; border:1.5px dashed #a9c2ff !important; border-radius:14px !important;
+  color:#1e1b4b !important; box-shadow:none !important; gap:8px !important;
+}
+html body.gx-light.gx-login #captchaText{
+  color:#1e1b4b !important; text-shadow:none !important; font-size:18px !important; font-weight:800 !important;
+  letter-spacing:.05em !important; white-space:nowrap; font-variant-numeric:tabular-nums;
+}
+html body.gx-light.gx-login .refresh-btn{
+  width:30px !important; height:30px !important; min-width:30px !important; border-radius:9px !important;
+  background:#155eef !important; color:#fff !important; border:0 !important; box-shadow:none !important;
+}
+html body.gx-light.gx-login .refresh-btn:hover{background:#0b43be !important;transform:none !important;}
+html body.gx-light.gx-login .refresh-btn svg{stroke:#fff !important;}
+html body.gx-light.gx-login .refresh-btn.qt-spin svg{animation:lgSpin .5s ease;}
+@keyframes lgSpin{to{transform:rotate(360deg)}}
+
+/* ---------- primary button ---------- */
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.shell,.card) form :is(.btn,button:not([type=button])){
+  position:relative; overflow:hidden;
+  display:block; width:100% !important; height:50px !important; min-height:50px !important;
+  margin-top:4px !important; padding:0 !important;
+  background:linear-gradient(135deg,#155eef 0%,#3b7bf5 45%,#0d84e0 100%) !important;
+  color:#fff !important; border:0 !important; border-radius:14px !important;
+  font-size:15px !important; font-weight:800 !important; letter-spacing:.02em; cursor:pointer;
+  box-shadow:0 10px 24px rgba(21,94,239,.38) !important;
+  transition:transform .15s ease, box-shadow .2s ease, filter .2s ease !important;
+  animation:none !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.shell,.card) form :is(.btn,button:not([type=button])):hover{
+  transform:translateY(-1px); filter:brightness(1.05);
+  box-shadow:0 14px 30px rgba(21,94,239,.45) !important;
+}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.shell,.card) form :is(.btn,button:not([type=button])):active{transform:translateY(0) scale(.99);}
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.shell,.card) form :is(.btn,button:not([type=button])):disabled{opacity:.7;cursor:not-allowed;}
+.qt-ripple{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;pointer-events:none;
+  background:rgba(255,255,255,.4);transform:scale(0);animation:lgRipple .6s ease-out forwards;}
+@keyframes lgRipple{to{transform:scale(28);opacity:0}}
+.qt-busy{cursor:progress !important;}
+.qt-busy::before{content:"";position:absolute;left:0;bottom:0;height:3px;width:40%;background:rgba(255,255,255,.85);
+  transform:translate3d(-100%,0,0);animation:lgBusy 1s ease-in-out infinite;}
+@keyframes lgBusy{to{transform:translate3d(250%,0,0)}}
+
+/* ---------- messages ---------- */
+html body.gx-light:is(.gx-login,.gx-portal-login) .msg{border-radius:12px !important;text-align:center;}
+html body.gx-light:is(.gx-login,.gx-portal-login) .msg.error{background:#fef2f2 !important;color:#b91c1c !important;border:1px solid #fecaca !important;}
+html body.gx-light:is(.gx-login,.gx-portal-login) .msg.success,
+html body.gx-light.gx-portal-login .msg.ok{background:#ecfdf5 !important;color:#047857 !important;border:1px solid #a7f3d0 !important;}
+html body.gx-light.gx-portal-login .msg.err{background:#fef2f2 !important;color:#b91c1c !important;border:1px solid #fecaca !important;}
+html body.gx-light.gx-portal-login .msg:empty{display:none;}
+.qtech-anim-on form.qt-shake{animation:lgShake .45s cubic-bezier(.36,.07,.19,.97) both;}
+@keyframes lgShake{10%,90%{transform:translate3d(-1px,0,0)}20%,80%{transform:translate3d(3px,0,0)}30%,50%,70%{transform:translate3d(-5px,0,0)}40%,60%{transform:translate3d(5px,0,0)}}
+
+/* Test Panel pill */
+html body.gx-light.gx-login .ams-test-pill{
+  position:absolute; top:16px; right:18px; z-index:2;
+  background:#eaf1ff !important; color:#0b43be !important; border:0 !important;
+  font-size:11px; font-weight:800; padding:5px 11px; border-radius:999px; text-decoration:none;
+}
+html body.gx-light.gx-login .ams-test-pill:hover{background:#dbe7ff !important;}
+
+/* keyboard focus */
+html body.gx-light:is(.gx-login,.gx-portal-login) :is(.btn,button,.row-between a):focus-visible{outline:2px solid #155eef;outline-offset:3px;}
+
+/* ---------- animation toggle ---------- */
+.login-anim-toggle{
+  position:fixed; top:14px; right:14px; z-index:60;
+  display:flex !important; align-items:center !important; gap:9px !important; flex-wrap:nowrap !important;
+  padding:6px 11px !important; border-radius:999px !important;
+  background:rgba(255,255,255,.12) !important; border:1px solid rgba(255,255,255,.22) !important;
+  color:#e2e8f0 !important; font-size:11.5px !important; font-weight:700 !important;
+  box-shadow:none !important;
+}
+.login-anim-label{color:#e2e8f0 !important;font-size:11.5px !important;font-weight:700 !important;margin:0 !important;padding:0 !important;white-space:nowrap;cursor:pointer;user-select:none;}
+.login-anim-switch,
+body:is(.gx-light,.gx-dark):is(.gx-login,.gx-portal-login) .login-anim-toggle .login-anim-switch{
+  appearance:none !important; -webkit-appearance:none !important;
+  position:relative !important; flex:0 0 auto;
+  width:38px !important; min-width:38px !important; max-width:38px !important;
+  height:21px !important; min-height:21px !important; margin:0 !important; padding:0 !important;
+  border:0 !important; border-radius:999px !important;
+  background:#64748b !important; box-shadow:none !important; cursor:pointer; outline:none;
+  transition:background .2s ease;
+}
+.login-anim-switch:checked,
+body:is(.gx-light,.gx-dark):is(.gx-login,.gx-portal-login) .login-anim-toggle .login-anim-switch:checked{background:#00c8b4 !important;}
+.login-anim-switch::after{content:"";position:absolute;left:2px;top:2px;width:17px;height:17px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .2s cubic-bezier(.4,0,.2,1);}
+.login-anim-switch:checked::after{transform:translateX(17px);}
+.login-anim-switch:focus-visible{outline:2px solid #7ce6dc !important;outline-offset:2px;}
+.login-anim-state{display:none !important;}
+
+/* ---------- OFF / hidden tab / reduced motion ---------- */
+.qtech-anim-off .qtech-login-bg > span,
+.qtech-anim-off :is(.shell,.card),
+.qtech-anim-off form{animation:none !important;}
+.qtech-anim-paused .qtech-login-bg > span{animation-play-state:paused !important;}
+@media (prefers-reduced-motion:reduce){
+  html:not(.qtech-anim-on) *{animation:none !important;transition:none !important;}
+}
+
+/* ---------- mobile ---------- */
+@media (max-width:480px){
+  html body.gx-light:is(.gx-login,.gx-portal-login){padding:16px 12px !important;}
+  html body.gx-light.gx-login .shell,
+  html body.gx-light.gx-portal-login > .card{padding:28px 20px 22px !important;border-radius:22px !important;max-width:none !important;}
+  html body.gx-light:is(.gx-login,.gx-portal-login) :is(.login-head h2,.title,h1){font-size:22px !important;}
+  /* >=16px stops iOS zoom on focus */
+  html body.gx-light:is(.gx-login,.gx-portal-login) :is(.shell,.card) input:not([type=checkbox]){font-size:16px !important;height:50px !important;}
+  html body.gx-light.gx-login .captcha-row{grid-template-columns:112px minmax(0,1fr) !important;}
+  html body.gx-light.gx-login .captcha-box{height:50px !important;}
+  html body.gx-light.gx-login .row-between{min-height:40px;}
+  .login-anim-toggle{top:auto !important;bottom:12px;right:50% !important;transform:translateX(50%);}
+}
+@media (max-height:620px){
+  html body.gx-light:is(.gx-login,.gx-portal-login) :is(.brand img,.logo img){height:44px !important;}
+  html body.gx-light:is(.gx-login,.gx-portal-login) :is(.eyebrow,.login-head p,.sub){display:none !important;}
+  html body.gx-light:is(.gx-login,.gx-portal-login){align-items:flex-start !important;}
+}

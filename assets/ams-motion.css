@@ -1,0 +1,356 @@
+/* ============================================================================
+   ams-motion.css  —  GLOBAL SMS motion & interaction layer
+   ----------------------------------------------------------------------------
+   One coordinated set of transitions for every role panel (Admin, Manager,
+   Agent, Client) and the secondary panels (Management, Payment, Panel Sharing,
+   Branding). It is a REFINEMENT layer on top of ams-ds.css, not a new design.
+
+   Load order:  ... ams-ds.css -> ams-sidebar-unify.css -> ams-motion.css
+                -> /branding/runtime.css  (branding must stay last)
+
+   Rules this file follows
+   - Same scope prefix as ams-ds.css (html body.ams-panel.ams-ui:is(.ams-light,.ams-dark))
+     so it can win the !important fights deterministically by source order.
+   - Colours come from the existing --ds-* variables (and colour-mixes of them),
+     so the Branding Panel's palette overrides keep working. No new hex colours
+     except the white spinner tile on the logo, which mirrors Admin's .sb-logo.
+   - Only transform / opacity / visibility are animated, with two deliberate
+     exceptions that cannot be done otherwise: sub-menu height (max-height) and
+     the content offset when the desktop sidebar is collapsed (margin-left,
+     already animated by ams-ds.css before this file).
+   - Respects html.ds-lite (the existing low-end / user "animations off" mode)
+     and prefers-reduced-motion. Decorative motion is dropped in LITE mode;
+     structural motion (sidebar slide, sub-menu open) is kept, exactly as
+     ams-ds.css already does.
+   - Does NOT touch login pages, chat, or any API/business logic.
+   ========================================================================== */
+
+/* ---- 0. Tokens ---------------------------------------------------------- */
+html body.ams-panel.ams-ui {
+  --ams-motion-ease: var(--ds-ease, cubic-bezier(.22, .8, .24, 1));   /* decelerate: things arriving */
+  --ams-motion-out:  cubic-bezier(.4, 0, 1, 1);                       /* accelerate: things leaving  */
+  --ams-motion-fast: .16s;
+  --ams-motion-base: .24s;
+  --ams-motion-slow: .34s;
+  --ams-motion-step: 30ms;                                            /* stagger step */
+  --ams-motion-glow: rgba(8, 16, 34, .30);                            /* neutral lift shadow */
+  --ams-motion-ring: rgba(11,67,190, .38);                          /* focus / hover ring  */
+  --ams-motion-ring-soft: rgba(11,67,190, .22);
+}
+@supports (color: color-mix(in srgb, red 10%, blue)) {
+  html body.ams-panel.ams-ui {
+    --ams-motion-ring: color-mix(in srgb, var(--ds-brand, #0b43be) 40%, transparent);
+    --ams-motion-ring-soft: color-mix(in srgb, var(--ds-brand, #0b43be) 24%, transparent);
+  }
+}
+
+@keyframes ams-motion-fade   { from { opacity: 0; } }
+@keyframes ams-motion-rise   { from { opacity: 0; transform: translate3d(0, 10px, 0); } }
+@keyframes ams-motion-pop    { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.985); } }
+@keyframes ams-motion-menu   { from { opacity: 0; transform: translate3d(0, -6px, 0) scale(.98); } }
+@keyframes ams-motion-slide  { from { opacity: 0; transform: translate3d(-10px, 0, 0); } }
+@keyframes ams-motion-spin   { to { transform: rotate(360deg); } }
+
+/* ---- 1. Sidebar: coordinated open / close --------------------------------
+   Opening decelerates (.38s), closing accelerates away (.28s). The transition
+   that runs is the one of the DESTINATION state, so the two are declared on the
+   two states. Desktop default = open; mobile default = closed. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.sidebar, .rail, .appbar) {
+  transition: transform var(--ams-motion-slow) var(--ams-motion-ease), box-shadow var(--ams-motion-slow) var(--ams-motion-ease) !important;
+}
+html body.ams-panel.ams-ui.ams-ui-sb-collapsed:is(.ams-light, .ams-dark) :is(.sidebar, .rail, .appbar) {
+  transition: transform var(--ams-motion-base) var(--ams-motion-out), box-shadow var(--ams-motion-base) var(--ams-motion-out) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.main, .appbar ~ .content, .appbar + .content) {
+  transition: margin-left var(--ams-motion-slow) var(--ams-motion-ease) !important;
+}
+html body.ams-panel.ams-ui.ams-ui-sb-collapsed:is(.ams-light, .ams-dark) :is(.main, .appbar ~ .content, .appbar + .content) {
+  transition: margin-left var(--ams-motion-base) var(--ams-motion-out) !important;
+}
+@media (max-width: 900px) {
+  html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.sidebar, .rail, .appbar) {
+    transition: transform var(--ams-motion-base) var(--ams-motion-out), box-shadow var(--ams-motion-base) var(--ams-motion-out) !important;
+  }
+  html body.ams-panel.ams-ui.ams-ui-sb-open:is(.ams-light, .ams-dark) :is(.sidebar, .rail, .appbar),
+  html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.sidebar, .rail, .appbar).show {
+    transition: transform var(--ams-motion-slow) var(--ams-motion-ease), box-shadow var(--ams-motion-slow) var(--ams-motion-ease) !important;
+    box-shadow: 18px 0 44px -14px rgba(0, 0, 0, .5);
+  }
+}
+
+/* Every sidebar backdrop fades the same way. Admin/Management already did;
+   Manager (.mgr-mobile-overlay), Agent (.ams-ui-sb-overlay) and Client (.sb-overlay)
+   toggled display and popped in. They are now always rendered but inert while
+   closed, sit just under the sidebar (z 49 < 50) and never intercept clicks. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.overlay, .mgr-mobile-overlay, .ams-ui-sb-overlay, .sb-overlay) {
+  display: block !important;
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  background: rgba(8, 16, 34, .5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--ams-motion-base) ease, visibility 0s linear var(--ams-motion-base);
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.overlay, .mgr-mobile-overlay, .ams-ui-sb-overlay, .sb-overlay).show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--ams-motion-base) ease, visibility 0s;
+}
+
+/* Nav entries cascade in when the mobile drawer opens (first 9 only). */
+@media (max-width: 900px) {
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > * {
+    animation: ams-motion-slide var(--ams-motion-base) var(--ams-motion-ease) backwards;
+  }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(2) { animation-delay: calc(var(--ams-motion-step) * 1 + 60ms); }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(3) { animation-delay: calc(var(--ams-motion-step) * 2 + 60ms); }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(4) { animation-delay: calc(var(--ams-motion-step) * 3 + 60ms); }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(5) { animation-delay: calc(var(--ams-motion-step) * 4 + 60ms); }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(6) { animation-delay: calc(var(--ams-motion-step) * 5 + 60ms); }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(7) { animation-delay: calc(var(--ams-motion-step) * 6 + 60ms); }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(8) { animation-delay: calc(var(--ams-motion-step) * 7 + 60ms); }
+  html:not(.ds-lite) body.ams-panel.ams-ui.ams-ui-sb-open :is(.sb-nav, .rail-nav, .navtabs) > :nth-child(n+9) { animation-delay: calc(var(--ams-motion-step) * 8 + 60ms); }
+}
+
+/* ---- 2. Nav items & sub-menus -------------------------------------------- */
+/* Press / hover feedback. Same easing everywhere; no layout properties. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.nav-item, .sub-item, .ritem, .rsubitem, .navtab, .dropitem, .tab) {
+  transition: background-color var(--ams-motion-fast) ease, color var(--ams-motion-fast) ease,
+              box-shadow var(--ams-motion-fast) ease, transform var(--ams-motion-fast) var(--ams-motion-ease) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.nav-item, .ritem, .navtab, .tab):active { transform: scale(.985) !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.nav-item, .ritem, .navtab) > svg:first-child {
+  transition: transform var(--ams-motion-base) var(--ams-motion-ease), opacity var(--ams-motion-fast) ease;
+}
+@media (hover: hover) {
+  html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.nav-item, .ritem, .navtab):hover > svg:first-child { transform: scale(1.08); opacity: 1; }
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.sub-item, .rsubitem, .dropitem) :is(.dot, .d) {
+  transition: transform var(--ams-motion-base) var(--ams-motion-ease), background-color var(--ams-motion-fast) ease;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.sub-item, .rsubitem, .dropitem):is(:hover, .active) :is(.dot, .d) { transform: scale(1.5); }
+
+/* Chevron: identical on every panel (points right when closed, down when open).
+   Manager's markup draws a down-chevron, so it is pre-rotated to match. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.nav-item, .ritem, .navtab) > .chev {
+  transition: transform var(--ams-motion-base) var(--ams-motion-ease) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .navtab > .chev { transform: rotate(-90deg) !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .navtab.open > .chev { transform: rotate(0deg) !important; }
+
+/* Dropdown groups: Admin/Management/Agent use .submenu/.rsub (.open),
+   Manager uses .dropmenu (.show) inside its sidebar. All now open to their
+   MEASURED height (--ams-motion-h set by ams-motion.js; 480px fallback without JS)
+   instead of a fixed cap, so there is no dead time at the end of the open
+   animation and long groups are never clipped. Closed groups are
+   visibility:hidden so their links cannot be tabbed to. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.submenu, .rsub, .navtabs .dropmenu, .appbar .dropmenu) {
+  display: block !important;
+  position: static !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0;
+  visibility: hidden;
+  transition: max-height var(--ams-motion-base) var(--ams-motion-out), opacity var(--ams-motion-fast) ease,
+              visibility 0s linear var(--ams-motion-base) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.submenu.open, .rsub.open, .navtabs .dropmenu.show, .appbar .dropmenu.show) {
+  max-height: var(--ams-motion-h, 480px) !important;
+  opacity: 1;
+  visibility: visible;
+  transition: max-height var(--ams-motion-slow) var(--ams-motion-ease), opacity var(--ams-motion-base) ease, visibility 0s !important;
+}
+html:not(.ams-motion-ready) body.ams-panel.ams-ui :is(.submenu, .rsub, .dropmenu) { transition: none !important; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.submenu.open, .rsub.open, .navtabs .dropmenu.show, .appbar .dropmenu.show) > * {
+  animation: ams-motion-slide var(--ams-motion-base) var(--ams-motion-ease) backwards;
+}
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.submenu.open, .rsub.open, .navtabs .dropmenu.show, .appbar .dropmenu.show) > :nth-child(2) { animation-delay: 35ms; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.submenu.open, .rsub.open, .navtabs .dropmenu.show, .appbar .dropmenu.show) > :nth-child(3) { animation-delay: 70ms; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.submenu.open, .rsub.open, .navtabs .dropmenu.show, .appbar .dropmenu.show) > :nth-child(4) { animation-delay: 105ms; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.submenu.open, .rsub.open, .navtabs .dropmenu.show, .appbar .dropmenu.show) > :nth-child(n+5) { animation-delay: 140ms; }
+
+/* ---- 3. Page-to-page navigation ------------------------------------------
+   Three rules used to compete for .page (ams-ds.css ds-in + ds-fade, api.js
+   msPageFade). One wins now: the page fades, its direct blocks rise in a short
+   cascade. Card rows keep their own per-card entrance (ams-ds/unify), so
+   those containers are excluded to avoid animating twice. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .page { animation: none; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .page.active { animation: ams-motion-fade .22s ease; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .page.active > :nth-child(-n+6):not(.stats-grid):not(.dash-metrics):not(.ams-ui-cards):not(.ams-ui-wcards):not(.grid2):not(.table-wrap) {
+  animation: ams-motion-rise .36s var(--ams-motion-ease) backwards;
+}
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .page.active > :nth-child(2) { animation-delay: 40ms; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .page.active > :nth-child(3) { animation-delay: 80ms; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .page.active > :nth-child(4) { animation-delay: 120ms; }
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .page.active > :nth-child(n+5) { animation-delay: 160ms; }
+
+/* ---- 4. Cards -------------------------------------------------------------
+   Entrance is already staggered per card by ams-ds.css / sidebar-unify.css.
+   Added: lift + lighting on hover (pointer devices only), a clear keyboard
+   focus state, and a pressed state. All transform/box-shadow, no layout. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.stat-card, .dash-metric, .ams-ui-card, .ams-ui-wcard) {
+  transition: transform var(--ams-motion-base) var(--ams-motion-ease), box-shadow var(--ams-motion-base) var(--ams-motion-ease),
+              border-color var(--ams-motion-base) ease !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .card {
+  transition: box-shadow var(--ams-motion-base) var(--ams-motion-ease), border-color var(--ams-motion-base) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.stat-card, .dash-metric, .ams-ui-card, .ams-ui-wcard):hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: 0 16px 30px -16px var(--ams-motion-glow), 0 0 0 1px var(--ams-motion-ring-soft) !important;
+  }
+  html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .card:hover {
+    border-color: var(--ams-motion-ring-soft) !important;
+    box-shadow: 0 12px 28px -18px var(--ams-motion-glow) !important;
+  }
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.stat-card, .dash-metric, .ams-ui-card, .ams-ui-wcard):active { transform: translate3d(0, 0, 0) scale(.992); }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.stat-card, .dash-metric, .ams-ui-card, .ams-ui-wcard, [data-page]):focus-visible {
+  outline: 2px solid var(--ds-brand, #0b43be);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--ams-motion-ring-soft) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .card:focus-within { border-color: var(--ams-motion-ring-soft) !important; }
+
+/* ---- 5. Buttons & controls ------------------------------------------------
+   Controls that are clicked repeatedly (table actions, toolbars, pagination)
+   no longer move on hover; they change tone and shadow instead. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.btn, .tb-btn, .modal-close, .pagination button, .hamburger, .mgr-mobile-menu, .mgr-topbar-menu) {
+  transition: background-color var(--ams-motion-fast) ease, border-color var(--ams-motion-fast) ease, color var(--ams-motion-fast) ease,
+              box-shadow var(--ams-motion-fast) ease, filter var(--ams-motion-fast) ease, opacity var(--ams-motion-fast) ease,
+              transform .12s var(--ams-motion-ease) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.btn, .tb-btn):hover:not(:disabled) { transform: none !important; filter: brightness(1.06); }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.btn, .tb-btn, .modal-close, .pagination button, .hamburger, .mgr-mobile-menu, .mgr-topbar-menu):active:not(:disabled) {
+  transform: scale(.97) !important;
+  filter: brightness(.96);
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.btn, .tb-btn, .modal-close, .pagination button, .hamburger, .mgr-mobile-menu, .mgr-topbar-menu):focus-visible {
+  outline: 2px solid var(--ds-brand, #0b43be);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--ams-motion-ring);
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(input, select, textarea):focus-visible {
+  box-shadow: 0 0 0 3px var(--ams-motion-ring);
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.btn, .tb-btn, .pagination button):disabled,
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .btn[aria-disabled="true"] {
+  opacity: .55;
+  cursor: not-allowed;
+  filter: saturate(.7);
+  transform: none !important;
+}
+/* Loading: .is-loading / .loading / aria-busy="true" (ams-motion.js also sets
+   .is-loading on a .btn that is disabled while its label ends in "…" / "..."). The label
+   stays visible; a small ring spins in front of it. currentColor => theme-safe. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .btn:is(.is-loading, .loading, [aria-busy="true"]) {
+  pointer-events: none;
+  cursor: progress;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .btn:is(.is-loading, .loading, [aria-busy="true"])::before {
+  content: "";
+  flex: none;
+  width: 13px;
+  height: 13px;
+  margin-right: 8px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: ams-motion-spin .7s linear infinite;
+}
+
+/* ---- 6. Modals, dialogs, dropdown menus ------------------------------------
+   Static modals (.modal-overlay + .show, used by Admin/Manager/Agent/Management
+   and api.js profile/activity dialogs) now animate OUT as well as in: they are
+   always rendered but invisible and inert while closed (visibility:hidden also
+   removes them from tab order and the accessibility tree). Overlays that a page
+   shows with an inline style="display:..." are excluded and keep their behaviour.
+   Dialogs created already-open by script get the keyframe entrance only. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.modal-overlay, .ms-modal-backdrop):not([style*="display"]) {
+  display: flex !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+  transition: opacity var(--ams-motion-base) ease, visibility 0s linear var(--ams-motion-base);
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.modal-overlay, .ms-modal-backdrop).show:not([style*="display"]) {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  animation: ams-motion-fade var(--ams-motion-base) ease;
+  transition: visibility 0s;           /* entrance is the keyframe; the transition above is for the exit */
+  will-change: opacity;                /* only while open, so hidden dialogs hold no extra layers */
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.modal-overlay, .ms-modal-backdrop):not(.show):not([style*="display"]) :is(.modal, .ms-modal) {
+  opacity: 0;
+  transform: none;
+  transition: opacity var(--ams-motion-fast) ease;
+  animation: none !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.modal-overlay, .ms-modal-backdrop).show :is(.modal, .ms-modal) {
+  animation: ams-motion-pop var(--ams-motion-slow) var(--ams-motion-ease) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .ams-ui-legal-overlay { animation: ams-motion-fade var(--ams-motion-base) ease; }
+
+/* Custom select menus and floating dropdowns (shown by toggling display). */
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.sd-menu, .sd-options-list, .dropmenu:not(.navtabs .dropmenu):not(.appbar .dropmenu)) {
+  transform-origin: top center;
+  animation: ams-motion-menu var(--ams-motion-fast) var(--ams-motion-ease);
+}
+html:not(.ds-lite) body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .sd-option { transition: background-color var(--ams-motion-fast) ease, color var(--ams-motion-fast) ease; }
+
+/* Table rows: tone change only (no movement on repeated-use lists). */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) tbody tr { transition: background-color var(--ams-motion-fast) ease; }
+
+/* ---- 6b. Click-origin navigation -------------------------------------------
+   When a link or card is clicked, the page that opens grows out of the spot that
+   was clicked (ams-motion.js sets --ams-motion-ox/--ams-motion-oy and html.ams-motion-from), and a thin
+   brand-coloured bar sweeps across the top while the next page loads. Transform
+   and opacity only. Decorative, so LITE mode and reduced-motion drop it. */
+@keyframes ams-motion-zoom { from { opacity: 0; transform: scale(.97); } }
+@keyframes ams-motion-bar-go   { from { transform: scaleX(0); } to { transform: scaleX(.85); } }
+@keyframes ams-motion-bar-done { from { transform: scaleX(.85); opacity: 1; } 60% { transform: scaleX(1); opacity: 1; } to { transform: scaleX(1); opacity: 0; } }
+html:not(.ds-lite).ams-motion-from body.ams-panel.ams-ui:is(.ams-light, .ams-dark) :is(.page.active, .main > main) {
+  transform-origin: var(--ams-motion-ox, 50%) var(--ams-motion-oy, 20%);
+  animation: ams-motion-zoom .4s var(--ams-motion-ease) backwards;
+}
+.ams-motion-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 2147483000;
+  background: var(--ds-brand, #0b43be);
+  transform: scaleX(0); transform-origin: left center; pointer-events: none;
+}
+.ams-motion-bar.go   { animation: ams-motion-bar-go 1.4s cubic-bezier(.1, .7, .2, 1) forwards; }
+.ams-motion-bar.done { animation: ams-motion-bar-done .45s ease-out forwards; }
+html.ds-lite .ams-motion-bar { display: none; }
+
+/* "View report →" style links: underline grows in on hover/focus (transform only). */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .ams-metric-report-link { position: relative; text-decoration: none; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .ams-metric-report-link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px;
+  background: currentColor; transform: scaleX(0); transform-origin: left center;
+  transition: transform var(--ams-motion-base) var(--ams-motion-ease);
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .ams-metric-report-link:is(:hover, :focus-visible)::after { transform: scaleX(1); }
+
+/* ---- 7. Safety nets ---------------------------------------------------------
+   Keep motion off the compositor while the tab is hidden (ams-ds.js sets
+   html.ds-paused) and honour reduced-motion with a selector strong enough to
+   beat every rule above (the triple .ams-ui is deliberate). */
+html.ds-paused body.ams-ui :is(.stat-card, .dash-metric, .btn)::before { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  html body.ams-panel.ams-ui.ams-ui.ams-ui:is(.ams-light, .ams-dark) *,
+  html body.ams-panel.ams-ui.ams-ui.ams-ui:is(.ams-light, .ams-dark) *::before,
+  html body.ams-panel.ams-ui.ams-ui.ams-ui:is(.ams-light, .ams-dark) *::after {
+    animation-duration: .001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}

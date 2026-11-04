@@ -1,0 +1,331 @@
+/* ==========================================================================
+   GLOBAL SMS — SHARED PANEL CHROME (Phase-5 §2A, §2B, §2C, §2D, §2E)
+   --------------------------------------------------------------------------
+   Hand-written companion to the generated assets/ams-layout.css. Load order in
+   every panel:  ams.css -> ams-light.css -> ams-layout.css -> THIS FILE.
+
+   Everything here is shared by Admin, Manager, Agent and Client (and the Provider
+   Management console) and is written theme-first: the same rule block exists for
+   Light and for Dark, so the two themes differ in COLOUR ONLY.
+
+   Scoped to body.ams-panel. Login pages use ams-login / ams-portal-login, so none of
+   this touches them — they keep their own design (see §6C in ams.css).
+
+   Sections
+     1  §2A  hamburger + sidebar (collapse on wide screens, off-canvas on narrow)
+     2  §2B  sun/moon Light-Dark toggle button
+     3  §2C  filter / label row alignment contract (identical in both themes)
+     4  §2D  range-allocation and page heading contrast
+     5  §2E  Terms and Conditions first-run dialog
+     6  §2B  Dark colours for the searchable dropdown widget (All Managers /
+             All Agents / All Clients filters) — the dark layer had none
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1 · §2A --
+   One hamburger that works on desktop, laptop and mobile in every panel.
+   Admin/Client had open-only buttons, Agent's ☰ existed only under 900px and had
+   no overlay, and Manager had two menu buttons — one hidden at every width
+   (.mgr-mobile-menu) and one hidden on desktop (.mgr-topbar-menu). api.js (AMSNav)
+   now drives them all; this is the geometry and the colours.                 */
+body.ams-panel :is(.hamburger,.mgr-topbar-menu){
+  display:inline-flex!important;align-items:center;justify-content:center;
+  width:38px;min-width:38px;height:38px;min-height:38px;flex:0 0 auto;
+  border-width:1px;border-style:solid;border-radius:8px;cursor:pointer;
+  font-size:19px;font-weight:800;line-height:1;padding:0;
+}
+body.ams-panel :is(.hamburger,.mgr-topbar-menu) svg{width:20px;height:20px;stroke:currentColor;fill:none;}
+/* Manager's floating duplicate is retired: one menu button, in the top bar. */
+body.ams-panel .mgr-mobile-menu{display:none!important;}
+
+body.ams-light.ams-panel :is(.hamburger,.mgr-topbar-menu){background:#fff;border-color:#c8dced;color:#155f92;}
+body.ams-light.ams-panel :is(.hamburger,.mgr-topbar-menu):hover{background:#eaf5fc;border-color:#9fc9e4;color:#0e4570;}
+body.ams-dark.ams-panel :is(.hamburger,.mgr-topbar-menu){background:#16233a;border-color:#31445f;color:#cbd5e1;}
+body.ams-dark.ams-panel :is(.hamburger,.mgr-topbar-menu):hover{background:#1d2c42;border-color:#38bdf8;color:#f1f5f9;}
+
+/* While the mobile drawer is open, AMSNav temporarily body-mounts the same
+   hamburger so the drawer cannot cover its own close control. */
+@media(max-width:900px){
+  body.ams-panel .ams-ui-sb-float{
+    position:fixed!important;top:10px!important;
+    left:min(220px,calc(100vw - 52px))!important;z-index:80!important;
+    box-shadow:0 10px 24px rgba(6,12,24,.3)!important;
+  }
+}
+
+/* Dimming overlay: Admin's #overlay, Client's #sbOverlay and Manager's
+   #mgrMobileOverlay had no background at all, so an open mobile menu floated over
+   live content with no visual separation. Agent had none, so api.js creates
+   .ams-ui-sb-overlay there. One rule covers all four. */
+.ams-ui-sb-overlay{position:fixed;inset:0;z-index:45;display:none;background:rgba(6,12,24,.55);}
+.ams-ui-sb-overlay.show{display:block;}
+body.ams-panel :is(.overlay,.sb-overlay,.mgr-mobile-overlay){background:rgba(6,12,24,.55);}
+
+/* ---- wide screens: the button collapses the sidebar, content resizes ---- */
+@media(min-width:901px){
+  body.ams-panel :is(.sidebar,.rail,.side,.appbar){transition:transform .24s cubic-bezier(.4,0,.2,1), opacity .2s ease;}
+  body.ams-panel :is(.main,.content,.mgr-topbar){transition:margin-left .24s cubic-bezier(.4,0,.2,1),width .24s cubic-bezier(.4,0,.2,1);}
+  body.ams-panel.ams-ui-sb-collapsed :is(.sidebar,.rail,.side,.appbar){transform:translateX(-105%)!important;}
+  body.ams-panel.ams-ui-sb-collapsed :is(.layout>.main,.main){margin-left:0!important;}
+  body.ams-panel.ams-ui-sb-collapsed :is(.appbar~.content,.mgr-topbar){margin-left:0!important;width:100%!important;}
+  /* Agent's rail widens on hover; a collapsed rail must not peek back in */
+  body.ams-panel.ams-ui-sb-collapsed .rail:hover{transform:translateX(-105%)!important;}
+}
+
+/* ---- narrow screens: off-canvas, no overlap, no horizontal scroll ---- */
+@media(max-width:900px){
+  body.ams-panel{overflow-x:hidden;}
+  body.ams-panel :is(.sidebar,.rail,.side,.appbar){transform:translateX(-105%);transition:transform .26s cubic-bezier(.4,0,.2,1);}
+  body.ams-panel.ams-ui-sb-open :is(.sidebar,.rail,.side,.appbar){transform:translateX(0)!important;}
+  body.ams-panel :is(.layout>.main,.main){margin-left:0!important;}
+  body.ams-panel :is(.appbar~.content,.mgr-topbar){margin-left:0!important;width:100%!important;}
+}
+
+/* ---------------------------------------------------------------- 2 · §2B --
+   The sun/moon Light-Dark toggle that replaced the dead top-nav Settings gear.
+   It reuses .tb-btn geometry, so only paint and icon sizing live here.       */
+body.ams-panel .ams-ui-theme-toggle{display:inline-flex;align-items:center;justify-content:center;}
+body.ams-panel .ams-ui-theme-toggle svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+body.ams-light.ams-panel .ams-ui-theme-toggle{color:#155f92;}
+body.ams-light.ams-panel .ams-ui-theme-toggle:hover{color:#0e4570;}
+body.ams-dark.ams-panel .ams-ui-theme-toggle{color:#fcd34d;}
+body.ams-dark.ams-panel .ams-ui-theme-toggle:hover{color:#fde68a;}
+
+/* ---------------------------------------------------------------- 3 · §2C --
+   Filter / label row contract. The geometry that used to exist only in the light
+   layer now lives in ams-layout.css; these rules state the alignment contract
+   explicitly so "All Manager / All Agent / All Client" and their labels sit on one
+   line at the same height in BOTH themes, and wrap as whole items when the width
+   runs out. No hidden labels, no tiny text, no new hardcoded widths.
+   Note: .toolbar stays a block container (it holds .filter-row cards).        */
+body.ams-panel :is(.filter-row,.table-controls,.tc-left,.tc-right,.head-actions){
+  display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-width:0;
+}
+body.ams-panel .table-controls{justify-content:space-between;}
+body.ams-panel :is(.filter-row,.table-controls,.tc-left,.tc-right)>*{max-width:100%;min-width:0;}
+body.ams-panel :is(.filter-row,.tc-left,.tc-right) :is(label,.lbl,.ams-ui-filter-label){
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex:0 0 auto;
+}
+body.ams-panel :is(.filter-row,.tc-left,.tc-right) :is(select,input,.sd-trigger){flex:0 1 auto;}
+body.ams-panel .searchable-dropdown{min-width:190px;max-width:100%;}
+body.ams-panel .searchable-dropdown .sd-trigger{min-height:34px;}
+/* a dropdown container must not force the row to overflow */
+body.ams-panel :is(.filter-row,.tc-left,.tc-right) [id$="Container"]{max-width:100%;}
+
+/* ---------------------------------------------------------------- 4 · §2D --
+   Range-allocation and page headings: near-black in Light, near-white in Dark,
+   identical everywhere. Replaces the hardcoded #cfdcff / #5eead4 lines that were
+   unreadable on one of the two themes. Use class="ams-ui-page-heading" for any heading
+   that is not inside a .page-head.                                          */
+body.ams-panel :is(.page-head,.head) :is(h1,h2,h3),
+body.ams-panel .ams-ui-page-heading{color:#0f172a!important;}
+body.ams-dark.ams-panel :is(.page-head,.head) :is(h1,h2,h3),
+body.ams-dark.ams-panel .ams-ui-page-heading{color:#f8fafc!important;}
+body.ams-panel :is(.page-head,.head) :is(h1,h2,h3) :is(span,b,strong){color:inherit!important;}
+
+/* ---------------------------------------------------------------- 5 · §2E --
+   Terms and Conditions — the first-run acceptance dialog (api.js amsLegalGate).
+   Same component, same markup and same classes in all four panels.            */
+.ams-ui-legal-overlay{
+  position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;
+  justify-content:center;padding:18px;
+}
+body.ams-light .ams-ui-legal-overlay{background:rgba(15,32,54,.55);}
+body.ams-dark .ams-ui-legal-overlay{background:rgba(3,8,18,.72);}
+.ams-ui-legal-card{
+  width:100%;max-width:640px;max-height:92dvh;overflow:auto;border-radius:16px;
+  border-width:1px;border-style:solid;padding:0;
+}
+body.ams-light .ams-ui-legal-card{background:#fff;border-color:#dbe4f0;color:#0f172a;box-shadow:0 28px 70px rgba(9,25,48,.28);}
+body.ams-dark .ams-ui-legal-card{background:#111c2e;border-color:#2b3d59;color:#e2e8f0;box-shadow:0 28px 70px rgba(0,0,0,.6);}
+.ams-ui-legal-head{padding:22px 24px 16px;border-bottom-width:1px;border-bottom-style:solid;}
+body.ams-light .ams-ui-legal-head{border-bottom-color:#e6ecf5;}
+body.ams-dark .ams-ui-legal-head{border-bottom-color:#22324a;}
+.ams-ui-legal-eyebrow{
+  font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;
+}
+body.ams-light .ams-ui-legal-eyebrow{color:#0f2a52;}
+body.ams-dark .ams-ui-legal-eyebrow{color:#8bb0d9;}
+.ams-ui-legal-title{font-size:21px;font-weight:800;line-height:1.3;margin:0;letter-spacing:-.02em;}
+body.ams-light .ams-ui-legal-title{color:#0f172a;}
+body.ams-dark .ams-ui-legal-title{color:#f8fafc;}
+.ams-ui-legal-body{padding:18px 24px 6px;font-size:13.5px;line-height:1.7;}
+.ams-ui-legal-body p{margin:0 0 12px;}
+.ams-ui-legal-body p:last-child{margin-bottom:0;}
+body.ams-light .ams-ui-legal-body{color:#475569;}
+body.ams-dark .ams-ui-legal-body{color:#b6c6da;}
+.ams-ui-legal-body b{font-weight:700;}
+body.ams-light .ams-ui-legal-body b{color:#0f172a;}
+body.ams-dark .ams-ui-legal-body b{color:#f1f5f9;}
+.ams-ui-legal-body ul{margin:0 0 12px;padding-left:19px;}
+.ams-ui-legal-body li{margin-bottom:6px;}
+.ams-ui-legal-agree{
+  display:flex;align-items:flex-start;gap:10px;margin:16px 24px 0;padding:12px 13px;
+  border-width:1px;border-style:solid;border-radius:11px;cursor:pointer;font-size:13.5px;line-height:1.55;
+}
+body.ams-light .ams-ui-legal-agree{background:#f6f9fd;border-color:#d7e2ef;color:#1e293b;}
+body.ams-dark .ams-ui-legal-agree{background:#0d1728;border-color:#2b3d59;color:#dbe6f2;}
+.ams-ui-legal-agree input{width:18px;height:18px;flex:0 0 auto;margin-top:1px;}
+body.ams-light .ams-ui-legal-agree input{accent-color:#0b43be;}
+body.ams-dark .ams-ui-legal-agree input{accent-color:#38bdf8;}
+.ams-ui-legal-foot{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:16px 24px 20px;margin-top:14px;border-top-width:1px;border-top-style:solid;
+}
+body.ams-light .ams-ui-legal-foot{border-top-color:#e6ecf5;}
+body.ams-dark .ams-ui-legal-foot{border-top-color:#22324a;}
+.ams-ui-legal-btn{
+  border:0;border-radius:10px;padding:11px 22px;font-size:14px;font-weight:800;cursor:pointer;
+  min-height:42px;transition:filter .15s ease,opacity .15s ease;
+}
+.ams-ui-legal-btn:disabled{opacity:.45;cursor:not-allowed;}
+.ams-ui-legal-btn.primary{background:linear-gradient(180deg,#155eef,#0b43be);color:#fff;}
+.ams-ui-legal-btn.primary:not(:disabled):hover{filter:brightness(1.07);}
+body.ams-dark .ams-ui-legal-btn.primary{background:linear-gradient(180deg,#38bdf8,#155eef);color:#04121f;}
+.ams-ui-legal-note{margin-right:auto;font-size:12px;}
+body.ams-light .ams-ui-legal-note{color:#64748b;}
+body.ams-dark .ams-ui-legal-note{color:#94a3b8;}
+.ams-ui-legal-error{margin:0 24px 4px;font-size:12.5px;display:none;}
+.ams-ui-legal-error.show{display:block;}
+body.ams-light .ams-ui-legal-error{color:#b42318;}
+body.ams-dark .ams-ui-legal-error{color:#fca5a5;}
+@media(max-width:600px){
+  .ams-ui-legal-overlay{padding:10px;}
+  .ams-ui-legal-head{padding:18px 16px 13px;}
+  .ams-ui-legal-title{font-size:18px;}
+  .ams-ui-legal-body{padding:14px 16px 4px;font-size:13px;}
+  .ams-ui-legal-agree{margin:13px 16px 0;}
+  .ams-ui-legal-foot{padding:14px 16px 16px;flex-wrap:wrap;}
+  .ams-ui-legal-note{margin:0 0 4px;width:100%;}
+  .ams-ui-legal-btn{flex:1 1 auto;}
+}
+
+/* ---------------------------------------------------------------- 6 · §2B --
+   Dark paint for the searchable dropdown widget. The base rules hardcode #ddd
+   borders and no background, and the dark layer in ams.css never covered the
+   menu — so in Dark the "All Managers / All Agents / All Clients" filters opened
+   as a transparent list on a dark page. Colours only; geometry comes from
+   ams-layout.css and is identical in both themes.                          */
+body.ams-dark :is(.sd-menu,.dropmenu){background:#111c2e!important;border-color:#31445f!important;color:#e2e8f0!important;box-shadow:0 18px 40px rgba(0,0,0,.55)!important;}
+body.ams-dark .sd-search-box{background:#0f1a2b!important;border-bottom:1px solid #24344d!important;}
+body.ams-dark .sd-search-box input{background:#0b1626!important;border:1px solid #31445f!important;color:#e2e8f0!important;}
+body.ams-dark .sd-search-box input::placeholder{color:#7f93ab!important;}
+body.ams-dark .sd-options{background:#111c2e!important;}
+body.ams-dark .sd-option{background:#111c2e!important;color:#cbd5e1!important;border-bottom:1px solid #1d2c42!important;}
+body.ams-dark .sd-option:hover{background:#16233a!important;color:#fff!important;}
+body.ams-dark .sd-option.selected{background:#0b43be!important;color:#fff!important;}
+body.ams-dark .sd-no-results{background:#111c2e!important;color:#94a3b8!important;}
+body.ams-dark :is(.sd-label,.sd-caret){color:#cbd5e1!important;}
+body.ams-dark .sd-trigger:hover{border-color:#38bdf8!important;}
+body.ams-dark .sd-trigger:focus-visible{outline-color:#38bdf8!important;}
+
+/* ---------------------------------------------------------------- 7 · §2B --
+   Dark paint for the dashboard / inventory stat cards (.stat-card, .dash-metric,
+   .metric). The light layer gives them a white surface and muted labels; the dark
+   layer in ams.css covered .card/.panel/.ams-ui-wcard but not this family, so in
+   Dark the cards were transparent boxes with light-theme-only text colours.
+   Colours only — geometry comes from ams-layout.css and is identical in both
+   themes, so the theme switch cannot move anything.                          */
+body.ams-dark :is(.stat-card,.dash-metric,.metric){background:#111c2e!important;color:#e2e8f0!important;border-color:#24344d!important;box-shadow:0 1px 3px rgba(0,0,0,.35)!important;}
+body.ams-dark :is(.stat-card,.dash-metric,.metric)::before{background:none!important;box-shadow:none!important;}
+body.ams-dark :is(.stat-card,.dash-metric,.metric)::after{background:none!important;}
+body.ams-dark :is(.stat-info h3,.metric h3){color:#f1f5f9!important;}
+body.ams-dark :is(.stat-info p,.stat-info span,.metric p){color:#94a3b8!important;}
+body.ams-dark :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card.dash-metric{background:#111c2e!important;border-color:#24344d!important;border-top-color:#0b43be!important;}
+body.ams-dark :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card.dash-metric .stat-info h3{color:#f1f5f9!important;}
+body.ams-dark :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card.dash-metric .stat-info p{color:#94a3b8!important;}
+body.ams-dark .dash-go{background:#16233a!important;border-color:#31445f!important;color:#7dd3fc!important;}
+body.ams-dark .dash-go svg{stroke:#7dd3fc!important;color:#7dd3fc!important;}
+
+/* ---------------------------------------------------------------- 8 · §5B --
+   Self-allocation status box on the Agent panel (#saAlertBox / #saAlert). The
+   markup sets .ams-ui-sa-alert plus a severity modifier; before Phase-5 no rule
+   existed for these classes, so the "no range available", "limit reached" and
+   "self-allocation disabled" messages rendered as unstyled text. One component,
+   both themes, colour + spacing only.                                          */
+body.ams-panel .ams-ui-sa-alert{display:none;margin:0 0 14px;padding:12px 14px;border:1px solid #bfd4ea;border-left:4px solid #155eef;border-radius:10px;background:#f2f7fd;color:#1e3a5f;font-size:13px;line-height:1.55;}
+body.ams-panel .ams-ui-sa-alert b{font-weight:800;}
+body.ams-panel .ams-ui-sa-alert a{color:#0b43be;text-decoration:underline;}
+body.ams-panel .ams-ui-sa-warn{border-color:#ecd9ae;border-left-color:#b45309;background:#fdf6e7;color:#6b4409;}
+body.ams-panel .ams-ui-sa-warn a{color:#92400e;}
+body.ams-panel .ams-ui-sa-danger{border-color:#f0c4c4;border-left-color:#b42318;background:#fdf1f0;color:#7a1c15;}
+body.ams-panel .ams-ui-sa-danger a{color:#b42318;}
+body.ams-dark.ams-panel .ams-ui-sa-alert{border-color:#2b4a6d;border-left-color:#38bdf8;background:#10203a;color:#cfe3f7;}
+body.ams-dark.ams-panel .ams-ui-sa-alert a{color:#7dd3fc;}
+body.ams-dark.ams-panel .ams-ui-sa-warn{border-color:#5b4a1f;border-left-color:#fbbf24;background:#2a2410;color:#fde3a7;}
+body.ams-dark.ams-panel .ams-ui-sa-warn a{color:#fcd34d;}
+body.ams-dark.ams-panel .ams-ui-sa-danger{border-color:#5f2b2b;border-left-color:#f87171;background:#2a1414;color:#fecaca;}
+body.ams-dark.ams-panel .ams-ui-sa-danger a{color:#fca5a5;}
+
+/* ---------------------------------------------------------------- 9 · §3F --
+   Provider / Range Summary group row: the row that names the real provider above
+   its ranges. Both themes, so a group heading is readable in Dark too.          */
+body.ams-panel .ps-group-row>td{background:#eef4fb!important;border-top:1px solid #dbe6f3!important;color:#0b43be!important;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:8px 14px!important;}
+body.ams-dark.ams-panel .ps-group-row>td{background:#16233a!important;border-top:1px solid #24344d!important;color:#9dc0f5!important;}
+
+/* Part 3.1 — sidebar smoothness: add will-change and ensure no flicker */
+body.ams-panel :is(.sidebar,.rail,.side){will-change:transform;}
+body.ams-panel.ams-ui-sb-open .ams-ui-sb-overlay{animation:amsFadeIn .2s ease both;}
+@keyframes amsFadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ---------------------------------------------------------------- 10 · §5 --
+   Payment Management — Daily / Weekly / Monthly as three compact, box-like
+   options side by side (Daily, Weekly, Monthly in that exact order), stacking
+   when the width runs out. Geometry only: every id, handler and value is the
+   panel's own; the theme supplies the colours, so both themes read the same way. */
+.pm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;}
+.pm-grid>.card{margin:0;min-width:0;display:flex;flex-direction:column;padding:14px 15px 15px;}
+.pm-grid>.card>.card-head{padding:0 0 10px;margin-bottom:10px;}
+.pm-grid>.card>.card-head h3{font-size:14.5px;margin:0;}
+.pm-field{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:12.5px;margin-bottom:9px;min-width:0;}
+.pm-field>span{overflow-wrap:anywhere;}
+.pm-field :is(select,input){width:auto;min-width:96px;max-width:130px;margin:0;}
+.pm-row{display:flex;gap:10px;align-items:baseline;justify-content:space-between;font-size:12.5px;padding:6px 0;border-top:1px solid rgba(127,143,166,.22);min-width:0;}
+.pm-row:first-of-type{border-top:0;}
+.pm-row>span{flex:0 0 auto;opacity:.72;}
+.pm-row>b{text-align:right;overflow-wrap:anywhere;}
+@media(max-width:1100px){.pm-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:720px){.pm-grid{grid-template-columns:1fr;gap:10px;}}
+/* Selected / unselected states for the three schedule boxes. Nothing here changes
+   what is saved: the "selected" look follows keyboard/click focus (the box being
+   edited), so the states are purely visual and both themes read the same way. */
+body.ams-light .pm-grid>.card{border:1px solid #dbe4f0;box-shadow:0 1px 2px rgba(15,23,42,.04);}
+body.ams-light .pm-grid>.card:hover{border-color:#b9cee6;}
+body.ams-light .pm-grid>.card:focus-within,
+body.ams-light .pm-grid>.card.pm-active{border-color:#155eef;box-shadow:0 0 0 3px rgba(21,94,239,.12);}
+body.ams-dark .pm-grid>.card{border:1px solid #24344d;box-shadow:0 1px 2px rgba(0,0,0,.35);}
+body.ams-dark .pm-grid>.card:hover{border-color:#31445f;}
+body.ams-dark .pm-grid>.card:focus-within,
+body.ams-dark .pm-grid>.card.pm-active{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.16);}
+.pm-grid>.card>.card-head{border-bottom:1px solid rgba(127,143,166,.22);}
+
+/* ------------------------------------------------------------------ *
+ * Top-bar tooltips. [data-tip] renders above the control by default,
+ * but controls in a top bar sit at the very top of the viewport, so the
+ * bubble was clipped off-screen. Inside a bar it flips below instead,
+ * and stays above the bar's stacking context.
+ * ------------------------------------------------------------------ */
+html body.ams-panel :is(.topbar,.tb1,.appbar,.appbar-top,.mgr-topbar,.rail,.navshell) [data-tip]{overflow:visible;}
+html body.ams-panel :is(.topbar,.tb1,.appbar,.appbar-top,.mgr-topbar,.rail,.navshell) [data-tip]:hover::after{
+  top:calc(100% + 7px)!important;bottom:auto!important;
+  z-index:12000;white-space:nowrap;max-width:min(320px,80vw);
+}
+html body.ams-panel :is(.topbar,.tb1,.appbar,.appbar-top,.mgr-topbar,.rail,.navshell) [data-tip]:hover::before{
+  content:"";position:absolute;top:calc(100% + 2px)!important;bottom:auto!important;
+  left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:transparent!important;border-bottom-color:#111827;z-index:12001;
+}
+body.ams-dark html body.ams-panel :is(.topbar,.tb1,.appbar,.appbar-top,.mgr-topbar,.rail,.navshell) [data-tip]:hover::before{border-bottom-color:#e2e8f0!important;}
+html body.ams-dark.ams-panel :is(.topbar,.tb1,.appbar,.appbar-top,.mgr-topbar,.rail,.navshell) [data-tip]:hover::before{border-bottom-color:#e2e8f0!important;}
+/* the last control in the bar would push its bubble past the right edge */
+html body.ams-panel :is(.topbar,.tb1,.appbar,.appbar-top,.mgr-topbar) [data-tip]:last-child:hover::after{left:auto!important;right:0!important;transform:none!important;}
+
+/* ------------------------------------------------------------------ *
+ * Brand logo container. assets/ams.css:336 paints every brand logo
+ * box white (0,4,1) and the panels add a #ddd border, which put a white
+ * card behind the transparent mark now that the sidebar is dark. The
+ * logo sits on the dark rail, so the box must not paint at all.
+ * Scoped to .ams-panel.ams-ui (the role panels) so the supplied login-page
+ * design - which is its own reference - is untouched.
+ * ------------------------------------------------------------------ */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sb-logo,.brand .logo,.rail > .brand > .logo,.sb-brand .logo,.brand-logo .logo,.rail .logo){
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}

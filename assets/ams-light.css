@@ -1,0 +1,351 @@
+/* Approved cross-panel LIGHT presentation, scoped away from every login page.
+   No controls are hidden by action/permission, and no workflow IDs are changed.
+   Phase-5 §2C: COLOURS ONLY. All theme-neutral geometry (sizes, spacing,
+   flex/grid, font metrics) now lives in assets/ams-layout.css, which is
+   loaded after this file in every panel, so Light and Dark share one layout. */
+/* Approved cross-panel presentation, scoped away from every login page.
+   No controls are hidden by action/permission, and no workflow IDs are changed. */
+body.ams-light.ams-panel {
+ --bg:#f9f9f9;--panel:#fff;--panel2:#f5f5f5;--text:#333;--muted:#666;--border:#d3d3d3;--border2:#c7c7c7;--accent:#155eef;--blue:#155eef;background:#f9f9f9!important;color:#333!important;
+}
+body.ams-light.ams-panel :is(.sidebar,.rail,.side,.appbar) {
+ background:#eee!important;border-right-color:#ccc!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab) {
+ background:linear-gradient(#fafafa,#e7e7e7)!important;color:#444!important;border-bottom-color:#d0d0d0!important;box-shadow:inset 0 1px #fff!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab):hover {
+ background:#f5fbff!important;color:#006da5!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab,.sub-item,.rsubitem,.dropitem).active {
+ background:#fff!important;color:#006da5!important;box-shadow:inset 3px 0 #155eef!important;
+}
+body.ams-light.ams-panel :is(.topbar,.mgr-topbar,.top) {
+ background:linear-gradient(#fff,#efefef)!important;border-bottom-color:#ccc!important;box-shadow:0 1px 4px #0000000c!important;
+}
+body.ams-light.ams-panel :is(.breadcrumb,.crumb) {
+ background:linear-gradient(#f8f8f8,#eaeaea)!important;color:#555!important;border-color:#ccc;
+}
+body.ams-light.ams-panel :is(.card,.panel,.table-wrap,.toolbar,.modal-box,.ms-modal,.box) {
+ border-color:#ccc!important;background:#fff!important;box-shadow:0 1px 2px #00000006!important;
+}
+body.ams-light.ams-panel :is(.card-head,.modal-head,.ms-modal-head,.ms-notif-head) {
+ background:linear-gradient(#f5f5f5,#e2e2e2)!important;border-bottom-color:#c9c9c9!important;
+}
+body.ams-light.ams-panel .card-head .sub {
+ color:#6b6b6b!important;
+}
+body.ams-light.ams-panel :is(.toolbar,.table-controls,.table-foot) {
+ background:linear-gradient(#fafafa,#f0f0f0)!important;
+}
+body.ams-light.ams-panel :is(th,td) {
+ border-right-color:#e1e1e1!important;border-bottom-color:#ddd!important;
+}
+body.ams-light.ams-panel th {
+ background:#f8f8f8!important;color:#444!important;
+}
+body.ams-light.ams-panel td {
+ background:#fff;
+}
+body.ams-light.ams-panel tbody tr:hover td {
+ background:#f2f9fc;
+}
+body.ams-light.ams-panel :is(input,select,textarea,.sd-trigger) {
+ border-color:#bbb!important;background:#fff!important;color:#444!important;box-shadow:inset 0 1px 2px #00000006!important;
+}
+body.ams-light.ams-panel :is(input[type=checkbox],input[type=radio]) {
+ accent-color:#155eef;
+}
+body.ams-light.ams-panel :is(button,a,input,select,textarea,summary,[tabindex]):focus-visible {
+ outline-color:#155eef!important;
+}
+body.ams-light.ams-panel :is(.btn,.ams-btn,.ms-btn.primary) {
+ background:linear-gradient(#3079f5,#0b43be)!important;border-color:#0b43be!important;color:#fff!important;box-shadow:inset 0 1px #ffffff22!important;
+}
+body.ams-light.ams-panel :is(.btn-ghost,.btn.ghost,.exp-btns .btn,.exp-btns .ams-btn,.ms-btn.ghost) {
+ background:linear-gradient(#fff,#eaeaea)!important;border-color:#bbb!important;color:#444!important;
+}
+body.ams-light.ams-panel :is(.btn-red,.btn.red,.ams-red,.ams-btn.danger) {
+ background:linear-gradient(#ec6561,#c83732)!important;border-color:#b5312c!important;color:#fff!important;
+}
+body.ams-light.ams-panel :is(.btn-green,.btn.green,.ams-green):not(.exp-btns *) {
+ background:linear-gradient(#69ae59,#428d36)!important;border-color:#3b7f31!important;color:#fff!important;
+}
+body.ams-light.ams-panel :is(.btn-amber,.btn-orange,.ams-amber) {
+ background:linear-gradient(#ffd28c,#efa336)!important;color:#52320d!important;border-color:#d79939!important;
+}
+body.ams-light.ams-panel button:disabled {
+ opacity:.5;filter:grayscale(.3);
+}
+body.ams-light.ams-panel .pagination button {
+ border-color:#ccc!important;background:linear-gradient(#fff,#eee)!important;color:#555!important;
+}
+body.ams-light.ams-panel .pagination button.active {
+ background:#155eef!important;color:#fff!important;border-color:#0076b0!important;
+}
+body.ams-light.ams-panel :is(.stat-card.dash-metric,.card.metric,.ams-pay-chip) {
+ border-color:#c8c8c8!important;background:linear-gradient(#f5f5f5,#e4e4e4)!important;box-shadow:inset 0 1px #fff!important;
+}
+body.ams-light.ams-panel .stat-card.dash-metric .stat-info p {
+ color:#555!important;
+}
+body.ams-light.ams-panel .stat-card.dash-metric .stat-info h3 {
+ color:#2750a5!important;
+}
+body.ams-light.ams-panel .stat-card.dash-metric .stat-info span {
+ color:#666!important;
+}
+body.ams-light.ams-panel .dash-go {
+ border-color:#ddd!important;background:#fff!important;
+}
+body.ams-light.ams-panel .dash-go svg {
+ fill:none!important;stroke:#348eae!important;
+}
+body.ams-light.ams-panel .ams-shortcut {
+ background:linear-gradient(#fff,#eee);border-color:#d3d3d3;box-shadow:0 0 0 3px #ededed,inset 0 1px #fff;color:#444;
+}
+body.ams-light.ams-panel .ams-shortcut svg {
+ stroke:#348eae!important;
+}
+body.ams-light.ams-panel a.ams-shortcut:hover {
+ border-color:#348eae;background:#f5fbff;
+}
+body.ams-light.ams-panel .ams-shortcut.ams-metric-unavailable {
+ background:#f5f5f5;color:#737373;box-shadow:0 0 0 3px #f0f0f0;
+}
+body.ams-light.ams-panel .ams-metric-unavailable svg {
+ stroke:#999!important;
+}
+body.ams-light.ams-panel .ams-metric-unavailable small {
+ color:#777;
+}
+body.ams-light.ams-panel .ams-metric-related .ams-shortcut {
+ box-shadow:none;background:#fff;
+}
+body.ams-light.ams-panel .ams-metric-dashboard-status {
+ color:#62717a;
+}
+body.ams-light.ams-panel .ams-metric-dashboard-status.is-error {
+ color:#a12b26;border-color:#ecc7c5;background:#fff4f3;
+}
+body.ams-light.ams-panel .ams-metric-volume-total {
+ color:#777;
+}
+body.ams-light.ams-panel .ams-metric-volume-total strong {
+ color:#348eae!important;
+}
+body.ams-light.ams-panel .ams-metric-volume-svg text {
+ fill:#777;
+}
+body.ams-light.ams-panel .ams-metric-volume-svg circle:focus {
+ stroke:#123d51;
+}
+body.ams-light.ams-panel .ams-metric-chart-values {
+ color:#666;
+}
+body.ams-light.ams-panel .ams-metric-chart-empty {
+ color:#777;
+}
+body.ams-light.ams-panel .ams-metric-summary-icon {
+ background:#fff;border-color:#ddd;box-shadow:inset 0 0 0 3px #f8f8f8;color:#348eae;
+}
+body.ams-light.ams-panel .ams-metric-summary:nth-child(2) .ams-metric-summary-icon,body.ams-light.ams-panel .ams-metric-summary:nth-child(3) .ams-metric-summary-icon {
+ color:#bc8f24;
+}
+body.ams-light.ams-panel .ams-metric-summary strong {
+ color:#398439!important;
+}
+body.ams-light.ams-panel .ams-metric-summary span:not(.ams-metric-summary-icon) {
+ color:#996738;
+}
+body.ams-light.ams-panel .ams-metric-summary small {
+ color:#888;
+}
+body.ams-light.ams-panel .ams-pay-chip .t {
+ color:#555!important;
+}
+body.ams-light.ams-panel .ams-pay-chip .v {
+ color:#2750a5!important;
+}
+body.ams-light.ams-panel .ams-pay-chip .s {
+ color:#777!important;
+}
+body.ams-light.ams-panel .ams-metric-earning-card {
+ border-color:#d8d8d8;background:#fff;
+}
+body.ams-light.ams-panel .ams-metric-earning-card strong {
+ color:#777!important;
+}
+body.ams-light.ams-panel .ams-metric-earning-card small,body.ams-light.ams-panel .ams-metric-earning-state>p {
+ color:#777;
+}
+body.ams-light.ams-panel .ams-map-wrap path:not(.ams-on) {
+ fill:#e0e7ea;stroke:#fff;
+}
+body.ams-light.ams-panel .ams-map-wrap path:hover {
+ fill:#348eae!important;
+}
+body.ams-light.ams-panel .welcome-step span b {
+ background:transparent;
+}
+body.ams-light.ams-panel .ams-metric-report-link {
+ color:#0075aa;
+}
+body.ams-light.ams-panel .ams-metric-empty {
+ color:#777;
+}
+body.ams-light.ams-panel .rail>.logo {
+ background:#fff!important;box-shadow:none!important;
+}
+/* ===== Final colour pass, 28 September 2026 =====
+   Blue sidebar and light blue top bar, chosen to sit with the approved light theme,
+   the white GLOBAL SMS logo and the existing card/table surfaces. Visual only. */
+body.ams-light.ams-panel :is(.sidebar,.rail,.side,.appbar) {
+ background:linear-gradient(180deg,#155177 0%,#103f61 45%,#0b2f4c 100%)!important;border-right-color:#072844!important;box-shadow:inset -1px 0 0 #1e6492,6px 0 20px #0d3b5c12!important;
+}
+body.ams-light.ams-panel :is(.sb-brand,.rail>.brand,.side>.brand,.sidebar>.brand,.appbar-top) {
+ border-color:#1c5a82!important;
+}
+body.ams-light.ams-panel :is(.brand small,.sb-brand small,.brand-text small,.side .brand small,.rail>.brand-text small,.appbar-top small) {
+ color:#a8d3ef!important;
+}
+body.ams-light.ams-panel :is(.brand h1,.sb-brand h1,.brand-text h1,.side .brand b,.rail>.brand-text h1) {
+ color:#fff!important;
+}
+body.ams-light.ams-panel :is(.sb-sec,.sb-section,.rsec) {
+ color:#8fbede!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab) {
+ background:transparent!important;border-bottom-color:#1b5678!important;color:#d6e8f4!important;box-shadow:none!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab) svg {
+ stroke:#a3cde9!important;color:#a3cde9!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab):hover {
+ background:#ffffff1c!important;color:#fff!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab,.sub-item,.rsubitem,.dropitem).active {
+ background:#fff!important;color:#0d3b5c!important;box-shadow:inset 3px 0 0 #7fc6ec!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab,.sub-item,.rsubitem,.dropitem).active svg {
+ stroke:#0d3b5c!important;color:#0d3b5c!important;
+}
+body.ams-light.ams-panel :is(.sub-item,.rsubitem,.dropitem) {
+ background:#10405f!important;color:#c5dcec!important;border-bottom-color:#1b5678!important;
+}
+body.ams-light.ams-panel :is(.sub-item,.rsubitem,.dropitem):hover {
+ background:#17577c!important;color:#fff!important;
+}
+body.ams-light.ams-panel :is(.sub-item,.rsubitem,.dropitem).active {
+ background:#1d6892!important;color:#fff!important;
+}
+body.ams-light.ams-panel .rail>.logo,body.ams-light.ams-panel :is(.sb-brand,.side>.brand) .logo {
+ box-shadow:0 1px 6px #041e300f!important;
+}
+/* Manager navigation surface — 29 September 2026 audit fix (visual only).
+   Manager is the only panel that renders its menu with .navtabs / .dropmenu, and
+   ams.css paints both of them white. The menu items inside are styled for the dark
+   sidebar (pale blue text), so the white container left the labels nearly unreadable.
+   Making the menu containers carry the same dark surface as Admin's .sb-nav and Agent's
+   .rail-nav (transparent over the sidebar gradient / the dark submenu surface) restores
+   one consistent colour system. No layout, markup or behaviour change. */
+body.ams-light.ams-panel .navtabs {
+ background:transparent!important;box-shadow:none!important;
+}
+body.ams-light.ams-panel .dropmenu {
+ background:#0f405f!important;border-color:#1b5678!important;box-shadow:none!important;
+}
+body.ams-light.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab,.sub-item,.rsubitem,.dropitem) :is(.lbl,.chev) {
+ color:currentColor!important;
+}
+body.ams-light.ams-panel :is(.topbar,.mgr-topbar,.top,.tb1) {
+ background:linear-gradient(#ffffff 0%,#eef6fb 100%)!important;border-bottom-color:#c3daeb!important;box-shadow:0 1px 5px #0d3b5c14!important;
+}
+body.ams-light.ams-panel :is(.topbar,.mgr-topbar,.top,.tb1) :is(.tb-title,.clock,.tb-date) {
+ color:#0e4570!important;
+}
+body.ams-light.ams-panel .tb-btn {
+ background:#fff!important;border-color:#c8dced!important;
+}
+body.ams-light.ams-panel .tb-btn svg {
+ stroke:#155f92!important;
+}
+body.ams-light.ams-panel .tb-btn:hover {
+ background:#eaf5fc!important;border-color:#9fc9e4!important;
+}
+body.ams-light.ams-panel .hamburger {
+ color:#155f92!important;background:transparent!important;
+}
+body.ams-light.ams-panel .hamburger svg {
+ stroke:#155f92!important;
+}
+body.ams-light.ams-panel :is(.who,.user-chip,.chip-user) {
+ background:#eef6fb!important;border-color:#c8dced!important;color:#123f60!important;
+}
+body.ams-light.ams-panel .who :is(.nm,.rl) {
+ color:#123f60!important;
+}
+body.ams-light.ams-panel .who .av {
+ background:linear-gradient(#1a6fa8,#12557f)!important;color:#fff!important;
+}
+body.ams-light.ams-panel .mgr-mobile-menu {
+ background:#fff!important;border-color:#c8dced!important;color:#155f92!important;
+}
+/* Dashboard card accents — muted professional palette, not random bright colours. */
+body.ams-light.ams-panel .ams-metric-acc-1 {
+ --ams-metric-accent:#1a6ba8;--ams-metric-tint:#eaf4fb;--ams-metric-edge:#bdd9ec;
+}
+body.ams-light.ams-panel .ams-metric-acc-2 {
+ --ams-metric-accent:#12776c;--ams-metric-tint:#e8f5f2;--ams-metric-edge:#b9dcd6;
+}
+body.ams-light.ams-panel .ams-metric-acc-3 {
+ --ams-metric-accent:#3d4fa4;--ams-metric-tint:#edeffb;--ams-metric-edge:#c8cfef;
+}
+body.ams-light.ams-panel .ams-metric-acc-4 {
+ --ams-metric-accent:#9a6a12;--ams-metric-tint:#fdf5e6;--ams-metric-edge:#ecd9ae;
+}
+body.ams-light.ams-panel .ams-metric-acc-5 {
+ --ams-metric-accent:#2f7a37;--ams-metric-tint:#ebf6ec;--ams-metric-edge:#c5dec5;
+}
+body.ams-light.ams-panel .ams-metric-acc-6 {
+ --ams-metric-accent:#0f6f96;--ams-metric-tint:#e9f4f9;--ams-metric-edge:#c2dcea;
+}
+body.ams-light.ams-panel .ams-shortcut[class*="ams-metric-acc-"] {
+ background:linear-gradient(#ffffff,var(--ams-metric-tint))!important;border-color:var(--ams-metric-edge)!important;box-shadow:0 0 0 3px #ededed,inset 0 3px 0 var(--ams-metric-accent)!important;
+}
+body.ams-light.ams-panel .ams-shortcut[class*="ams-metric-acc-"] svg {
+ stroke:var(--ams-metric-accent)!important;
+}
+body.ams-light.ams-panel .ams-shortcut[class*="ams-metric-acc-"]>span {
+ color:#2b4657!important;
+}
+body.ams-light.ams-panel a.ams-shortcut[class*="ams-metric-acc-"]:hover {
+ background:linear-gradient(#ffffff,var(--ams-metric-tint))!important;border-color:var(--ams-metric-accent)!important;
+}
+body.ams-light.ams-panel #page-dashboard .stat-card.dash-metric[class*="ams-metric-acc-"] {
+ background:linear-gradient(#ffffff,var(--ams-metric-tint))!important;border-color:var(--ams-metric-edge)!important;box-shadow:inset 0 3px 0 var(--ams-metric-accent),inset 0 1px #fff!important;
+}
+body.ams-light.ams-panel #page-dashboard .stat-card.dash-metric[class*="ams-metric-acc-"] .dash-go {
+ background:#fff!important;border-color:var(--ams-metric-edge)!important;
+}
+body.ams-light.ams-panel #page-dashboard .stat-card.dash-metric[class*="ams-metric-acc-"] .dash-go svg {
+ stroke:var(--ams-metric-accent)!important;
+}
+body.ams-light.ams-panel #page-dashboard .stat-card.dash-metric[class*="ams-metric-acc-"] .stat-info p {
+ color:#3d5a6d!important;
+}
+body.ams-light.ams-panel #page-dashboard .stat-card.dash-metric[class*="ams-metric-acc-"] .stat-info h3 {
+ color:#164a79!important;
+}
+body.ams-light.ams-panel .ams-copy-inline {
+ border-color:#c6d9e8;background:#fff;color:#1a6ba8;
+}
+body.ams-light.ams-panel .ams-copy-inline svg {
+ stroke:currentColor;fill:none;
+}
+body.ams-light.ams-panel .ams-copy-inline:hover {
+ background:#eaf4fb;border-color:#8fc0e0;
+}
+body.ams-light.ams-panel .ams-copy-inline.is-copied {
+ background:#ebf6ec;border-color:#8fbf95;color:#2f7a37;
+}

@@ -1,0 +1,61 @@
+<!doctype html><html lang="en" class="ams-light"><head><script src="/assets/ams-storage.js?v=gsms-20261104"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="/assets/ams-favicon.png?v=gsms-20261104"><title>GLOBAL SMS — Payment Panel</title><style>html{visibility:hidden;}
+body{margin:0;font-family:Inter,Segoe UI,Arial;}
+.layout{display:flex;min-height:100vh;}
+.side{width:260px;position:fixed;inset:0 auto 0 0;padding:16px;box-sizing:border-box;}
+.brand{display:flex;gap:12px;align-items:center;padding-bottom:16px;border-bottom:1px solid #ddd;}
+.brand img{width:46px;height:46px;border-radius:13px;}
+.nav{padding-top:14px;}
+.item{padding:12px 13px;border-radius:12px;cursor:pointer;font-weight:800;margin-bottom:5px;}
+.main{margin-left:260px;flex:1;}
+.top{height:58px;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:10px;padding:0 20px;}
+.top .sp{flex:1;}
+.btn{border:0;border-radius:10px;min-height:36px;padding:8px 14px;font-weight:900;cursor:pointer;}
+.btn.ghost{border:1px solid #ddd;}
+.content{padding:22px;}
+.page{display:none;}
+.page.active{display:block;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.card,.toolbar,.table{border:1px solid #ddd;border-radius:16px;padding:18px;margin-bottom:16px;}
+.metric h3{font-size:26px;margin:6px 0;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+input,select,textarea{border:1px solid #ddd;border-radius:10px;padding:10px 11px;font:inherit;}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:11px 12px;border-bottom:1px solid #ddd;text-align:left;font-size:13px;vertical-align:top;}
+.tag{display:inline-block;padding:4px 9px;border-radius:8px;font-weight:900;}
+.money{font-weight:900;}
+.page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.page-head h2{margin:0;}
+.modal{display:none;position:fixed;inset:0;z-index:20;align-items:center;justify-content:center;padding:18px;}
+.modal.show{display:flex;}
+.box{width:min(620px,96vw);border-radius:18px;border:1px solid #ddd;padding:20px;}
+.help-shot{border:1px solid #ddd;border-radius:14px;padding:12px;margin:10px 0;}</style><script>(function(){try{const t=sessionStorage.getItem('ams_token')||localStorage.getItem('ams_token'),r=sessionStorage.getItem('ams_role')||localStorage.getItem('ams_role');if(!t||r!=='admin'){location.replace('/payment-login');return}fetch('/api/me',{headers:{Authorization:'Bearer '+t}}).then(x=>{if(!x.ok)throw Error();return x.json()}).then(u=>{if(u.role!=='admin')throw Error();document.documentElement.style.visibility='visible'}).catch(()=>{sessionStorage.clear();location.replace('/payment-login')})}catch(e){sessionStorage.clear();location.replace('/payment-login')}})();</script>
+<style id="ams-sms-module-theme">.side{border-right:1px solid #ddd!important;}
+.brand{border-bottom:1px solid #ddd!important;}
+.brand img{border:1px solid #ddd!important;}
+.brand b{font-weight:750!important;}
+.brand .muted{text-transform:uppercase!important;letter-spacing:.13em!important;font-size:11px!important;font-weight:600!important;}
+.item{font-weight:550!important;border-radius:11px!important;}
+.top{border-bottom:1px solid #ddd!important;}
+.card,.toolbar,.table,.box{border:1px solid #ddd!important;border-radius:20px!important;}
+.metric{position:relative!important;overflow:hidden!important;}
+.metric::before{content:""!important;position:absolute!important;left:0;right:0;top:0;height:2px;}
+.metric h3{font-weight:750!important;font-variant-numeric:tabular-nums!important;}
+.page-head h2{font-weight:700!important;letter-spacing:-.028em!important;}
+input,select,textarea{border:1px solid #ddd!important;border-radius:11px!important;}
+input:focus,select:focus,textarea:focus{outline:none!important;}
+table{border-collapse:separate!important;border-spacing:0!important;}
+th{text-transform:uppercase!important;font-size:11px!important;letter-spacing:.10em!important;font-weight:650!important;border-bottom:1px solid #ddd!important;}
+td{border-bottom:1px solid #ddd!important;}
+.btn{border-radius:11px!important;font-weight:650!important;transition:transform .14s ease,filter .16s ease!important;}
+.btn:hover{transform:translateY(-1px)!important;}
+.btn.ghost{border:1px solid #ddd!important;}
+.tag{border:1px solid #ddd!important;font-weight:650!important;}
+.money{font-weight:700!important;}
+.help-shot{border:1px solid #ddd!important;}</style>
+<link rel="stylesheet" href="/assets/ams.css?v=gsms-20261104"/><script src="/assets/ams.js?v=gsms-20261104" defer></script><script src="/assets/credit-notes.js?v=gsms-20261104" defer></script>
+
+<link rel="stylesheet" href="/assets/ams-light.css?v=gsms-20261104"/>
+<link rel="stylesheet" href="/assets/ams-ds.css?v=gsms-20261104"/>
+<script src="/assets/ams-ds.js?v=gsms-20261104" defer></script>
+<link rel="stylesheet" href="/assets/ams-motion.css?v=gsms-20261104"/><script src="/assets/ams-motion.js?v=gsms-20261104" defer></script>
+<link rel="stylesheet" href="/branding/runtime.css"/><script src="/branding/runtime.js" defer></script><link rel="stylesheet" href="/assets/ams-panel.css?v=gsms-20261104"/><script src="/assets/ams-cli-search.js?v=gsms-20261104" defer></script></head><body class="ams-light ams-panel ams-ui"><div class="layout"><aside class="side"><div class="brand"><img src="/assets/ams-logo-square.png?v=gsms-20261104"><div><b data-brand="login">GLOBAL SMS</b><div class="muted">Payment Panel</div></div></div><div class="nav"><div class="item active" data-page="dashboard">Dashboard</div><div class="item" data-page="requests">Payment Requests</div><div class="item" data-page="settings">Minimum Settings</div><div class="item" data-page="audit">Audit Logs</div><div class="item" data-page="creditNotes">Credit Notes</div></div></aside><main class="main"><div class="top"><b>Admin Payment Panel</b><div class="sp"></div><button class="btn ghost" onclick="location.href='/admin'">Admin Panel</button><button class="btn red" onclick="API.logout()">Logout</button></div><div class="content"><section class="page" id="page-creditNotes"></section><section class="page active" id="page-dashboard"><div class="page-head"><h2>Payment Dashboard</h2><button class="btn" onclick="loadAll()">Refresh</button></div><div class="grid"><div class="card metric"><div class="muted">Pending Requests</div><h3 id="pendingCount">0</h3><div class="money" id="pendingAmount">$0</div></div><div class="card metric"><div class="muted">Paid Requests</div><h3 id="paidCount">0</h3><div class="money" id="paidAmount">$0</div></div></div></section><section class="page" id="page-requests"><div class="page-head"><h2>Payment Requests</h2><div class="row"><select id="statusFilter" onchange="loadRequests()"><option value="">All</option><option>Pending</option><option>Paid</option><option>Rejected</option></select><button class="btn" onclick="loadRequests()">Refresh</button></div></div><div class="table"><table><thead><tr><th>ID</th><th>Agent</th><th>Manager</th><th>Type</th><th>Amount</th><th>Wallet</th><th>Status</th><th>Requested</th><th>Proof</th><th>Action</th></tr></thead><tbody id="reqBody"></tbody></table></div></section><section class="page" id="page-settings"><div class="page-head"><h2>Minimum Withdrawal Settings</h2></div><div class="card"><div id="settingsBody"></div><button class="btn green" onclick="saveSettings()">Save Minimums</button></div></section><section class="page" id="page-audit"><div class="page-head"><h2>Payment Audit Logs</h2><button class="btn" onclick="loadAudit()">Refresh</button></div><div class="table"><table><thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Agent</th><th>Type</th><th>Amount</th><th>Status</th><th>Details</th></tr></thead><tbody id="auditBody"></tbody></table></div></section></div></main></div><div class="modal" id="payModal"><div class="box"><h3>Mark Payment as Paid</h3><input type="hidden" id="payId"><div class="row"><input id="payTxid" placeholder="Transaction ID (optional)"><input type="file" id="payShot" accept="image/*"></div><textarea id="payNotes" placeholder="Notes" style="width:100%;min-height:80px;margin-top:10px"></textarea><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn ghost" onclick="payModal.classList.remove('show')">Cancel</button><button class="btn green" onclick="submitPaid()">Save Paid</button></div></div></div><script src="/api.js?v=gsms-20261104"></script><script>API.guard('admin');function page(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');document.querySelectorAll('.item').forEach(i=>i.classList.toggle('active',i.dataset.page===id));if(id==='requests')loadRequests();if(id==='settings')loadSettings();if(id==='audit')loadAudit();if(id==='dashboard')loadSummary()}document.querySelectorAll('.item').forEach(i=>i.onclick=()=>page(i.dataset.page));function money(v){return '$'+(String(v||'0'))}async function loadSummary(){const s=await API.get('/payment-v2/admin/summary');pendingCount.textContent=s.pending_count||0;pendingAmount.textContent=money(s.pending_amount);paidCount.textContent=s.paid_count||0;paidAmount.textContent=money(s.paid_amount)}async function loadRequests(){const st=statusFilter?.value||'';const rows=await API.get('/payment-v2/admin/requests'+(st?'?status='+encodeURIComponent(st):''));reqBody.innerHTML=rows.map(r=>`<tr><td>#${r.id}</td><td><b>${r.agent_name}</b></td><td>${r.manager_name||'—'}</td><td><span class="tag">${r.payment_label}</span></td><td class="money">$${r.amount}</td><td style="word-break:break-all">${r.wallet_address}</td><td>${r.status}</td><td>${(r.requested_at||'').slice(0,19)}</td><td>${r.screenshot_url?`<a href="${r.screenshot_url}" target="_blank">View</a>`:'—'}</td><td>${r.status==='Pending'?`<button class="btn green" onclick="openPay(${r.id})">Paid</button> <button class="btn red" onclick="rejectReq(${r.id})">Reject</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="10">No requests</td></tr>'}function openPay(id){payId.value=id;payTxid.value='';payNotes.value='';payShot.value='';payModal.classList.add('show')}async function submitPaid(){const fd=new FormData();fd.append('txid',payTxid.value);fd.append('notes',payNotes.value);if(payShot.files[0])fd.append('screenshot',payShot.files[0]);const res=await fetch('/api/payment-v2/admin/requests/'+payId.value+'/pay',{method:'POST',headers:{Authorization:'Bearer '+sessionStorage.getItem('ams_token')},body:fd});const data=await res.json().catch(()=>({}));if(!res.ok)return alert('❌ '+(data.error||res.status));payModal.classList.remove('show');await loadRequests();await loadSummary()}async function rejectReq(id){const reason=prompt('Reject reason:','')||'';await API.post('/payment-v2/admin/requests/'+id+'/reject',{reason});await loadRequests();await loadSummary()}async function loadSettings(){const rows=await API.get('/payment-v2/settings');settingsBody.innerHTML=rows.map(r=>`<div class="row" style="margin-bottom:12px"><label style="width:170px"><b>${r.label}</b></label><input data-ptype="${r.payment_type}" value="${r.min_withdrawal}" placeholder="Minimum"></div>`).join('')}async function saveSettings(){const settings=[...settingsBody.querySelectorAll('input[data-ptype]')].map(i=>({payment_type:i.dataset.ptype,min_withdrawal:i.value}));await API.put('/payment-v2/settings',{settings});alert('✅ Saved');loadSettings()}async function loadAudit(){const rows=await API.get('/payment-v2/admin/audit-logs');auditBody.innerHTML=rows.map(r=>`<tr><td>${(r.created_at||'').slice(0,19)}</td><td>${r.actor_name}</td><td><b>${r.action}</b></td><td>${r.agent_id||''}</td><td>${r.payment_type}</td><td>$${r.amount||'0'}</td><td>${r.status}</td><td>${r.details||''}</td></tr>`).join('')||'<tr><td colspan="8">No logs</td></tr>'}async function loadAll(){await loadSummary();await loadRequests()}loadAll();</script></body></html>

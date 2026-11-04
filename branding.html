@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="en">
+<head><script src="/assets/ams-storage.js?v=gsms-20261104"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow,noarchive"/>
+<title>GLOBAL SMS — Panel Branding</title>
+<link rel="icon" type="image/png" href="/assets/ams-favicon.png"/>
+<style>
+:root{
+  --bg:#f4f6fa;--surface:#fff;--ink:#0f1b2d;--text:#1e293b;--muted:#64748b;
+  --line:#e3e8f0;--line2:#cfd7e3;--brand:#0b43be;--brand-d:#0b43be;
+  --ok:#0f9d6b;--bad:#d6364a;--warn:#c77d0a;--r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:14px;line-height:1.5;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+a{color:var(--brand);text-decoration:none}
+button{font-family:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 120px}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(15,27,45,.05),0 4px 14px rgba(15,27,45,.05)}
+.topbar img{height:34px;width:auto;object-fit:contain}
+.topbar h1{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.topbar .spacer{flex:1}
+.pill{font-size:11.5px;padding:4px 10px;border-radius:999px;background:#eef2f8;color:var(--muted);border:1px solid var(--line)}
+.pill.dirty{background:#fdf1dc;color:#9a5f05;border-color:#f2ddb4}
+.pill.saved{background:#e3f6ee;color:#0a7a54;border-color:#bfe8d8}
+
+/* ---------- buttons ---------- */
+.btn{padding:9px 15px;font-size:13px;font-weight:600;border-radius:9px;border:1px solid var(--line2);
+  background:#fff;color:var(--text);cursor:pointer}
+.btn:hover{background:#f3f6fb}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-d)}
+.btn.danger{background:#fff;border-color:#f0c3cb;color:#b72a3c}
+.btn.danger:hover{background:#fde8eb}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+
+/* ---------- layout ---------- */
+.cols{display:grid;grid-template-columns:1fr 420px;gap:18px;margin-top:18px;align-items:start}
+@media(max-width:1020px){.cols{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 1px 2px rgba(15,27,45,.05),0 4px 14px rgba(15,27,45,.05);margin-bottom:18px;overflow:hidden}
+.card>h2{font-size:14px;font-weight:700;color:var(--ink);padding:14px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px}
+.card>h2 .n{width:20px;height:20px;border-radius:6px;background:var(--brand);color:#fff;font-size:11px;
+  display:inline-flex;align-items:center;justify-content:center;flex:none}
+.card .body{padding:16px 18px}
+
+/* ---------- form ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.f label{display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px}
+.f input[type=text],.f input[type=password],.f input[type=color]{
+  width:100%;padding:9px 11px;font-size:13.5px;font-family:inherit;border:1px solid var(--line2);
+  border-radius:9px;background:#fff;color:#0f172a}
+.f input[type=text]:focus,.f input[type=password]:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(11,67,190,.15)}
+
+/* ================================================================== *
+ * Req 5 — colour editor: categories, rows, inherited vs saved
+ * ================================================================== */
+
+/* theme-set switch (which set you are editing) */
+.setswitch{display:inline-flex;background:#eef2f8;border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.setswitch button{border:0;background:transparent;padding:7px 16px;border-radius:8px;font-size:12.5px;
+  font-weight:600;color:var(--muted);cursor:pointer}
+.setswitch button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(15,27,45,.10)}
+
+/* one category */
+.cat{border:1px solid var(--line);border-radius:11px;margin-bottom:10px;overflow:hidden;background:#fff}
+.cat>summary{cursor:pointer;list-style:none;padding:11px 14px;display:flex;align-items:center;gap:9px;
+  font-size:13px;font-weight:700;color:var(--ink);background:#fafbfd}
+.cat>summary::-webkit-details-marker{display:none}
+.cat>summary:hover{background:#f3f6fb}
+.cat>summary .chev{width:14px;height:14px;flex:none;color:var(--muted);transition:transform .15s}
+.cat[open]>summary .chev{transform:rotate(90deg)}
+.cat>summary .cnt{font-size:11px;font-weight:600;color:var(--muted);background:#eef2f8;
+  border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.cat>summary .setdot{margin-left:auto;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;
+  background:#eef2f8;color:var(--muted);border:1px solid var(--line)}
+.cat>summary .setdot.has{background:#e3f6ee;color:#0a7a54;border-color:#bfe8d8}
+.cat .catbody{padding:4px 14px 14px}
+
+/* one colour row */
+.crow{display:grid;grid-template-columns:38px 1fr 116px auto;gap:11px;align-items:start;
+  padding:11px 0;border-top:1px dashed var(--line)}
+.crow:first-child{border-top:0}
+.crow .sw{position:relative;width:38px;height:38px;border-radius:9px;border:1px solid var(--line2);
+  overflow:hidden;cursor:pointer;background:#fff}
+.crow .sw input[type=color]{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);
+  border:0;padding:0;background:transparent;cursor:pointer}
+.crow .sw.unset::after{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,#f1f4f9 0 5px,#fff 5px 10px);pointer-events:none}
+.crow .meta{min-width:0}
+.crow .meta .lb{font-size:12.5px;font-weight:600;color:#334155}
+.crow .meta .wh{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+.crow .hex{display:flex;align-items:center;gap:6px}
+.crow .hex input{width:100%;padding:7px 9px;font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  border:1px solid var(--line2);border-radius:8px;background:#fff;color:#0f172a}
+.crow .hex input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(11,67,190,.15)}
+.crow .hex input.bad{border-color:#d6364a;background:#fde8eb}
+.crow .state{display:flex;align-items:center;gap:6px;padding-top:8px}
+.crow .tag{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid;white-space:nowrap}
+.crow .tag.inh{background:#f4f6fa;color:#64748b;border-color:var(--line)}
+.crow .tag.saved{background:#e3f6ee;color:#0a7a54;border-color:#bfe8d8}
+.crow .tag.dirtyv{background:#fdf1dc;color:#9a5f05;border-color:#f2ddb4}
+.crow .inhsw{width:11px;height:11px;border-radius:3px;border:1px solid var(--line2);flex:none}
+.crow .reset{border:1px solid var(--line2);background:#fff;border-radius:8px;font-size:11px;font-weight:600;
+  color:var(--muted);padding:7px 10px;cursor:pointer;white-space:nowrap}
+.crow .reset:hover{background:#f3f6fb;color:var(--ink)}
+.crow .reset:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:640px){
+  .crow{grid-template-columns:38px 1fr;gap:9px}
+  .crow .hex,.crow .state,.crow .reset{grid-column:2}
+}
+
+/* ================================================================== *
+ * Req 5C — previews. These consume the SAME --br-* custom properties
+ * that backend/branding.js publishes for the real application, so a
+ * preview cannot drift from production.
+ * ================================================================== */
+.pv-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:9px}
+.pv-tabs button{border:1px solid var(--line2);background:#fff;border-radius:8px;padding:6px 11px;
+  font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
+.pv-tabs button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.pv-stage{margin-top:12px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
+.pv-pane{display:none}
+.pv-pane.on{display:block}
+
+/* the preview root: token defaults mirror the app's own inherited values */
+.pv-root{
+  --br-general-bg:#f4f6fa; --br-general-content-bg:#f4f6fa; --br-general-heading:#0f172a;
+  --br-general-text:#1e293b; --br-general-text-secondary:#475569; --br-general-text-muted:#64748b;
+  --br-general-footer-bg:#0c1730; --br-general-footer-text:#94a3b8;
+  --br-header-bg:#ffffff; --br-header-text:#0f172a;
+  --br-sidebar-bg:#0c1730; --br-sidebar-text:#cbd5e1; --br-sidebar-hover-bg:#16264a;
+  --br-sidebar-active-bg:#0b43be; --br-sidebar-active-text:#ffffff;
+  --br-card-bg:#ffffff; --br-card-border:#e3e8f0; --br-card-shadow:#0f1b2d;
+  --br-table-header-bg:#f8fafc; --br-table-header-text:#475569; --br-table-row-bg:#ffffff;
+  --br-table-row-alt-bg:#f8fafc; --br-table-row-hover-bg:#f3f6fb; --br-table-row-selected-bg:#eaf1ff;
+  --br-table-border:#e3e8f0; --br-table-text:#1e293b;
+  --br-form-label:#334155; --br-form-input-bg:#ffffff; --br-form-input-border:#cbd5e1;
+  --br-form-input-text:#0f172a; --br-form-placeholder:#94a3b8; --br-form-focus:#0b43be; --br-form-checkbox:#0b43be;
+  --br-btn-primary-bg:#0b43be; --br-btn-primary-text:#ffffff; --br-btn-primary-hover:#0b43be;
+  --br-btn-secondary-bg:#e2e8f0; --br-btn-secondary-text:#1e293b;
+  --br-btn-success-bg:#0f9d6b; --br-btn-success-text:#ffffff;
+  --br-btn-warning-bg:#c77d0a; --br-btn-warning-text:#ffffff;
+  --br-btn-danger-bg:#d6364a; --br-btn-danger-text:#ffffff;
+  --br-btn-neutral-bg:#64748b; --br-btn-neutral-text:#ffffff;
+  --br-modal-bg:#ffffff; --br-modal-text:#1e293b; --br-modal-overlay:#060c18;
+  --br-status-success-bg:#e3f6ee; --br-status-success-text:#0a7a54;
+  --br-status-warning-bg:#fdf1dc; --br-status-warning-text:#9a5f05;
+  --br-status-danger-bg:#fde8eb; --br-status-danger-text:#b72a3c;
+  --br-status-info-bg:#eaf1ff; --br-status-info-text:#0b43be;
+  --br-login-bg:#071f34; --br-login-bg2:#0b2a44; --br-login-particle:#38bdf8;
+  --br-login-card-bg:#ffffff; --br-login-card-border:#e2e8f0;
+  --br-login-heading:#0f172a; --br-login-sub:#475569;
+  --br-login-input-bg:#ffffff; --br-login-input-border:#cbd5e1; --br-login-input-text:#0f172a;
+  --br-login-placeholder:#94a3b8; --br-login-input-focus:#0b43be;
+  --br-login-btn-bg:#0b43be; --br-login-btn-text:#ffffff; --br-login-btn-hover:#0b43be;
+  --br-login-btn-active:#0a357f; --br-login-link:#0b43be;
+  --br-login-error:#dc2626; --br-login-success:#16a34a;
+  font-family:"Inter","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:12px;line-height:1.45;color:var(--br-general-text);
+}
+/* dark preview overrides the inherited defaults, mirroring the app */
+.pv-root.dk{
+  --br-general-bg:#0a1226; --br-general-content-bg:#0a1226; --br-general-heading:#e2e8f0;
+  --br-general-text:#e2e8f0; --br-general-text-secondary:#b6c6da; --br-general-text-muted:#94a3b8;
+  --br-general-footer-bg:#0a1226; --br-general-footer-text:#94a3b8;
+  --br-header-bg:#111c2e; --br-header-text:#e2e8f0;
+  --br-sidebar-bg:#0a1226; --br-sidebar-text:#b6c6da; --br-sidebar-hover-bg:#16233a;
+  --br-sidebar-active-bg:#0b43be; --br-sidebar-active-text:#ffffff;
+  --br-card-bg:#111c2e; --br-card-border:#2b3d59;
+  --br-table-header-bg:#16233a; --br-table-header-text:#b6c6da; --br-table-row-bg:#111c2e;
+  --br-table-row-alt-bg:#141f33; --br-table-row-hover-bg:#16233a; --br-table-row-selected-bg:#1b2c47;
+  --br-table-border:#2b3d59; --br-table-text:#e2e8f0;
+  --br-form-label:#b6c6da; --br-form-input-bg:#0d1728; --br-form-input-border:#2b3d59;
+  --br-form-input-text:#e2e8f0; --br-form-placeholder:#7d8ca3; --br-form-focus:#38bdf8; --br-form-checkbox:#38bdf8;
+}
+/* ---- preview primitives ---- */
+.pv-app{display:grid;grid-template-columns:150px 1fr;min-height:230px;background:var(--br-general-content-bg)}
+.pv-app .pv-sb{background:var(--br-sidebar-bg);padding:10px 8px;color:var(--br-sidebar-text)}
+.pv-app .pv-sb .b{font-weight:700;font-size:11.5px;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.pv-app .pv-sb .b img{height:15px;width:auto;object-fit:contain}
+.pv-app .pv-sb .i{padding:6px 8px;border-radius:6px;font-size:11px;margin-bottom:2px}
+.pv-app .pv-sb .i.act{background:var(--br-sidebar-active-bg);color:var(--br-sidebar-active-text);font-weight:600}
+.pv-app .pv-sb .i:hover{background:var(--br-sidebar-hover-bg)}
+.pv-app .pv-main{background:var(--br-general-content-bg);min-width:0}
+.pv-hd{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--br-header-bg);
+  color:var(--br-header-text);border-bottom:1px solid var(--br-card-border);font-size:11.5px}
+.pv-hd .nm{font-weight:700}
+.pv-hd .sp{flex:1}
+.pv-hd .clk{opacity:.8}
+.pv-bd{padding:11px}
+.pv-c{background:var(--br-card-bg);border:1px solid var(--br-card-border);border-radius:9px;
+  padding:11px;margin-bottom:10px;box-shadow:0 1px 3px color-mix(in srgb,var(--br-card-shadow) 18%,transparent)}
+.pv-c h4{font-size:12px;font-weight:700;color:var(--br-general-heading);margin-bottom:4px}
+.pv-c p{font-size:11px;color:var(--br-general-text-secondary);margin-bottom:8px}
+.pv-c p.mut{color:var(--br-general-text-muted)}
+.pv-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.pv-tbl th{background:var(--br-table-header-bg);color:var(--br-table-header-text);text-align:left;
+  padding:6px 8px;border:1px solid var(--br-table-border);font-weight:600}
+.pv-tbl td{padding:6px 8px;border:1px solid var(--br-table-border);color:var(--br-table-text);
+  background:var(--br-table-row-bg)}
+.pv-tbl tbody tr:nth-child(even) td{background:var(--br-table-row-alt-bg)}
+.pv-tbl tbody tr:hover td{background:var(--br-table-row-hover-bg)}
+.pv-tbl tbody tr.sel td{background:var(--br-table-row-selected-bg)}
+.pv-lbl{display:block;font-size:10.5px;font-weight:600;color:var(--br-form-label);margin-bottom:3px}
+.pv-inp{width:100%;padding:6px 8px;font-size:11px;border:1px solid var(--br-form-input-border);
+  border-radius:6px;background:var(--br-form-input-bg);color:var(--br-form-input-text);font-family:inherit}
+.pv-inp::placeholder{color:var(--br-form-placeholder)}
+.pv-inp:focus{outline:none;border-color:var(--br-form-focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--br-form-focus) 22%,transparent)}
+.pv-chk{accent-color:var(--br-form-checkbox)}
+.pv-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pv-b{padding:6px 11px;border-radius:6px;border:0;font-size:11px;font-weight:600;cursor:default;font-family:inherit}
+.pv-b.p1{background:var(--br-btn-primary-bg);color:var(--br-btn-primary-text)}
+.pv-b.p2{background:var(--br-btn-secondary-bg);color:var(--br-btn-secondary-text)}
+.pv-b.ok{background:var(--br-btn-success-bg);color:var(--br-btn-success-text)}
+.pv-b.wn{background:var(--br-btn-warning-bg);color:var(--br-btn-warning-text)}
+.pv-b.dg{background:var(--br-btn-danger-bg);color:var(--br-btn-danger-text)}
+.pv-b.nu{background:var(--br-btn-neutral-bg);color:var(--br-btn-neutral-text)}
+.pv-bg{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;margin:2px 3px 2px 0}
+.pv-bg.ok{background:var(--br-status-success-bg);color:var(--br-status-success-text)}
+.pv-bg.wn{background:var(--br-status-warning-bg);color:var(--br-status-warning-text)}
+.pv-bg.dg{background:var(--br-status-danger-bg);color:var(--br-status-danger-text)}
+.pv-bg.in{background:var(--br-status-info-bg);color:var(--br-status-info-text)}
+.pv-ft{padding:8px 12px;background:var(--br-general-footer-bg);color:var(--br-general-footer-text);font-size:10.5px}
+/* modal / alert */
+.pv-ov{position:relative;background:color-mix(in srgb,var(--br-modal-overlay) 55%,transparent);padding:16px}
+.pv-mo{background:var(--br-modal-bg);color:var(--br-modal-text);border:1px solid var(--br-card-border);
+  border-radius:10px;padding:13px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-width:330px;margin:0 auto}
+.pv-mo h5{font-size:12px;font-weight:700;margin-bottom:5px;color:var(--br-general-heading)}
+.pv-al{padding:9px 11px;border-radius:7px;font-size:11px;font-weight:600;margin-bottom:7px;border:1px solid}
+.pv-al.ok{background:var(--br-status-success-bg);color:var(--br-status-success-text);border-color:var(--br-status-success-text)}
+.pv-al.wn{background:var(--br-status-warning-bg);color:var(--br-status-warning-text);border-color:var(--br-status-warning-text)}
+.pv-al.dg{background:var(--br-status-danger-bg);color:var(--br-status-danger-text);border-color:var(--br-status-danger-text)}
+.pv-al.in{background:var(--br-status-info-bg);color:var(--br-status-info-text);border-color:var(--br-status-info-text)}
+/* login */
+.pv-lg{padding:18px;background:linear-gradient(160deg,var(--br-login-bg),var(--br-login-bg2));
+  display:flex;align-items:center;justify-content:center;min-height:250px;position:relative;overflow:hidden}
+.pv-lg .orb{position:absolute;width:120px;height:120px;border-radius:50%;
+  background:var(--br-login-particle);opacity:.18;filter:blur(26px)}
+.pv-lg .o1{top:-30px;left:-20px}.pv-lg .o2{bottom:-40px;right:-10px}
+.pv-lc{position:relative;background:var(--br-login-card-bg);border:1px solid var(--br-login-card-border);
+  border-radius:11px;padding:16px;width:250px;box-shadow:0 10px 30px color-mix(in srgb,var(--br-login-card-shadow) 40%,transparent)}
+.pv-lc img{height:26px;width:auto;object-fit:contain;display:block;margin:0 auto 6px}
+.pv-lc h5{font-size:13px;font-weight:700;color:var(--br-login-heading);text-align:center}
+.pv-lc small{display:block;text-align:center;color:var(--br-login-sub);font-size:10px;margin-bottom:10px}
+.pv-lc input{width:100%;padding:7px 9px;font-size:11px;margin-bottom:7px;border-radius:6px;
+  border:1px solid var(--br-login-input-border);background:var(--br-login-input-bg);color:var(--br-login-input-text);
+  font-family:inherit}
+.pv-lc input::placeholder{color:var(--br-login-placeholder)}
+.pv-lc input.f{border-color:var(--br-login-input-focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--br-login-input-focus) 22%,transparent)}
+.pv-lc button{width:100%;padding:8px;border:0;border-radius:6px;font-size:11.5px;font-weight:700;
+  background:var(--br-login-btn-bg);color:var(--br-login-btn-text);cursor:default;font-family:inherit}
+.pv-lc a{display:block;text-align:center;margin-top:7px;font-size:10px;color:var(--br-login-link)}
+.pv-lc .er{color:var(--br-login-error);font-size:10px;margin-top:5px}
+.pv-lc .su{color:var(--br-login-success);font-size:10px;margin-top:5px}
+/* OTP / SMS cards */
+.pv-otp{display:flex;gap:8px;flex-wrap:wrap}
+.pv-otp .o{background:var(--br-card-bg);border:1px solid var(--br-card-border);border-radius:9px;padding:10px;
+  width:150px;box-shadow:0 1px 3px color-mix(in srgb,var(--br-card-shadow) 18%,transparent)}
+.pv-otp .o .t{font-size:10px;color:var(--br-general-text-muted);text-transform:uppercase;letter-spacing:.04em}
+.pv-otp .o .v{font-size:17px;font-weight:800;color:var(--br-general-heading);margin:3px 0}
+.pv-msg{background:var(--br-card-bg);border:1px solid var(--br-card-border);border-radius:9px;padding:10px;margin-top:9px}
+.pv-msg .hd{font-size:10.5px;color:var(--br-general-text-muted);margin-bottom:3px}
+.pv-msg .bd{font-size:11px;color:var(--br-general-text)}
+.f input[type=color]{padding:3px;height:38px;cursor:pointer}
+.f .hint{font-size:11px;color:var(--muted);margin-top:4px}
+.colorrow{display:flex;align-items:center;gap:8px}
+.colorrow input[type=color]{width:44px;flex:none}
+.colorrow input[type=text]{flex:1;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+.grp{margin-bottom:20px}
+.grp:last-child{margin-bottom:0}
+.grp h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  margin:0 0 10px;padding-bottom:6px;border-bottom:1px dashed var(--line)}
+
+/* ---------- logo ---------- */
+.logobox{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.prev{width:170px;flex:none;border:1px solid var(--line);border-radius:10px;background:
+  repeating-conic-gradient(#f1f4f9 0% 25%,#ffffff 0% 50%) 50%/16px 16px;padding:10px}
+.prev .onlight,.prev .ondark{border-radius:6px;padding:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.prev .onlight{background:#fff;border:1px solid var(--line)}
+.prev .ondark{background:#0b1424;border:1px solid #24344d;margin-bottom:0}
+.prev img{max-width:100%;max-height:64px;object-fit:contain;display:block}
+.prev .cap{font-size:10.5px;color:var(--muted);text-align:center;margin-top:4px}
+.logoact{display:flex;flex-direction:column;gap:8px;min-width:210px}
+.logoact .btn{width:100%;text-align:left}
+
+/* ---------- preview ---------- */
+.preview{position:sticky;top:14px}
+.pv{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.pv-top{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--pv-headerBg,#fff);color:var(--pv-headerText,#0f172a);border-bottom:1px solid var(--line)}
+.pv-top .dot{width:22px;height:22px;border-radius:5px;background:var(--pv-accent,#0b43be)}
+.pv-top b{font-size:12.5px}
+.pv-mid{display:flex;min-height:250px}
+.pv-side{width:112px;flex:none;background:var(--pv-sidebarBg,#0c1730);color:var(--pv-sidebarText,#cbd5e1);padding:10px 8px;font-size:11.5px}
+.pv-side div{padding:6px 8px;border-radius:6px;margin-bottom:3px}
+.pv-side div.act{background:var(--pv-sidebarActiveBg,#0b43be);color:#fff}
+.pv-main{flex:1;padding:12px;background:var(--pv-contentBg,#f4f6fa);min-width:0}
+.pv-card{background:var(--pv-cardBg,#fff);border:1px solid var(--pv-cardBorder,#e3e8f0);border-radius:9px;padding:11px;margin-bottom:10px}
+.pv-card h4{font-size:12px;color:var(--pv-heading,#0f172a);margin-bottom:6px}
+.pv-card p{font-size:11px;color:var(--pv-textMuted,#64748b);margin-bottom:9px}
+.pv-row{display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap}
+.pv-btn{padding:5px 11px;font-size:11px;font-weight:600;border-radius:6px;border:0;
+  background:var(--pv-btnPrimaryBg,#0b43be);color:var(--pv-btnPrimaryText,#fff)}
+.pv-btn.sec{background:var(--pv-btnSecondaryBg,#e2e8f0);color:var(--pv-btnSecondaryText,#1e293b)}
+.pv-btn.dan{background:var(--pv-btnDangerBg,#d6364a);color:var(--pv-btnDangerText,#fff)}
+.pv-inp{width:100%;padding:6px 9px;font-size:11.5px;border-radius:6px;border:1px solid var(--pv-inputBorder,#cbd5e1);
+  background:var(--pv-inputBg,#fff);color:var(--pv-inputText,#0f172a);margin-bottom:8px}
+.pv-inp:focus{outline:2px solid var(--pv-focus,#0b43be);outline-offset:0}
+.pv-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.pv-tbl th{background:var(--pv-thBg,#f8fafc);color:var(--pv-thText,#475569);text-align:left;padding:5px 7px;border-bottom:1px solid var(--pv-tableBorder,#e3e8f0)}
+.pv-tbl td{padding:5px 7px;border-bottom:1px solid var(--pv-tableBorder,#e3e8f0);color:var(--pv-tableText,#1e293b)}
+.pv-tbl tr:hover td{background:var(--pv-rowHover,#f3f6fb)}
+.badges{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.bdg{font-size:10px;padding:2px 7px;border-radius:999px}
+.bdg.ok{background:var(--pv-okBg,#e3f6ee);color:var(--pv-okText,#0a7a54)}
+.bdg.warn{background:var(--pv-warnBg,#fdf1dc);color:var(--pv-warnText,#9a5f05)}
+.bdg.bad{background:var(--pv-badBg,#fde8eb);color:var(--pv-badText,#b72a3c)}
+/* login preview */
+.pv-login{background:var(--pv-loginBg,#071f34);padding:14px;display:flex;justify-content:center}
+.pv-lcard{width:100%;max-width:250px;background:var(--pv-loginCardBg,rgba(255,255,255,.92));
+  border:1px solid var(--pv-loginCardBorder,#e2e8f0);border-radius:12px;padding:14px;text-align:center}
+.pv-lcard img{height:34px;margin-bottom:8px;object-fit:contain}
+.pv-lcard h5{font-size:12.5px;color:var(--pv-loginHeading,#0f172a);margin-bottom:3px}
+.pv-lcard small{font-size:10px;color:var(--pv-loginSub,#475569);display:block;margin-bottom:10px}
+.pv-lcard input{width:100%;padding:6px 8px;font-size:11px;border-radius:6px;margin-bottom:7px;
+  border:1px solid var(--pv-loginInputBorder,#cbd5e1);background:var(--pv-loginInputBg,#fff);color:var(--pv-loginInputText,#0f172a)}
+.pv-lcard button{width:100%;padding:7px;font-size:11px;font-weight:600;border:0;border-radius:6px;
+  background:var(--pv-loginBtnBg,#0b43be);color:var(--pv-loginBtnText,#fff)}
+.pv-tabs{display:flex;gap:6px;margin-top:12px}
+.pv-tabs button{flex:1;padding:6px;font-size:11.5px;font-weight:600;border-radius:7px;border:1px solid var(--line2);
+  background:#fff;color:var(--text);cursor:pointer}
+.pv-tabs button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* ---------- sticky actions ---------- */
+.actions{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);padding:12px 20px;z-index:40}
+.actions .in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.actions .spacer{flex:1}
+.toast{position:fixed;right:20px;bottom:76px;z-index:60;padding:12px 16px;border-radius:10px;
+  font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(2,10,32,.28);display:none;max-width:420px}
+.toast.ok{background:#e3f6ee;color:#0a7a54;border:1px solid #bfe8d8;display:block}
+.toast.err{background:#fde8eb;color:#b72a3c;border:1px solid #f5c6cf;display:block}
+.banner{background:#fdf1dc;border:1px solid #f2ddb4;color:#9a5f05;padding:11px 16px;border-radius:10px;
+  margin-top:14px;font-size:13px}
+.req{color:var(--bad)}
+
+/* ---------- motion polish (same tokens/timing as shared/ams-motion.css; uses this page's own variables,
+   touches nothing in the .pv-* live previews) ---------- */
+.btn{transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .12s cubic-bezier(.22,.8,.24,1)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:focus-visible,.cat>summary:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.card{transition:box-shadow .28s cubic-bezier(.22,.8,.24,1),border-color .28s ease}
+@media (hover:hover) and (pointer:fine){.card:hover{box-shadow:0 12px 28px -18px rgba(15,27,45,.30)}}
+.cat>summary{transition:background-color .16s ease}
+.cat>summary .chev{transition:transform .28s cubic-bezier(.22,.8,.24,1)}
+.cat[open]>.catbody{animation:amsBrFade .3s cubic-bezier(.22,.8,.24,1)}
+.pill{transition:background-color .2s ease,color .2s ease,border-color .2s ease}
+.toast.ok,.toast.err{animation:amsBrFade .28s cubic-bezier(.22,.8,.24,1)}
+@keyframes amsBrFade{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.btn,.card,.pill,.cat>summary,.cat>summary .chev{transition:none}.cat[open]>.catbody,.toast.ok,.toast.err{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <img id="topLogo" src="/assets/ams-logo-trim.png" alt=""/>
+    <h1 id="topName">Panel Branding</h1>
+    <span class="pill" id="who"></span>
+    <span class="spacer"></span>
+    <span class="pill" id="dirty">No unsaved changes</span>
+    <button class="btn" id="btnPw">Change credentials</button>
+    <button class="btn" id="btnOut">Sign out</button>
+  </div>
+
+  <div id="mustChange" class="banner" style="display:none">
+    <b>Please change the initial branding password now.</b>
+    The account was created with the default password supplied at installation.
+    Open <i>Change credentials</i> and set your own — the initial password must not stay in use.
+  </div>
+
+  <div class="cols">
+    <!-- ================= SETTINGS ================= -->
+    <div>
+      <!-- A. GENERAL -->
+      <div class="card">
+        <h2><span class="n">A</span>General Branding</h2>
+        <div class="body">
+          <div class="grid2">
+            <div class="f"><label>Panel name <span class="req">*</span></label>
+              <input type="text" id="g_panelName" maxlength="120"/>
+              <div class="hint">Used for titles, headers, sidebars and reports.</div></div>
+            <div class="f"><label>Short panel name</label>
+              <input type="text" id="g_shortName" maxlength="60"/>
+              <div class="hint">Compact spaces; defaults to the panel name.</div></div>
+            <div class="f"><label>Login page title</label>
+              <input type="text" id="g_loginTitle" maxlength="120"/></div>
+            <div class="f"><label>Browser tab title</label>
+              <input type="text" id="g_tabTitle" maxlength="120"/>
+              <div class="hint">Blank = use the panel name.</div></div>
+            <div class="f"><label>Header brand text</label>
+              <input type="text" id="g_headerBrand" maxlength="120"/>
+              <div class="hint">Blank = use the panel name.</div></div>
+            <div class="f"><label>Sidebar brand text</label>
+              <input type="text" id="g_sidebarBrand" maxlength="120"/></div>
+            <div class="f"><label>Tagline / subtitle</label>
+              <input type="text" id="g_tagline" maxlength="120"/></div>
+            <div class="f"><label>Report / export brand</label>
+              <input type="text" id="g_reportBrand" maxlength="120"/>
+              <div class="hint">Brand shown on reports and generated documents.</div></div>
+            <div class="f"><label>Footer text</label>
+              <input type="text" id="g_footerText" maxlength="120"/></div>
+            <div class="f"><label>Support / contact text</label>
+              <input type="text" id="g_supportText" maxlength="120"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- B. LOGO -->
+      <div class="card">
+        <h2><span class="n">B</span>Logo Management</h2>
+        <div class="body">
+          <div class="logobox">
+            <div class="prev">
+              <div class="onlight"><img id="pvLogo" src="/assets/ams-logo-trim.png" alt=""/></div>
+              <div class="cap">on light</div>
+              <div class="ondark" style="margin-top:8px"><img id="pvLogoDark" src="/assets/ams-logo-trim.png" alt=""/></div>
+              <div class="cap">on dark</div>
+            </div>
+            <div class="logoact">
+              <button class="btn primary" id="btnUpload">Upload new logo…</button>
+              <button class="btn" id="btnUploadDark">Upload dark variant… (optional)</button>
+              <button class="btn" id="btnUploadFav">Upload favicon…</button>
+              <button class="btn danger" id="btnRemoveLogo">Remove logo — restore default</button>
+              <div class="hint" id="logoHint">PNG, JPEG, WebP or ICO. Maximum 2 MB.
+                SVG is rejected: it can carry scripts. Transparency is preserved;
+                the logo is never forced square or circular.</div>
+            </div>
+          </div>
+          <input type="file" id="fileLogo" accept="image/png,image/jpeg,image/webp,image/x-icon" hidden/>
+        </div>
+      </div>
+
+      <!-- C + D. COLOURS AND THEME -->
+      <div class="card">
+        <h2><span class="n">C</span>Colours &amp; <span class="n" style="margin-left:6px">D</span>Theme and Appearance</h2>
+        <div class="body">
+          <div class="grp">
+            <h3>Theme</h3>
+            <div class="grid2">
+              <div class="f"><label>Default theme</label>
+                <select id="t_mode" style="width:100%;padding:9px 11px;border:1px solid var(--line2);border-radius:9px;font-size:13.5px;font-family:inherit">
+                  <option value="">Leave as-is (user switchable)</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select></div>
+              <div class="f"><label>Animations</label>
+                <select id="t_animations" style="width:100%;padding:9px 11px;border:1px solid var(--line2);border-radius:9px;font-size:13.5px;font-family:inherit">
+                  <option value="">Leave as-is</option>
+                  <option value="on">Enabled</option>
+                  <option value="off">Disabled</option>
+                </select></div>
+            </div>
+          </div>
+          <div class="setswitch" id="setSwitch" style="margin-bottom:12px">
+            <button id="setLight" class="on" type="button">Editing: Light set</button>
+            <button id="setDark" type="button">Editing: Dark set</button>
+          </div>
+          <div class="hint" style="margin-bottom:12px">
+            Each set is saved independently — editing Light never changes Dark.
+            An empty field means <b>inherited</b>: the app keeps its own colour and
+            nothing is emitted. Unset is never treated as white, black or transparent.
+          </div>
+          <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="search" id="colorSearch" placeholder="Filter colours…" style="flex:1;min-width:180px;padding:8px 11px;font-size:13px;font-family:inherit;border:1px solid var(--line2);border-radius:9px"/>
+            <label style="font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;white-space:nowrap">
+              <input type="checkbox" id="onlySet" style="accent-color:var(--brand)"/> Only show configured
+            </label>
+          </div>
+          <div id="colorGroups"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PREVIEW ================= -->
+    <div class="preview">
+      <div class="card">
+        <h2><span class="n">E</span>Live Preview</h2>
+        <div class="body">
+          <div class="pv-tabs" id="pvTabs">
+            <button data-pv="dashboard" class="on" type="button">Dashboard</button>
+            <button data-pv="login" type="button">Login</button>
+            <button data-pv="header" type="button">Header / Toolbar</button>
+            <button data-pv="sidebar" type="button">Sidebar</button>
+            <button data-pv="otp" type="button">OTP / SMS</button>
+            <button data-pv="tables" type="button">Tables</button>
+            <button data-pv="forms" type="button">Forms / Buttons</button>
+            <button data-pv="modals" type="button">Modals / Alerts</button>
+          </div>
+
+          <div class="pv-stage">
+            <div class="pv-root" id="pvRoot">
+
+              <!-- 1. DASHBOARD -->
+              <div class="pv-pane on" data-pane="dashboard">
+                <div class="pv-app">
+                  <div class="pv-sb">
+                    <div class="b"><img id="pvSbLogo" src="/assets/ams-logo-trim.png" alt=""/><span id="pvSbName">GLOBAL SMS</span></div>
+                    <div class="i act">Dashboard</div><div class="i">Numbers</div>
+                    <div class="i">SMS Test</div><div class="i">Reports</div>
+                  </div>
+                  <div class="pv-main">
+                    <div class="pv-hd"><span class="nm" id="pvHdName">GLOBAL SMS</span><span class="sp"></span>
+                      <span class="clk">14:32 GMT</span></div>
+                    <div class="pv-bd">
+                      <div class="pv-c"><h4>Today's Traffic</h4><p class="mut">Delivered, failed and pending messages.</p>
+                        <div class="pv-otp">
+                          <div class="o"><div class="t">Sent</div><div class="v">12,480</div><span class="pv-bg ok">Active</span></div>
+                          <div class="o"><div class="t">Failed</div><div class="v">142</div><span class="pv-bg dg">1.1%</span></div>
+                        </div>
+                      </div>
+                      <div class="pv-c"><h4>Latest Messages</h4>
+                        <table class="pv-tbl"><thead><tr><th>Number</th><th>Status</th></tr></thead>
+                          <tbody><tr><td>+44 7700 900001</td><td><span class="pv-bg ok">Delivered</span></td></tr>
+                          <tr><td>+44 7700 900002</td><td><span class="pv-bg wn">Queued</span></td></tr>
+                          <tr class="sel"><td>+44 7700 900003</td><td><span class="pv-bg dg">Failed</span></td></tr></tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div class="pv-ft" id="pvFtText">GLOBAL SMS · support</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. LOGIN -->
+              <div class="pv-pane" data-pane="login">
+                <div class="pv-lg">
+                  <div class="orb o1"></div><div class="orb o2"></div>
+                  <div class="pv-lc">
+                    <img id="pvLgLogo" src="/assets/ams-logo-trim.png" alt=""/>
+                    <h5 id="pvLgTitle">GLOBAL SMS</h5>
+                    <small id="pvLgTag">Intelligent Messaging Infrastructure</small>
+                    <input value="Username" readonly/>
+                    <input class="f" value="Password" readonly/>
+                    <button type="button">Sign in</button>
+                    <a href="#" onclick="return false">Forgot your password?</a>
+                    <div class="er">Incorrect username or password.</div>
+                    <div class="su">Signed in successfully.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. HEADER / TOOLBAR -->
+              <div class="pv-pane" data-pane="header">
+                <div class="pv-hd" style="border-bottom:1px solid var(--br-card-border)">
+                  <span class="nm" id="pvHdName2">GLOBAL SMS</span><span class="sp"></span>
+                  <span class="clk">14:32 GMT</span><span class="clk">·</span>
+                  <span class="clk">admin</span><span class="clk">·</span><span class="clk">Theme</span>
+                </div>
+                <div class="pv-bd" style="background:var(--br-general-content-bg)">
+                  <div class="pv-c"><h4>Header and top toolbar</h4>
+                    <p>The bar above uses Header background and Header text. Buttons below use the button tokens.</p>
+                    <div class="pv-btns">
+                      <span class="pv-b p1">Primary</span><span class="pv-b p2">Secondary</span>
+                      <span class="pv-b nu">1</span><span class="pv-b nu">2</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. SIDEBAR -->
+              <div class="pv-pane" data-pane="sidebar">
+                <div class="pv-app" style="grid-template-columns:190px 1fr">
+                  <div class="pv-sb">
+                    <div class="b"><img id="pvSbLogo2" src="/assets/ams-logo-trim.png" alt=""/>
+                      <span id="pvSbName2">GLOBAL SMS</span></div>
+                    <div class="i">Dashboard</div><div class="i act">Numbers</div>
+                    <div class="i">Ranges</div><div class="i">Reports</div><div class="i">Settings</div>
+                  </div>
+                  <div class="pv-main"><div class="pv-hd"><span class="nm">Sidebar preview</span></div>
+                    <div class="pv-bd"><div class="pv-c"><h4>Hover and active states</h4>
+                      <p>Hover a menu item to see the hover colour; the highlighted one is the active item.</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. OTP / SMS -->
+              <div class="pv-pane" data-pane="otp">
+                <div class="pv-bd" style="background:var(--br-general-content-bg)">
+                  <div class="pv-otp">
+                    <div class="o"><div class="t">Balance</div><div class="v">4,820</div><span class="pv-bg in">Credits</span></div>
+                    <div class="o"><div class="t">Queued</div><div class="v">36</div><span class="pv-bg wn">Pending</span></div>
+                    <div class="o"><div class="t">Delivered</div><div class="v">98.9%</div><span class="pv-bg ok">Healthy</span></div>
+                  </div>
+                  <div class="pv-msg"><div class="hd">+44 7700 900001 · 2 minutes ago</div>
+                    <div class="bd">Your verification code is 482910. It expires in 10 minutes.</div></div>
+                  <div class="pv-msg"><div class="hd">+44 7700 900002 · 8 minutes ago</div>
+                    <div class="bd">Delivery to this handset failed and will be retried.</div></div>
+                </div>
+              </div>
+
+              <!-- 6. TABLES -->
+              <div class="pv-pane" data-pane="tables">
+                <div class="pv-bd" style="background:var(--br-general-content-bg)">
+                  <div class="pv-c"><h4>SMS Detailed Report</h4>
+                    <table class="pv-tbl">
+                      <thead><tr><th>Date</th><th>Number</th><th>Provider</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td>2026-10-20</td><td>+44 7700 900001</td><td>Provider A</td><td><span class="pv-bg ok">Delivered</span></td></tr>
+                        <tr><td>2026-10-20</td><td>+44 7700 900002</td><td>Provider B</td><td><span class="pv-bg wn">Queued</span></td></tr>
+                        <tr class="sel"><td>2026-10-19</td><td>+44 7700 900003</td><td>Provider A</td><td><span class="pv-bg dg">Failed</span></td></tr>
+                        <tr><td>2026-10-19</td><td>+44 7700 900004</td><td>Provider C</td><td><span class="pv-bg in">Draft</span></td></tr>
+                      </tbody>
+                    </table>
+                    <div class="pv-btns" style="margin-top:9px">
+                      <span class="pv-b nu">‹ Prev</span><span class="pv-b p1">1</span><span class="pv-b nu">2</span><span class="pv-b nu">Next ›</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 7. FORMS / BUTTONS -->
+              <div class="pv-pane" data-pane="forms">
+                <div class="pv-bd" style="background:var(--br-general-content-bg)">
+                  <div class="pv-c"><h4>Create user</h4><p>Field labels, inputs and focus rings.</p>
+                    <label class="pv-lbl">Username</label><input class="pv-inp" value="jsmith" readonly/>
+                    <label class="pv-lbl" style="margin-top:7px">Email</label>
+                    <input class="pv-inp" placeholder="name@example.com" readonly/>
+                    <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+                      <input type="checkbox" class="pv-chk" checked disabled/><span style="font-size:11px">Active</span>
+                      <input type="radio" class="pv-chk" checked disabled/><span style="font-size:11px">Agent</span>
+                    </div>
+                    <div class="pv-btns">
+                      <span class="pv-b p1">Save</span><span class="pv-b p2">Cancel</span>
+                      <span class="pv-b ok">Approve</span><span class="pv-b wn">Suspend</span><span class="pv-b dg">Delete</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 8. MODALS / ALERTS -->
+              <div class="pv-pane" data-pane="modals">
+                <div class="pv-ov">
+                  <div class="pv-mo"><h5>Confirm deletion</h5>
+                    <div style="font-size:11px">This cannot be undone. Delete this record?</div>
+                    <div class="pv-btns"><span class="pv-b dg">Delete</span><span class="pv-b p2">Cancel</span></div>
+                  </div>
+                </div>
+                <div class="pv-bd" style="background:var(--br-general-content-bg);padding-top:0">
+                  <div class="pv-al ok">Settings saved successfully.</div>
+                  <div class="pv-al wn">Balance is running low.</div>
+                  <div class="pv-al dg">Delivery failed: rejected by the provider.</div>
+                  <div class="pv-al in">3 numbers are awaiting allocation.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="hint" style="margin-top:10px">
+            The preview shows your unsaved edits. Nothing here changes the live
+            panels until you press <b>Save Changes</b>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <div class="in">
+    <button class="btn primary" id="btnSave">Save Changes</button>
+    <button class="btn" id="btnCancel">Cancel</button>
+    <span class="spacer"></span>
+    <button class="btn danger" id="btnReset">Reset to Defaults</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+var TOKEN_KEY='ams_branding_token';
+var tok=null; try{tok=sessionStorage.getItem(TOKEN_KEY)}catch(e){}
+if(!tok){location.replace('/branding-login');return;}
+
+var TOKENS=[], CATEGORIES=[], TEXT_DEFAULTS={}, saved=null, work=null;
+var $=function(id){return document.getElementById(id)};
+
+function api(path,opts){
+  opts=opts||{};
+  opts.headers=opts.headers||{};
+  opts.headers['Authorization']='Bearer '+tok;
+  if(opts.json){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(opts.json);delete opts.json;}
+  return fetch(path,opts).then(function(r){
+    return r.json().catch(function(){return {}}).then(function(d){
+      if(r.status===401||r.status===403){
+        try{sessionStorage.removeItem(TOKEN_KEY)}catch(e){}
+        location.replace('/branding-login');
+        throw new Error('session');
+      }
+      if(!r.ok) throw new Error(d&&d.error?d.error:('Request failed ('+r.status+')'));
+      return d;
+    });
+  });
+}
+function toast(msg,ok){
+  var t=$('toast');t.textContent=msg;t.className='toast '+(ok?'ok':'err');
+  clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast'},ok?3200:6000);
+}
+
+/* ------------------------- state ------------------------- */
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function norm(o){
+  var c=o&&o.colors?o.colors:{};
+  var light={},dark={};
+  Object.keys(c.light||{}).forEach(function(k){ if(c.light[k]) light[k]=c.light[k]; });
+  Object.keys(c.dark ||{}).forEach(function(k){ if(c.dark[k])  dark[k] =c.dark[k]; });
+  return JSON.stringify({general:o.general,theme:o.theme,assets:o.assets,colors:{light:light,dark:dark}});
+}
+function dirty(){
+  return norm(work)!==norm(saved);
+}
+function refreshDirty(){
+  var d=dirty(),p=$('dirty');
+  p.textContent=d?'Unsaved changes':'No unsaved changes';
+  p.className='pill '+(d?'dirty':'saved');
+  $('btnSave').disabled=!d;
+  $('btnCancel').disabled=!d;
+}
+
+/* ------------------------- colour UI ------------------------- */
+/* The storage key maps 1:1 onto the CSS custom property the real runtime
+   publishes (`sidebar.bg` -> `--br-sidebar-bg`), so the preview and the
+   live application literally read the same token names. */
+/* One canonical token -> custom-property mapping, shared with the backend:
+   `login.cardBg` -> `--br-login-card-bg`. camelCase MUST fold to kebab-case
+   or the preview would read a different variable than the runtime emits. */
+function cssVar(k){ return '--br-' + k.replace(/\./g,'-').replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();}); }
+var editSet='light';
+var HEXOK=/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+
+function tokensFor(set){ return TOKENS.filter(function(t){ return set==='light'? t.scope!=='dark' : t.scope!=='light'; }); }
+
+function buildColors(){
+  var host=$('colorGroups'); host.innerHTML='';
+  CATEGORIES.forEach(function(cat){
+    /* All twelve categories stay visible. A category whose tokens belong to
+       the other theme still renders, with its rows marked as belonging to
+       that set, so nothing silently disappears when you switch tabs. */
+    var list=TOKENS.filter(function(t){return t.g===cat;});
+    if(!list.length) return;
+    var d=document.createElement('details'); d.className='cat'; d.dataset.cat=cat;
+    /* open the first category so the panel is immediately usable */
+    if(cat===CATEGORIES[0]) d.open=true;
+    d.innerHTML='<summary><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">'+
+      '<path d="M6 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+      esc(cat)+' <span class="cnt">'+list.length+'</span>'+
+      '<span class="setdot" data-dot="'+esc(cat)+'"></span></summary><div class="catbody"></div>';
+    var body=d.querySelector('.catbody');
+    list.forEach(function(t){ body.appendChild(rowFor(t)); });
+    host.appendChild(d);
+  });
+  wireRows();
+  refreshSetDots();
+}
+
+function rowFor(t){
+  var d=document.createElement('div');
+  d.className='crow'; d.dataset.k=t.k; d.dataset.cat=t.g;
+  var other = (editSet==='light' && t.scope==='dark') || (editSet==='dark' && t.scope==='light');
+  if(other){
+    d.dataset.other='1';
+    d.innerHTML='<div class="sw unset" style="pointer-events:none"></div>'+
+      '<div class="meta"><div class="lb">'+esc(t.l)+'</div><div class="wh">'+esc(t.w||'')+'</div>'+
+      '<div class="state"><span class="tag inh">'+esc(editSet==='light'?'dark set':'light set')+'</span>'+
+      '<span style="font-size:10.5px;color:var(--muted)">switch to the '+esc(editSet==='light'?'Dark':'Light')+
+      ' set above to edit this</span></div></div>'+
+      '<div class="hex"><input type="text" disabled placeholder="—" /></div>'+
+      '<button class="reset" type="button" disabled>Reset</button>';
+    return d;
+  }
+  d.innerHTML=
+    '<div class="sw" title="Pick a colour"><input type="color" data-c="'+esc(t.k)+'" value="'+(t.hint||'#888888')+'"/></div>'+
+    '<div class="meta"><div class="lb">'+esc(t.l)+'</div><div class="wh">'+esc(t.w||'')+'</div>'+
+      '<div class="state"><span class="tag" data-tag></span>'+
+      '<span class="inhsw" data-inhsw title="Inherited value"></span>'+
+      '<span style="font-size:10.5px;color:var(--muted)" data-inhtxt></span></div></div>'+
+    '<div class="hex"><input type="text" data-t="'+esc(t.k)+'" placeholder="inherited" maxlength="32" spellcheck="false" autocomplete="off"/></div>'+
+    '<button class="reset" type="button" data-r="'+esc(t.k)+'" title="Discard this colour and inherit the app default">Reset</button>';
+  return d;
+}
+
+function wireRows(){
+  var host=$('colorGroups');
+  host.querySelectorAll('input[data-c]').forEach(function(el){
+    el.addEventListener('input',function(){ setColor(el.getAttribute('data-c'), el.value); });
+  });
+  host.querySelectorAll('input[data-t]').forEach(function(el){
+    el.addEventListener('input',function(){
+      var v=el.value.trim();
+      if(v===''||HEXOK.test(v)) setColor(el.getAttribute('data-t'), v);
+      el.classList.toggle('bad', v!=='' && !HEXOK.test(v));
+    });
+    el.addEventListener('blur',function(){
+      var v=el.value.trim();
+      if(v!==''&&HEXOK.test(v)&&v.length===4){ /* #abc -> #aabbcc */
+        setColor(el.getAttribute('data-t'), '#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3]);
+      }
+    });
+  });
+  host.querySelectorAll('button[data-r]').forEach(function(el){
+    el.addEventListener('click',function(){ setColor(el.getAttribute('data-r'), ''); });
+  });
+}
+
+function setColor(k,v){
+  if(!work.colors[editSet]) work.colors[editSet]={};
+  if(v===undefined||v===null||v==='') delete work.colors[editSet][k];
+  else work.colors[editSet][k]=String(v).trim();
+  paintRow(k); applyPreview(); refreshDirty();
+}
+
+/* Req 5B: always distinguish inherited from saved, and never render an
+   unset colour as white/black/transparent. */
+function paintRow(k){
+  var row=document.querySelector('.crow[data-k="'+cssEsc(k)+'"]'); if(!row) return;
+  if(row.getAttribute('data-other')) return;   /* belongs to the other theme set */
+  var t=TOKENS.filter(function(x){return x.k===k;})[0]; if(!t) return;
+  var cur=(work.colors[editSet]||{})[k]||'';
+  var savedV=(saved&&saved.colors&&saved.colors[editSet]&&saved.colors[editSet][k])||'';
+  var sw=row.querySelector('.sw'), ci=row.querySelector('input[data-c]'), ti=row.querySelector('input[data-t]');
+  var tag=row.querySelector('[data-tag]'), isw=row.querySelector('[data-inhsw]'), itx=row.querySelector('[data-inhtxt]');
+  var rs=row.querySelector('button[data-r]');
+  sw.classList.toggle('unset', !cur);
+  if(cur){ ci.value=/^#[0-9a-f]{6}$/i.test(cur)?cur:'#888888'; }
+  else   { ci.value=t.hint||'#888888'; }
+  if(ti.value!==cur) ti.value=cur;
+  ti.classList.toggle('bad', cur!=='' && !HEXOK.test(cur));
+  isw.style.background=t.hint||'#888888';
+  itx.textContent='inherits '+(t.hint||'default');
+  tag.className='tag '+(cur?(cur!==savedV?'dirtyv':'saved'):'inh');
+  tag.textContent=cur?(cur!==savedV?'unsaved':'saved'):'inherited';
+  rs.disabled=!cur;
+}
+
+function refreshSetDots(){
+  CATEGORIES.forEach(function(cat){
+    var dot=document.querySelector('[data-dot="'+cssEsc(cat)+'"]'); if(!dot) return;
+    var mine=tokensFor(editSet).filter(function(t){return t.g===cat;});
+    if(!mine.length){ dot.textContent=editSet==='light'?'dark set':'light set'; dot.classList.remove('has'); return; }
+    var n=mine.filter(function(t){return (work.colors[editSet]||{})[t.k];}).length;
+    dot.textContent=n? n+' set' : 'all inherited';
+    dot.classList.toggle('has', n>0);
+  });
+}
+
+function allRows(){
+  var out=[];
+  tokensFor(editSet).forEach(function(t){ out.push(t.k); });
+  return out;
+}
+
+function applyFilter(){
+  var q=($('colorSearch').value||'').trim().toLowerCase();
+  var only=$('onlySet').checked;
+  var host=$('colorGroups');
+  host.querySelectorAll('.crow').forEach(function(row){
+    var k=row.getAttribute('data-k');
+    var t=TOKENS.filter(function(x){return x.k===k;})[0]||{};
+    var set=!!((work.colors[editSet]||{})[k]);
+    if(row.getAttribute('data-other')){
+      var hitO=!q || (t.l||'').toLowerCase().indexOf(q)>=0 || (t.w||'').toLowerCase().indexOf(q)>=0 || (t.g||'').toLowerCase().indexOf(q)>=0;
+      row.style.display=(hitO&&!only)?'':'none';
+      return;
+    }
+    var hit=!q || (t.l||'').toLowerCase().indexOf(q)>=0 || (t.w||'').toLowerCase().indexOf(q)>=0
+              || (t.g||'').toLowerCase().indexOf(q)>=0 || k.toLowerCase().indexOf(q)>=0;
+    row.style.display=(hit&&(!only||set))?'':'none';
+  });
+  host.querySelectorAll('.cat').forEach(function(cat){
+    var any=cat.querySelectorAll('.crow').length? Array.prototype.some.call(cat.querySelectorAll('.crow'),function(r){return r.style.display!=='none';}) : false;
+    cat.style.display=any?'':'none';
+    if(q) cat.open=true;
+  });
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function cssEsc(s){return String(s).replace(/["\\]/g,'\\$&')}
+
+/* ------------------------- preview ------------------------- */
+/* Req 5C: the preview reads the SAME --br-* custom properties the runtime
+   publishes for the real app, so it cannot drift from production.
+   Req 5D: the previewed theme follows the set you are editing, and each
+   set is written from its own values only. */
+function applyPreview(){
+  var root=$('pvRoot'); if(!root) return;
+  root.classList.toggle('dk', editSet==='dark');
+  var set=(work.colors&&work.colors[editSet])||{};
+  /* start from a clean slate, then publish only what is actually set, so an
+     unset token falls through to the app's own inherited default */
+  tokensFor(editSet).forEach(function(t){
+    var v=(set[t.k]||'').trim();
+    if(v) root.style.setProperty(cssVar(t.k), v);
+    else  root.style.removeProperty(cssVar(t.k));
+  });
+  /* login tokens always preview from the light set, because login pages
+     render on the light root by design */
+  if(editSet==='dark') TOKENS.filter(function(t){return t.g==='Login Page';}).forEach(function(t){
+    var v=((work.colors&&work.colors.light)||{})[t.k]||'';
+    if(v) root.style.setProperty(cssVar(t.k), v); else root.style.removeProperty(cssVar(t.k));
+  });
+  /* brand text */
+  var nm=work.general.panelName||'Panel name';
+  var sb=work.general.sidebarBrand||nm, hd=work.general.headerBrand||nm;
+  ['pvSbName','pvSbName2','pvHdName','pvHdName2'].forEach(function(id){var e=$(id); if(e)e.textContent=sb&&id.indexOf('Sb')>=0?sb:hd;});
+  var lt=work.general.loginTitle||nm;
+  ['pvLgTitle'].forEach(function(id){var e=$(id); if(e)e.textContent=lt;});
+  var tg=work.general.tagline||''; var e2=$('pvLgTag'); if(e2)e2.textContent=tg;
+  var ft=[work.general.footerText,work.general.supportText].filter(Boolean).join(' · ')||nm;
+  var ef=$('pvFtText'); if(ef)ef.textContent=ft;
+  /* the settings response exposes URLs for uploaded assets, never server paths */
+  var au=(work.assetUrls)||{};
+  var lg=au.logo||'/assets/ams-logo-trim.png';
+  ['pvSbLogo','pvSbLogo2','pvLgLogo','pvLogo','topLogo'].forEach(function(id){var e=$(id); if(e)e.src=lg;});
+  var e=$('pvLogoDark'); if(e)e.src=au.logoDark||lg;
+  var tn=$('topName'); if(tn)tn.textContent=(work.general.shortName||nm);
+  var pvl=$('pvLoginTitle'); if(pvl)pvl.textContent=lt;
+}
+
+/* ------------------------- load / fill ------------------------- */
+function fill(){
+  ['panelName','shortName','loginTitle','tabTitle','tagline','headerBrand','sidebarBrand',
+   'footerText','supportText','reportBrand'].forEach(function(k){
+    var el=$('g_'+k); if(el)el.value=work.general[k]||'';
+  });
+  $('t_mode').value=work.theme.mode||'';
+  $('t_animations').value=work.theme.animations||'';
+  buildColors();
+  tokensFor(editSet).forEach(function(t){ paintRow(t.k); });
+  refreshSetDots();
+  applyFilter();
+  var lg=(work.assets&&work.assets.logo)||'/assets/ams-logo-trim.png';
+  $('topLogo').src=lg;
+  $('topName').textContent=(work.general.shortName||work.general.panelName||'Panel Branding');
+  applyPreview();refreshDirty();
+}
+function bindText(){
+  ['panelName','shortName','loginTitle','tabTitle','tagline','headerBrand','sidebarBrand',
+   'footerText','supportText','reportBrand'].forEach(function(k){
+    var el=$('g_'+k); if(!el)return;
+    el.addEventListener('input',function(){ work.general[k]=el.value; applyPreview(); refreshDirty(); });
+  });
+  $('t_mode').addEventListener('change',function(){work.theme.mode=this.value;refreshDirty();});
+  $('t_animations').addEventListener('change',function(){work.theme.animations=this.value;refreshDirty();});
+}
+
+/* ------------------------- actions ------------------------- */
+function save(){
+  if(!work.general.panelName.trim()){toast('Panel name is required',false);return;}
+  $('btnSave').disabled=true;
+  /* Req 5D: send ONLY the set being edited. The backend leaves an absent set
+     untouched, so saving Light can never overwrite Dark (not even a
+     concurrent change made by someone else). */
+  var payload={light:{},dark:{}}; payload[editSet]=clone(work.colors[editSet]||{});
+  api('/api/branding/settings',{method:'PUT',json:{general:work.general,colors:payload,theme:work.theme}})
+   .then(function(r){
+     saved=clone(r.settings);work=clone(r.settings);fill();
+     toast('Branding saved and applied',true);
+   })
+   .catch(function(e){ if(e.message!=='session')toast(e.message,false); })
+   .then(function(){$('btnSave').disabled=false;});
+}
+function cancel(){
+  work=clone(saved);fill();toast('Reverted to the saved settings',true);
+}
+function reset(){
+  if(!confirm('Reset ALL branding to defaults?\n\nThis clears the panel name, colours, theme and any uploaded logo.\nIt does NOT delete users, SMS records, providers, rates or any other application data.\n\nType RESET BRANDING to confirm.'))return;
+  var v=prompt('Type RESET BRANDING to confirm:');
+  if(v!=='RESET BRANDING'){toast('Reset cancelled',true);return;}
+  api('/api/branding/reset',{method:'POST',json:{confirm:'RESET BRANDING'}})
+   .then(function(r){saved=clone(r.settings);work=clone(r.settings);fill();toast('Reset to defaults',true);})
+   .catch(function(e){if(e.message!=='session')toast(e.message,false);});
+}
+function upload(kind){
+  var inp=$('fileLogo');inp.value='';
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0];if(!f)return;
+    if(f.size>2*1024*1024){toast('File is too large (maximum 2 MB)',false);return;}
+    var fd=new FormData();fd.append('file',f);
+    toast('Uploading…',true);
+    fetch('/api/branding/logo/'+kind,{method:'POST',headers:{Authorization:'Bearer '+tok},body:fd})
+      .then(function(r){return r.json().catch(function(){return{}}).then(function(d){
+        if(!r.ok)throw new Error(d.error||('Upload failed ('+r.status+')'));return d;});
+      })
+      .then(function(r){
+        saved=clone(r.settings);work=clone(r.settings);fill();
+        toast('Logo updated — it will appear everywhere',true);
+      })
+      .catch(function(e){toast(e.message,false);});
+  };
+  inp.click();
+}
+function removeLogo(){
+  if(!confirm('Remove the uploaded logo and restore the default mark?'))return;
+  api('/api/branding/logo/logo',{method:'DELETE'})
+    .then(function(r){saved=clone(r.settings);work=clone(r.settings);fill();toast('Default logo restored',true);})
+    .catch(function(e){if(e.message!=='session')toast(e.message,false);});
+}
+function changePassword(){
+  var cur=prompt('Current password:');if(cur===null)return;
+  var np=prompt('New password (at least 8 characters):');if(np===null)return;
+  if(np.length<8){toast('New password must be at least 8 characters',false);return;}
+  var np2=prompt('Repeat the new password:');
+  if(np2!==np){toast('The two new passwords do not match',false);return;}
+  var nu=prompt('New username (leave blank to keep "'+(saved&&saved._u||'')+'"):');
+  api('/api/branding/password',{method:'POST',json:{currentPassword:cur,newPassword:np,newUsername:nu||''}})
+    .then(function(r){
+      tok=r.token;try{sessionStorage.setItem(TOKEN_KEY,tok)}catch(e){}
+      $('mustChange').style.display='none';
+      toast('Credentials updated. Use them next time you sign in.',true);
+    })
+    .catch(function(e){if(e.message!=='session')toast(e.message,false);});
+}
+
+/* ------------------------- boot ------------------------- */
+api('/api/branding/session').then(function(s){
+  $('who').textContent='Signed in as '+(s.username||'');
+  if(s.mustChange)$('mustChange').style.display='block';
+  return api('/api/branding/settings');
+}).then(function(r){
+  TOKENS=r.tokens;TEXT_DEFAULTS=r.textDefaults||{};
+  CATEGORIES=r.categories||[];
+  saved=clone(r.settings);work=clone(r.settings);
+  ['light','dark'].forEach(function(k){
+    if(!saved.colors||!saved.colors[k]) { if(!saved.colors)saved.colors={}; saved.colors[k]=saved.colors[k]||{}; }
+    if(!work.colors||!work.colors[k])  { if(!work.colors) work.colors={};  work.colors[k] =work.colors[k] ||{}; }
+  });
+  buildColors();bindText();fill();
+}).catch(function(e){ if(e.message!=='session')toast(e.message,false); });
+
+/* ---- which set is being edited ---- */
+function switchSet(set){
+  editSet=set;
+  $('setLight').classList.toggle('on',set==='light');
+  $('setDark').classList.toggle('on',set==='dark');
+  $('setLight').textContent=set==='light'?'Editing: Light set':'Light set';
+  $('setDark').textContent=set==='dark'?'Editing: Dark set':'Dark set';
+  buildColors();
+  tokensFor(editSet).forEach(function(t){paintRow(t.k);});
+  refreshSetDots();applyFilter();applyPreview();refreshDirty();
+}
+$('setLight').addEventListener('click',function(){switchSet('light')});
+$('setDark').addEventListener('click',function(){switchSet('dark')});
+$('colorSearch').addEventListener('input',applyFilter);
+$('onlySet').addEventListener('change',applyFilter);
+
+/* ---- preview tabs ---- */
+$('pvTabs').addEventListener('click',function(ev){
+  var b=ev.target.closest('button[data-pv]'); if(!b) return;
+  $('pvTabs').querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+  b.classList.add('on');
+  var want=b.getAttribute('data-pv');
+  $('pvRoot').querySelectorAll('.pv-pane').forEach(function(p){
+    p.classList.toggle('on', p.getAttribute('data-pane')===want);
+  });
+});
+
+$('btnSave').addEventListener('click',save);
+$('btnCancel').addEventListener('click',cancel);
+$('btnReset').addEventListener('click',reset);
+$('btnUpload').addEventListener('click',function(){upload('logo')});
+$('btnUploadDark').addEventListener('click',function(){upload('logoDark')});
+$('btnUploadFav').addEventListener('click',function(){upload('favicon')});
+$('btnRemoveLogo').addEventListener('click',removeLogo);
+$('btnPw').addEventListener('click',changePassword);
+$('btnOut').addEventListener('click',function(){
+  api('/api/branding/logout',{method:'POST'}).catch(function(){}).then(function(){
+    try{sessionStorage.removeItem(TOKEN_KEY)}catch(e){} location.replace('/branding-login');
+  });
+});
+/* preview tabs are handled by the pvTabs delegate above */
+window.addEventListener('beforeunload',function(e){ if(dirty()){e.preventDefault();e.returnValue='';} });
+})();
+</script>
+</body>
+</html>

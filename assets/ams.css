@@ -1,0 +1,636 @@
+/* GLOBAL SMS — light-only structural components and theme. */
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{border-radius:8px;border:2px solid var(--bg);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+.sidebar .nav-item,.sidebar .side-item,.sidebar .item,.nav-item{border-radius:10px;}
+.sidebar .nav-item span,.side-item span{font-size:13px;}
+.nav-item.active,.side-item.active,.sidebar .nav-item.active{position:relative;}
+.nav-item.active::before,.side-item.active::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;}
+.nav-item.active svg,.side-item.active svg{stroke:var(--accent)!important;}
+.side-group,.nav-section,.group-label, .sidebar .group, .sidebar .sg-title{font-size:10.5px!important;letter-spacing:.14em!important;font-weight:700!important;text-transform:uppercase!important;}
+.topbar,.tb1,.rail-top,.headerbar{position:sticky;top:0;z-index:40;}
+.tb-btn,.tb-icon{border-radius:10px!important;}
+.page-head{margin-bottom:18px!important;}
+.page-head h2{font-size:22px!important;font-weight:700!important;letter-spacing:-.02em!important;display:block!important;visibility:visible!important;opacity:1!important;}
+.card,.panel,.stat-card,.table-wrap,.modal-box,.toolbar{border:1px solid var(--border)!important;border-radius:14px!important;}
+.stat-card{overflow:hidden;position:relative;}
+.stat-card::after{content:"";position:absolute;inset:0 0 auto 0;height:2px;opacity:.55;}
+.stat-card:hover{transform:translateY(-1px);transition:.18s ease;}
+.stat-info h3{font-weight:750!important;font-variant-numeric:tabular-nums;}
+.stat-info span{font-size:11.5px!important;}
+.btn{border-radius:10px!important;font-weight:650!important;font-size:12.5px!important;padding:7px 13px!important;border:1px solid transparent!important;transition:filter .15s ease,transform .1s ease,box-shadow .15s ease!important;}
+.btn:active{transform:translateY(1px);}
+.ams-actions{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.ams-btn{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border2)!important;cursor:pointer;position:relative;flex:0 0 auto;padding:0!important;}
+.ams-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+[data-tip]{position:relative;}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);border:1px solid var(--border2);border-radius:8px;padding:5px 9px;font-size:11.5px;font-weight:600;white-space:nowrap;z-index:90;pointer-events:none;animation:amsTip .12s ease;}
+@keyframes amsTip{from{opacity:0;transform:translateX(-50%) translateY(3px);}
+to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.table-wrap{padding:6px!important;}
+table{border-collapse:separate!important;border-spacing:0!important;}
+thead th,table th{font-size:11px!important;letter-spacing:.06em!important;text-transform:uppercase!important;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--border2)!important;}
+tbody tr,table tr{border-bottom:1px solid #ddd;}
+td .x{cursor:pointer;font-weight:700;}
+.tag{border-radius:999px!important;padding:2.5px 9px!important;font-size:11px!important;font-weight:650!important;border:1px solid transparent!important;}
+.chip{border:1px solid #ddd!important;border-radius:999px!important;}
+input,select,textarea{border:1px solid var(--border2)!important;border-radius:10px!important;}
+input:focus,select:focus,textarea:focus{outline:none!important;}
+label{font-weight:600!important;font-size:12px!important;}
+input[type="checkbox"],input[type="radio"]{accent-color:#30abed;width:auto;}
+.modal-box{border:1px solid var(--border2)!important;}
+.chart .bar{border-radius:6px;}
+.chart .bar .fill,.bar .fill{border-radius:6px;}
+.table-controls label{font-size:12px;}
+.table-controls select{min-width:70px;}
+.pager button,.page-btn,.pg-btn,button[class*="page"]{border:1px solid var(--border)!important;border-radius:8px!important;padding:4px 10px!important;font-size:12px!important;cursor:pointer;}
+.login-card,.shell .login-panel{border-radius:22px!important;}
+.dot{border-radius:50%;}
+.empty-state{padding:34px 18px;text-align:center;}
+.empty-state .es-icon{width:44px;height:44px;margin:0 auto 10px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);}
+.empty-state .es-icon svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.error-state{padding:30px 18px;text-align:center;}
+.error-state .btn{margin-top:12px;}
+.skeleton{animation:amssk 1.2s infinite;border-radius:8px;}
+@keyframes amssk{}
+.ams-dash-grid{display:grid;grid-template-columns:repeat(4,minmax(210px,1fr));gap:14px;}
+.ams-dash-grid .stat-card{min-height:104px;}
+.ams-dash-sub{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 4px;}
+.ams-dash-sub .ams-pay-chip{flex:1 1 220px;min-width:0;}
+@media(max-width:620px){.ams-dash-sub .ams-pay-chip{flex:1 1 100%;}}
+.ams-pay-chip{flex:1 1 220px;border:1px solid var(--border);border-radius:14px;padding:14px 16px;}
+.ams-pay-chip .t{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+.ams-pay-chip .v{font-size:22px;font-weight:750;font-variant-numeric:tabular-nums;margin-top:4px;}
+.ams-pay-chip .s{font-size:11.5px;margin-top:2px;}
+.ams-map-wrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid #ddd;}
+.ams-map-wrap svg{display:block;width:100%;height:auto;}
+.ams-map-wrap path{fill:#16234a;stroke:rgba(124,152,230,.30);stroke-width:.45;transition:fill .2s ease;}
+.ams-map-wrap path.ams-on{fill:#2f9fe0;}
+.ams-map-wrap path:hover{fill:#9252dc!important;}
+.ams-map-legend{display:flex;gap:16px;align-items:center;padding:10px 14px;font-size:12px;flex-wrap:wrap;}
+.ams-map-legend .k{display:inline-flex;align-items:center;gap:6px;}
+.ams-map-legend .sw{width:10px;height:10px;border-radius:3px;}
+.chart .bar-col{border-radius:8px;}
+.chart .bar{border-radius:8px 8px 2px 2px!important;}
+.ams-map-info{position:absolute;top:10px;left:10px;z-index:5;border:1px solid var(--border2);border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:650;display:none;pointer-events:none;max-width:220px;}
+.ams-map-info .cnt{font-weight:750;}
+@media(max-width:900px){.ams-btn{width:34px;height:34px;}
+.ams-btn svg{width:17px;height:17px;}}
+@media(prefers-reduced-motion:reduce){html:not(.ams-anim-on) *{animation:none!important;transition:none!important;}}
+@media(max-width:900px){.page-head h2{font-size:19px!important;}
+.content{padding:16px 12px!important;}
+.stats-grid.dash-metrics,.ams-dash-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;}
+.stat-card{min-height:88px!important;}
+.stat-info h3{font-size:18px!important;}
+.grid2.dash-row{grid-template-columns:1fr!important;}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;}
+.toolbar .btn{flex:1 1 auto;}
+.sidebar{width:264px!important;}}
+@media(max-width:720px){.ams-cards table,table.ams-cards{display:block;}
+table.ams-cards thead{display:none;}
+table.ams-cards tbody{display:block;}
+table.ams-cards tr{display:block;border:1px solid var(--border)!important;border-radius:14px!important;padding:12px 12px 10px;margin:10px 0;}
+table.ams-cards td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0!important;padding:5px 2px!important;}
+table.ams-cards td::before{content:attr(data-label);font-size:11px!important;font-weight:700;letter-spacing:.05em;text-transform:uppercase;flex:0 0 auto;text-align:left;}
+table.ams-cards td.ams-num{order:-1;border-radius:9px;padding:8px 10px!important;margin-bottom:6px;}
+table.ams-cards td.ams-num,table.ams-cards td.ams-num *{font-size:14px!important;font-weight:700!important;}}
+@media(max-width:480px){.ams-dash-grid{grid-template-columns:1fr 1fr!important;}
+.ams-pay-chip{flex:1 1 100%;}}
+.ams-dash-grid .stat-card,.stats-grid .stat-card,.dash-metrics .stat-card{border:0!important;border-radius:18px!important;overflow:hidden;position:relative;display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:108px;padding:18px 20px;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;}
+.ams-dash-grid .stat-card:hover,.stats-grid .stat-card:hover,.dash-metrics .stat-card:hover{transform:translateY(-2px)!important;}
+.ams-dash-grid .stat-card::before,.stats-grid .stat-card::before,.dash-metrics .stat-card::before{content:""!important;display:block!important;position:absolute!important;width:140px!important;height:140px!important;right:-58px!important;top:-62px!important;border-radius:50%!important;z-index:0;}
+.ams-dash-grid .stat-card::after,.stats-grid .stat-card::after,.dash-metrics .stat-card::after{content:"";position:absolute;width:74px;height:74px;right:36px;bottom:-36px;border-radius:50%;z-index:0;}
+.ams-dash-grid .stat-card .stat-info,.stats-grid .stat-card .stat-info,.dash-metrics .stat-card .stat-info{position:relative;z-index:1;}
+.ams-dash-grid .stat-card .stat-info p,.stats-grid .stat-card .stat-info p,.dash-metrics .stat-card .stat-info p{text-transform:uppercase!important;font-size:10.5px!important;font-weight:800!important;letter-spacing:.42px!important;margin:0 0 8px!important;}
+.ams-dash-grid .stat-card .stat-info h3,.stats-grid .stat-card .stat-info h3,.dash-metrics .stat-card .stat-info h3{font-size:23px!important;font-weight:850!important;margin:0!important;letter-spacing:.2px;}
+.ams-dash-grid .stat-card .stat-info span,.stats-grid .stat-card .stat-info span,.dash-metrics .stat-card .stat-info span{font-size:11px!important;display:block!important;margin-top:3px!important;}
+.dash-metrics .dash-go,.stats-grid .dash-go,.ams-dash-grid .dash-go{width:42px!important;height:42px!important;border:1px solid #ddd!important;font-size:13px!important;flex:0 0 auto;}
+.dash-go svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;}
+.ams-pay-chip{position:relative;overflow:hidden;border:0!important;border-radius:18px!important;}
+.ams-pay-chip::before{content:"";position:absolute;width:130px;height:130px;right:-52px;top:-58px;border-radius:50%;z-index:0;}
+.ams-pay-chip::after{content:"";position:absolute;width:66px;height:66px;right:40px;bottom:-32px;border-radius:50%;z-index:0;}
+.ams-pay-chip .t{position:relative;z-index:1;}
+.ams-pay-chip .v{position:relative;z-index:1;}
+.ams-pay-chip .s{position:relative;z-index:1;}
+@media(max-width:720px){.topbar,.tb1,.headerbar{flex-wrap:wrap;row-gap:6px;padding-top:8px!important;padding-bottom:8px!important;height:auto!important;min-height:54px;}
+.tb-date{order:9;flex:1 1 100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;margin:0;min-height:0;}}
+.mono, td.mono, th.mono, .cell-mono, .ams-num-val, .ams-cli-val, td span.mono{font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace !important;font-size: 14.5px !important;font-weight: 700 !important;letter-spacing: 0.035em !important;line-height: 1.4 !important;white-space: nowrap !important;-webkit-font-smoothing: antialiased !important;text-rendering: optimizeLegibility !important;}
+@media (max-width: 768px) {.mono, td.mono, th.mono, .cell-mono, td span.mono{font-size: 13px !important;letter-spacing: 0.02em !important;}}
+.searchable-dropdown{position: relative;display: inline-block;min-width: 200px;user-select: none;font-family: inherit;vertical-align: middle;}
+.sd-trigger{display: flex;align-items: center;justify-content: space-between;padding: 8px 12px;border: 1px solid #ddd;border-radius: 6px;font-size: 13px;cursor: pointer;min-height: 38px;box-sizing: border-box;transition: border-color 0.15s ease, box-shadow 0.15s ease;}
+.sd-trigger:hover, .sd-trigger:focus{outline: none;}
+.sd-label{white-space: nowrap;overflow: hidden;text-overflow: ellipsis;padding-right: 8px;}
+.sd-caret{font-size: 11px;flex-shrink: 0;}
+.sd-menu{position: absolute;top: calc(100% + 4px);left: 0;width: 100%;min-width: 240px;max-height: 300px;border: 1px solid #ddd;border-radius: 6px;z-index: 2000;display: flex;flex-direction: column;overflow: hidden;}
+.sd-search-box{padding: 8px;border-bottom: 1px solid #ddd;position: sticky;top: 0;z-index: 10;}
+.sd-search-box input{width: 100%;box-sizing: border-box;padding: 6px 10px;border: 1px solid #ddd;border-radius: 4px;font-size: 12px;outline: none;}
+.sd-options{overflow-y: auto;max-height: 240px;}
+.sd-option{padding: 8px 12px;font-size: 13px;cursor: pointer;border-bottom: 1px solid #ddd;display: flex;align-items: center;justify-content: space-between;transition: background 0.1s ease;}
+.sd-option.selected{font-weight: 600;}
+.sd-no-results{padding: 14px;text-align: center;font-size: 12px;font-style: italic;}
+/* Filter cards clip their content (rounded corners; table cards also clip for their
+   horizontal scroll). That clip also cut an open search dropdown off after the first
+   few rows - the Test Panel Range menu showed only ~3-4 of its ranges and the rest
+   could not be reached. A card that hosts a searchable dropdown and no table of its
+   own now lets the menu open fully; .sd-menu keeps its own max-height and inner
+   scrolling, so a long range list stays scrollable instead of being hidden. Table
+   cards (which really need their horizontal-scroll clip) are not affected. */
+.table-wrap:has(.searchable-dropdown):not(:has(table)),
+.toolbar:has(.searchable-dropdown),
+.filter-row:has(.searchable-dropdown){overflow: visible !important;}
+/* Approved presentation-only rebrand. Loaded after legacy styles.
+   Scoped to the light theme: saved dark preferences and existing toggle survive.
+   No visibility overrides on pages, security gates or permission-controlled actions. */
+html.ams-light { background:#f8fafc!important; }
+body.ams-light{--bg:#f8fafc;--bg2:#f1f5f9;--panel:#fff;--panel2:#f8fafc;--row:#fff;--text:#0f172a;--muted:#475569;--ice:#0f172a;--border:#e2e8f0;--border2:#cbd5e1;--blue:#155eef;--accent:#155eef;--accent2:#0b43be;--indigo:#155eef;--cyan:#0d7fd4;--sidebar:#fff;--topbar:#fff;--grad:linear-gradient(90deg,#155eef,#0b43be);--shadow:0 3px 14px rgba(15,23,42,.045);--glow:0 0 0 3px #dbe7ff;background:#f8fafc!important;color:#0f172a!important}
+body.ams-light :is(h1,h2,h3,h4,b,strong,.title,.nm,.tb-title,.t1,.pt) {color:#0f172a!important;}
+body.ams-light :is(.muted,.sub,.hint,.breadcrumb,.crumb,.clock,.tb-date,.rl,.cell-sub,.bar-label,.info,.footer,.t2) {color:#64748b!important;}
+body.ams-light :is(.sidebar,.rail,.navshell,.appbar,.side) {background:#fff!important;color:#334155!important;border-color:#e2e8f0!important;box-shadow:1px 0 0 #e2e8f0!important;}
+body.ams-light :is(.sb-brand,.brand,.brand-text,.appbar-top) {border-color:#e2e8f0!important;background:transparent!important;}
+body.ams-light :is(.brand b,.brand h1,.sb-brand h1,.brand-text h1){color:#0f172a!important}
+body.ams-light :is(.brand small,.sb-brand small,.brand-text small,.brand .muted) {color:#64748b!important;}
+body.ams-light :is(.sb-logo,.brand .logo,.rail .logo,.sb-brand .logo,.brand img) {box-shadow:none!important;border-color:#e2e8f0!important;}
+body.ams-light :is(.nav-item,.side-item,.sub-item,.ritem,.rsubitem,.navtab,.item,.sb-nav .tab,.dropitem){color:#475569!important;box-shadow:none!important}
+body.ams-light :is(.nav-item,.side-item,.sub-item,.ritem,.rsubitem,.navtab,.item,.sb-nav .tab,.dropitem):hover {background:#f1f5f9!important;color:#0b43be!important;}
+body.ams-light :is(.nav-item,.side-item,.sub-item,.ritem,.rsubitem,.navtab,.item,.sb-nav .tab,.dropitem).active{background:#eef4ff!important;color:#0b43be!important;box-shadow:inset 3px 0 0 #155eef!important}
+body.ams-light :is(.sb-section,.sb-sec,.rsec,.sec){color:#64748b!important}
+body.ams-light :is(.topbar,.tb1,.mgr-topbar,.top,.navtabs) {background:#fff!important;color:#334155!important;border-color:#e2e8f0!important;box-shadow:0 1px 0 #e2e8f0!important;}
+body.ams-light :is(.tb-btn,.ams-theme-btn,.hamburger,.hamb,.mgr-topbar-menu){background:#f8fafc!important;color:#475569!important;border-color:#e2e8f0!important;box-shadow:none!important}
+body.ams-light .av {background:#eef4ff!important;color:#155eef!important;box-shadow:none!important;}
+body .main,body .content {min-width:0;}
+
+body.ams-light :is(.page-head,.head){border-color:#e2e8f0!important}
+
+body.ams-light :is(.card,.stat-card,.table-wrap,.table,.toolbar,.box,.dash-note-card,.ams-pay-chip,.readonly-note,.upload-box,.client-welcome-card){background:#fff!important;color:#0f172a!important;border-color:#e2e8f0!important;box-shadow:0 3px 14px rgba(15,23,42,.035)!important}
+
+body.ams-light :is(.stat-card,.dash-metric,.metric){border-top-color:#c2d6ff!important}
+body.ams-light :is(.stat-card,.dash-metric,.metric)::before {background:none!important;box-shadow:none!important;}
+body.ams-light :is(.stat-info h3,.metric h3){color:#0f172a!important}
+body.ams-light :is(.stat-info p,.stat-info span,.metric p) {color:#64748b!important;}
+body.ams-light .dash-go{background:#eef4ff!important;color:#155eef!important;box-shadow:none!important}
+body.ams-light :is(.card-head,.table-controls,.table-foot,.modal-head,.modal-foot){background:#fff!important;border-color:#e2e8f0!important}
+
+
+body :is(.table-wrap,.table,.tscroll) {max-width:100%;overflow-x:auto;}
+body.ams-light table{background:#fff!important}
+body.ams-light th{background:#f8fafc!important;color:#475569!important;border-color:#e2e8f0!important}
+body.ams-light td{background:#fff!important;color:#334155!important;border-color:#edf1f5!important}
+body.ams-light tbody tr:hover td {background:#f8fbff!important;}
+body.ams-light :is(.cell-money,.money){color:#0f172a!important}
+
+body.ams-light :is(input,select,textarea){background:#fff!important;color:#0f172a!important;border-color:#cbd5e1!important;box-shadow:none!important}
+
+body.ams-light :is(input,textarea)::placeholder {color:#64748b!important;opacity:1;}
+body.ams-light :is(input,select,textarea):focus{border-color:#155eef!important;box-shadow:0 0 0 3px #dbe7ff!important}
+body.ams-light :is(input,select,textarea):disabled {background:#f1f5f9!important;color:#64748b!important;}
+body.ams-light :is(input[type=checkbox],input[type=radio]) {accent-color:#155eef;}
+body.ams-light :is(label,.form-group label,.field label){color:#334155!important}
+body.ams-light select option {background:#fff!important;color:#0f172a!important;}
+body.ams-light :is(.btn,.ams-btn){background:#155eef!important;color:#fff!important;border-color:transparent!important;box-shadow:none!important}
+body.ams-light :is(.btn,.ams-btn):hover{background:#0b43be!important;filter:none!important}
+body.ams-light :is(.btn-ghost,.btn.ghost,.exp-btns .ams-btn,.exp-btns .btn,.icon-btn,.ams-copy-num-btn){background:#fff!important;color:#475569!important;border-color:#cbd5e1!important;box-shadow:none!important}
+body.ams-light :is(.btn-red,.btn.red,.ams-red,.ams-btn.danger) {background:#dc2626!important;color:#fff!important;}
+body.ams-light :is(.btn-green,.btn.green,.ams-green):not(.exp-btns *) {background:#15803d!important;color:#fff!important;}
+body.ams-light :is(.ams-amber,.btn-amber) {background:#fff7ed!important;color:#9a3412!important;border-color:#fed7aa!important;}
+body.ams-light :is(button,.btn,.ams-btn):disabled{opacity:.5}
+body.ams-light :is(.tag,.chip,.ams-num-page-badge){background:#eef4ff!important;color:#0b43be!important;border-color:#dbe7ff!important;box-shadow:none!important}
+body.ams-light :is(.tag-green,.tag.success) {background:#f0fdf4!important;color:#166534!important;border-color:#bbf7d0!important;}
+body.ams-light :is(.tag-red,.tag.error) {background:#fef2f2!important;color:#991b1b!important;border-color:#fecaca!important;}
+body.ams-light .tag-amber {background:#fffbeb!important;color:#92400e!important;border-color:#fde68a!important;}
+body.ams-light .tag-gray {background:#f1f5f9!important;color:#475569!important;border-color:#e2e8f0!important;}
+body.ams-light :is(.pagination button,.pagination a){background:#fff!important;color:#475569!important;border-color:#e2e8f0!important}
+body.ams-light :is(.pagination button,.pagination a).active {background:#155eef!important;color:#fff!important;}
+body.ams-light :is(.modal-overlay,.client-welcome-overlay) {background:rgba(15,23,42,.45)!important;}
+body.ams-light .modal{background:#fff!important;color:#0f172a!important;border-color:#e2e8f0!important;box-shadow:0 20px 60px #0f172a26!important}
+body.ams-light .modal:has(> .box){background:rgba(15,23,42,.45)!important}
+
+body.ams-light :is(.dropmenu,.sd-options-list,.sd-search-box,.sd-option,.sd-header,.sd-selected,.sd-dropdown) {background:#fff!important;color:#334155!important;border-color:#e2e8f0!important;}
+body.ams-light :is(.sd-option:hover,.sd-option.selected) {background:#eef4ff!important;color:#0b43be!important;}
+body.ams-light :is(.bar-track,.ams-map-legend,.help-shot) {background:#f1f5f9!important;color:#475569!important;border-color:#e2e8f0!important;}
+body.ams-light .bar {background:#155eef!important;box-shadow:none!important;}
+body.ams-light :is(.msg.error,.msg.err) {background:#fef2f2!important;color:#991b1b!important;border-color:#fecaca!important;}
+body.ams-light :is(.msg.success,.msg.ok) {background:#f0fdf4!important;color:#166534!important;border-color:#bbf7d0!important;}
+body.ams-light :focus-visible{outline-color:#155eef}
+body.ams-light * {scrollbar-color:#cbd5e1 transparent;}
+/* Login geometry is presentation only and shared with the optional dark mode. */
+body.ams-login {min-height:100dvh;display:flex;align-items:center!important;justify-content:center;padding:32px 16px!important;overflow-y:auto!important;}
+body.ams-login .shell {display:block!important;width:100%!important;max-width:420px!important;border-radius:20px!important;overflow:hidden;margin:auto!important;min-height:0!important;}
+body.ams-login .brand-panel.logo-only-panel {display:none!important;}
+body.ams-login .login-panel {padding:32px!important;min-height:0!important;}
+body.ams-login .login-card {width:100%!important;max-width:none!important;}
+body.ams-login .m-brand {display:flex!important;align-items:center;justify-content:center;margin:0 0 24px!important;}
+body.ams-login .m-brand-t {display:none!important;}
+body.ams-login .m-brand img {box-shadow:none!important;}
+body.ams-login .login-head {text-align:center;margin-bottom:24px!important;}
+body.ams-login .login-head h2 {font-size:26px!important;line-height:1.2;letter-spacing:-.04em!important;}
+body.ams-login .login-head .eyebrow {display:block!important;font-size:10px!important;letter-spacing:.15em!important;margin-bottom:10px!important;}
+body.ams-login .field {margin-bottom:18px!important;}
+body.ams-login .field label {margin-bottom:7px!important;}
+body.ams-login .input-wrap input {height:48px!important;padding-left:42px!important;}
+body.ams-login .pass-input {padding-right:70px!important;}
+body.ams-login .captcha-row {grid-template-columns:120px minmax(0,1fr)!important;gap:12px!important;}
+body.ams-login .captcha-box {height:48px!important;border-radius:8px!important;}
+body.ams-login .row-between {gap:8px;flex-wrap:wrap;margin:8px 0 22px!important;font-size:12px!important;}
+body.ams-login form > .btn {height:48px!important;border-radius:9px!important;}
+body.ams-login .footer {margin-top:24px!important;font-size:11px!important;}
+body.ams-light.ams-login .shell {background:#fff!important;border:1px solid #e2e8f0!important;box-shadow:0 18px 60px #0f172a0c!important;}
+body.ams-light.ams-login .login-panel {background:#fff!important;}
+body.ams-light.ams-login :is(.captcha-box,.toggle-pass) {background:#eef4ff!important;color:#0b43be!important;border-color:#c2d6ff!important;}
+body.ams-portal-login {min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:32px 16px!important;}
+body.ams-portal-login > .card {width:100%!important;max-width:420px!important;padding:32px!important;border-radius:20px!important;}
+body.ams-light.ams-portal-login form button {background:#155eef!important;color:white!important;border-radius:8px!important;box-shadow:none!important;min-height:46px;}
+body.ams-portal-login :is(.title,h1) {font-size:24px!important;letter-spacing:-.03em;}
+body.ams-portal-login .logo {box-shadow:none!important;}
+body.ams-portal-login input {min-height:46px!important;}
+@media(max-width:1100px) {
+ 
+ body :is(.filter-row,.head-actions,.table-controls,.table-foot,.tc-left,.tc-right) {flex-wrap:wrap;gap:10px;}
+ 
+}
+@media(max-width:767px) {
+ 
+ body :is(.grid2,.dash-row,.two-col,.form-grid) {grid-template-columns:minmax(0,1fr)!important;}
+ body :is(.toolbar,.filter-row) {flex-wrap:wrap;}
+ body .filter-row > * {max-width:100%;}
+ body :is(.top,.topbar,.mgr-topbar) {gap:8px;}
+ body .top {flex-wrap:wrap;}
+ 
+ 
+ 
+ body.ams-login .login-panel {padding:26px 22px!important;}
+ body.ams-login {padding:20px 14px!important;}
+ body .modal-body {padding:16px!important;}
+}
+@media(max-width:420px) {
+ 
+ body.ams-portal-login > .card {padding:24px!important;}
+}
+@media(prefers-reduced-motion:reduce) {
+ html:not(.ams-anim-on) body *,html:not(.ams-anim-on) body *::before,html:not(.ams-anim-on) body *::after {scroll-behavior:auto!important;transition:none!important;animation:none!important;}
+}
+/* Higher-specificity legacy dashboard rhythm and runtime widgets. */
+body.ams-light :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card.dash-metric{background:#fff!important;border-color:#e2e8f0!important;border-top-color:#c2d6ff!important}
+body.ams-light .stat-card.dash-metric .stat-info p{color:#475569!important}
+body.ams-light .stat-card.dash-metric .stat-info h3 {color:#0f172a!important;}
+body.ams-light .stat-card.dash-metric .stat-info span {color:#64748b!important;}
+body.ams-light .ams-pay-chip :is(.t,.v,.s) {color:#334155!important;}
+body.ams-light :is(.ritem,.nav-item,.tab,.navtab,.item).active svg {stroke:#155eef!important;color:#155eef!important;}
+body.ams-light :is(.ritem,.nav-item,.item).active::before {background:#155eef!important;box-shadow:none!important;}
+body.ams-light :is(.main,.content) {color:#0f172a!important;}
+body.ams-light :is(.ms-modal,.ms-modal-head,.ms-modal-foot,.ms-settings-panel,.ms-notif-panel,.ms-notif-head,.ms-notif-foot,.ms-profile-menu,.ms-toast) {background:#fff!important;color:#0f172a!important;border-color:#e2e8f0!important;box-shadow:0 8px 30px #0f172a12!important;}
+body.ams-light :is(.ms-profile-item,.ms-notif-item,.ms-switch,.ms-field label) {color:#334155!important;border-color:#e2e8f0!important;}
+body.ams-light .ms-btn.primary {background:#155eef!important;color:#fff!important;}
+body.ams-light .ms-btn.ghost {background:#f8fafc!important;color:#475569!important;}
+body.ams-light .ms-progress {background:#155eef!important;}
+body.ams-light .amsc-cstatus.Open {color:#0b43be;background:#eef4ff;border-color:#c2d6ff;}
+body.ams-light .amsc-cstatus.InProgress {color:#92400e;background:#fffbeb;border-color:#fde68a;}
+body.ams-light .amsc-cstatus.Resolved {color:#166534;background:#f0fdf4;border-color:#bbf7d0;}
+body.ams-light .amsc-cmsg.user {background:#f8fafc;color:#334155;}
+body.ams-light .amsc-cmsg.admin {background:#eef4ff;color:#0b43be;}
+body.ams-light.ams-login .login-head .eyebrow {color:#155eef!important;}
+body.ams-light.ams-login .row-between a {color:#0b43be!important;}
+@media(max-width:900px) {
+ /* Secondary portals have no drawer handler: keep every link visible, wrapping
+    their existing navigation above content rather than introducing a new flow. */
+ body .layout:has(> .side) {display:block;}
+ body .layout > .side {position:relative!important;inset:auto!important;width:100%!important;height:auto!important;padding:14px!important;}
+ body .layout > .side .brand {padding-bottom:12px;}
+ body .layout > .side .nav {display:flex;flex-wrap:wrap;gap:6px;padding-top:12px;}
+ body .layout > .side .item {margin:0;padding:10px 12px;min-height:44px;font-size:13px;}
+ body .layout > .side + .main {margin-left:0!important;width:100%!important;}
+ body .layout > .side + .main .top {height:auto;min-height:60px;padding:12px 14px;flex-wrap:wrap;}
+ body .layout > .side + .main .grid {grid-template-columns:minmax(0,1fr);}
+}
+body.ams-light .dash-go svg {stroke:#155eef!important;color:#155eef!important;}
+body.ams-light .avatar {background:#eef4ff!important;color:#155eef!important;box-shadow:none!important;}
+/* Icon-only controls retain adequate drawable area; do not inherit text-button padding. */
+
+body.ams-light .ams-btn svg{stroke:currentColor!important}
+
+
+body.ams-light :is(.sd-trigger,.sd-menu){background:#fff!important;color:#334155!important;border-color:#cbd5e1!important;box-shadow:none!important}
+body.ams-light .sd-menu {box-shadow:0 8px 24px #0f172a1a!important;}
+
+body.ams-light .sd-trigger:focus-visible{outline-color:#155eef!important}
+@media(max-width:767px) {}
+
+/* Phase-2 responsive fix: a .ams-btn that carries a text label (e.g. "Lock Payment",
+   "Refresh", "Export CSV") must size to its label — the 38/44px square above is only
+   correct for icon-only buttons. Icon buttons (a single inline <svg> child) are unchanged. */
+
+@media(max-width:767px) {}
+/* Phase-2 responsive fix: KPI/metric rows outside the dashboard (Payment, Agent Account PIN)
+   go single-column on phones instead of being crushed into two 160px columns. */
+@media(max-width:600px) {}
+body .form-group {min-width:0;}
+body input[type=file] {box-sizing:border-box;max-width:100%;min-width:0;}
+
+/* ===== Approved screenshot-derived light system, September 2026 ===== */
+:root,html.ams-light,body.ams-light{
+ --bg:#f9f9f9;--bg2:#eee;--panel:#fff;--panel2:#f8f8f8;--row:#fff;--text:#333;--text-2:#555;--muted:#666;--text-muted:#666;--border:#ddd;--border2:#ccc;--blue:#155eef;--accent:#155eef;--accent2:#0b43be;--sidebar:#eee;--topbar:#f8f8f8;--red:#c9302c;--danger:#c9302c;--green:#398439;--ok:#398439;--amber:#ad6500;--indigo:#0b43be;--sky:#155eef;--cyan:#155eef;--mgr:#0068ad;--agt:#155eef;--cli:#3273a0;--grad:linear-gradient(#155eef,#0b43be);--shadow:0 1px 3px #0000000d;
+}
+body.ams-light{background:#f9f9f9!important;color:#333!important}
+body.ams-light :is(h1,h2,h3,h4,b,strong,.title,.nm,.tb-title,.t1,.pt){color:#333!important;}
+body.ams-light :is(.sidebar,.rail,.side,.navshell,.appbar){background:#eee!important;box-shadow:none!important;border-right-color:#ccc!important}
+
+body.ams-light :is(.sb-logo,.brand .logo,.rail > .brand > .logo,.sb-brand .logo){background:white!important;box-shadow:none!important}
+body.ams-light :is(.ams-sms-logo-img,.logo img,.brand > img){filter:none!important;background:#fff!important;box-shadow:none!important}
+
+
+body.ams-light :is(.brand small,.sb-brand small,.brand-text small,.side .brand .muted){color:#0b43be!important}
+
+body.ams-light :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab){border-top-color:white!important;border-bottom-color:#ccc!important;background:linear-gradient(#f6f6f6,#e5e5e5)!important;color:#333!important}
+body.ams-light :is(.sub-item,.rsubitem,.dropitem){background:#f1f1f1!important;color:#555!important;border-bottom-color:#ddd!important}
+body.ams-light :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab,.sub-item,.rsubitem,.dropitem).active{background:#fff!important;color:#0b43be!important;box-shadow:inset 3px 0 #155eef!important;}
+body.ams-light :is(.sb-section,.sb-sec,.rsec){color:#777!important}
+body.ams-light :is(.topbar,.tb1,.mgr-topbar,.top){background:linear-gradient(#fff,#eee)!important;box-shadow:0 1px 3px #00000012!important;border-color:#ccc!important;}
+
+
+
+body.ams-light :is(.breadcrumb,.crumb){background:linear-gradient(#f8f8f8,#e8e8e8)!important;border-color:#ccc;color:#555!important}
+body.ams-light :is(.card,.stat-card,.table-wrap,.table,.toolbar,.box,.dash-note-card,.ams-pay-chip){border-color:#ccc!important;box-shadow:0 1px 3px #00000008!important}
+body.ams-light :is(.card-head,.modal-head){background:linear-gradient(#f3f3f3,#e4e4e4)!important;border-bottom-color:#ccc!important}
+
+body.ams-light :is(.toolbar,.table-controls,.table-foot){background:#f8f8f8!important}
+body.ams-light :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card.dash-metric{border-color:#ccc!important;background:linear-gradient(#f5f5f5,#e9e9e9)!important}
+body.ams-light .stat-card.dash-metric .stat-info h3{color:#0b43be!important}
+body.ams-light .stat-card.dash-metric .stat-info p{color:#555!important}
+body.ams-light .dash-go{background:#fff!important;color:#155eef!important;border-color:#ddd!important}
+body.ams-light :is(.btn,.ams-btn,.ms-btn.primary){background:linear-gradient(#155eef,#0b43be)!important;color:#fff!important;border-color:#0069ad!important}
+body.ams-light :is(.btn-ghost,.btn.ghost,.exp-btns .btn,.exp-btns .ams-btn,.ms-btn.ghost){background:linear-gradient(#fff,#f0f0f0)!important;color:#444!important;border-color:#ccc!important}
+body.ams-light :is(.btn-red,.btn.red,.ams-red,.ams-btn.danger){background:linear-gradient(#e65b58,#bd302c)!important;border-color:#b72c28!important;color:#fff!important;}
+body.ams-light :is(.btn-green,.btn.green,.ams-green):not(.exp-btns *){background:linear-gradient(#68ad51,#398439)!important;border-color:#398439!important;color:#fff!important;}
+body.ams-light :is(.btn-amber,.btn-orange,.ams-amber){background:linear-gradient(#ffbf65,#e58b16)!important;color:#402800!important;border-color:#d7891e!important;}
+body.ams-light :is(input,select,textarea,.sd-trigger){border-color:#c4c4c4!important;box-shadow:inset 0 1px 2px #00000005!important;color:#333!important}
+body.ams-light :is(th,td){border-bottom-color:#ddd!important;border-right-color:#e2e2e2!important}
+body.ams-light th{background:#f6f6f6!important;color:#333!important}
+
+
+body.ams-light .ams-shortcut{border-color:#ccc;background:linear-gradient(#fff,#eee);box-shadow:0 0 0 3px #efefef;color:#333}
+body.ams-light .ams-shortcut svg{stroke:#155eef;fill:none}
+body.ams-light .ams-shortcut:hover{border-color:#155eef;background:#eef7fc;}
+
+/* ==========================================================================
+   FINAL POLISH §6C — GLOBAL SMS LOGIN BRANDING (every login entry point)
+   --------------------------------------------------------------------------
+   The previous login surface was a pale grey page (#f2f3f5) with a pale blue card
+   (#eaf0fa) and a green button: the background and the card were almost the same
+   tone, so the form had no separation, and the green did not belong to the GLOBAL SMS palette. This block is the single login design for /panel-login and for the
+   portal logins (Management, Payment, Test), so all entry points carry the same
+   branding.
+
+   Design: a calm deep-navy brand gradient behind one crisp white card. The dark,
+   low-detail background gives the card a clear edge without competing with the
+   form; the blue is the existing GLOBAL SMS accent (#0b43be / #155eef) already used
+   by the panels, which keeps the login visually distinct from the panels' light
+   grey working surfaces. Colours only — sizes, spacing and the responsive
+   breakpoints above are unchanged, and no login, password, session, CAPTCHA or role
+   behaviour is touched.
+   ========================================================================== */
+body.ams-light:is(.ams-login,.ams-portal-login){
+  background:
+    radial-gradient(1100px 520px at 50% -14%, rgba(21,94,239,.55) 0%, rgba(21,94,239,0) 62%),
+    radial-gradient(760px 420px at 88% 108%, rgba(0,168,155,.30) 0%, rgba(0,168,155,0) 60%),
+    linear-gradient(165deg,#0b1f3d 0%,#0a1730 48%,#071124 100%)!important;
+  background-attachment:fixed!important;
+}
+/* the card */
+body.ams-light.ams-login .shell{
+  max-width:420px!important;border-radius:18px!important;background:#fff!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 30px 70px rgba(3,12,30,.45),0 2px 10px rgba(3,12,30,.28)!important;
+}
+body.ams-light.ams-login .login-panel{background:#fff!important;padding:30px 30px 26px!important;}
+body.ams-light.ams-portal-login > .card{
+  background:#fff!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:18px!important;
+  box-shadow:0 30px 70px rgba(3,12,30,.45),0 2px 10px rgba(3,12,30,.28)!important;color:#0f172a!important;
+}
+/* logo: the supplied mark, unchanged, on its own white plate */
+body.ams-light.ams-login .m-brand{margin:6px 0 22px!important;}
+body.ams-light.ams-login .m-brand img{width:190px!important;height:114px!important;max-width:100%!important;max-height:none!important;border-radius:0!important;object-fit:contain!important;background:#fff;}
+/* headings and labels */
+body.ams-light.ams-login .login-head h2{font-size:25px!important;font-weight:800!important;color:#0f172a!important;letter-spacing:-.03em!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) .login-head .eyebrow,
+body.ams-light.ams-portal-login .eyebrow{color:#0b43be!important;font-weight:800!important;}
+body.ams-light.ams-portal-login :is(.title,h1){color:#0f172a!important;font-weight:800!important;}
+body.ams-light.ams-portal-login .sub{color:#475569!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) :is(.field label,label){color:#334155!important;font-weight:700!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) :is(.footer,.hint){color:#cbd5e1!important;}
+body.ams-light.ams-login .footer{color:#64748b!important;}
+/* fields */
+body.ams-light:is(.ams-login,.ams-portal-login) input{
+  background:#fff!important;border:1px solid #c9d6e8!important;border-radius:12px!important;
+  color:#0f172a!important;box-shadow:0 1px 2px rgba(15,23,42,.05)!important;
+}
+body.ams-light:is(.ams-login,.ams-portal-login) input::placeholder{color:#8b9bb0!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) input:focus{border-color:#0b43be!important;box-shadow:0 0 0 3px #dbe7ff!important;}
+body.ams-light.ams-login .input-wrap svg{stroke:#7c8ea6!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) :is(.checkbox,.row-between){color:#334155!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) .row-between a{color:#0b43be!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) :is(.captcha-box,.toggle-pass){background:#f2f7fd!important;color:#0b43be!important;border-color:#cfe0f5!important;}
+body.ams-light.ams-login .captcha-box{border-style:dashed!important;font-weight:800!important;}
+/* primary action */
+body.ams-light:is(.ams-login,.ams-portal-login) :is(form > .btn,form button){
+  background:linear-gradient(180deg,#155eef,#0b43be)!important;border:1px solid #0b43be!important;
+  border-radius:12px!important;color:#fff!important;font-size:15px!important;font-weight:800!important;
+  box-shadow:0 10px 24px rgba(11,67,190,.32)!important;
+}
+body.ams-light:is(.ams-login,.ams-portal-login) :is(form > .btn,form button):hover{filter:brightness(1.07)!important;}
+body.ams-light:is(.ams-login,.ams-portal-login) :is(form > .btn,form button):active{filter:brightness(.96)!important;}
+/* status messages keep the shared light semantics (red / green) with a readable body */
+body.ams-light:is(.ams-login,.ams-portal-login) .msg{border-radius:11px!important;}
+body.ams-light.ams-portal-login .logo{width:180px!important;height:110px!important;display:block;margin:0 auto 20px!important;background:white!important;border:0!important;border-radius:0!important;}
+body.ams-light.ams-portal-login .logo img{width:100%;height:100%;object-fit:contain;}
+body.ams-light .ams-statement-notice{border-color:#c4ddeb;border-left-color:#155eef;background:#eff8fc;color:#355469}
+
+
+body.ams-light .ams-statement-status{color:#666}
+
+
+
+@media(min-width:901px){
+ 
+ 
+ 
+ body.ams-light .rail :is(.lbl,.brand-text){opacity:1!important;}
+}
+@media(max-width:900px){}
+@media(max-width:767px){
+ 
+ 
+ 
+ 
+ body.ams-light.ams-login .login-panel{padding:24px!important;}
+ 
+}
+
+/* ===== GLOBAL SMS — reference-style dashboard components (ams-ui-*) =====
+   Gradient KPI cards, white stat groups and smooth area charts used by the
+   Admin / Manager / Agent / Client dashboards. Presentation only. */
+.ams-ui-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 16px}
+.ams-ui-card{position:relative;border-radius:16px;padding:18px 20px;color:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.08)}
+.ams-ui-card.ams-ui-indigo{background:linear-gradient(135deg,#0b43be 0%,#0a9e93 100%)}
+.ams-ui-card.ams-ui-pink{background:linear-gradient(135deg,#0a9e93 0%,#f43f5e 100%)}
+.ams-ui-card.ams-ui-purple{background:linear-gradient(135deg,#0b43be 0%,#00c2b0 100%)}
+.ams-ui-card.ams-ui-orange{background:linear-gradient(135deg,#f59e0b 0%,#f97316 100%)}
+.ams-ui-card .ams-ui-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.92);margin:0 0 6px}
+.ams-ui-card .ams-ui-value{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0}
+.ams-ui-card .ams-ui-spark{position:absolute;right:14px;bottom:12px;width:96px;height:40px;opacity:.9}
+.ams-ui-group{margin:0 0 16px}
+.ams-ui-group-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted,#666);margin:0 0 8px}
+.ams-ui-wcards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.ams-ui-wcard{display:flex;align-items:center;gap:12px;background:var(--panel,#fff);border:1px solid var(--border,#d3d3d3);border-radius:14px;padding:14px 16px;min-width:0}
+.ams-ui-wtxt{min-width:0}
+.ams-ui-wcard .ams-ui-label{font-size:12px;color:var(--muted,#666);margin:0 0 2px}
+.ams-ui-wcard .ams-ui-value{font-size:19px;font-weight:800;color:var(--text,#333);margin:0;line-height:1.15;word-break:break-word}
+.ams-ui-chip{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none}
+.ams-ui-chip svg{width:18px;height:18px}
+.ams-ui-chip.c1{background:#eaf1ff;color:#155eef}
+.ams-ui-chip.c2{background:#fdf2f8;color:#0a9e93}
+.ams-ui-chip.c3{background:#f5f3ff;color:#0b43be}
+.ams-ui-chip.c4{background:#fff7ed;color:#ea580c}
+.ams-ui-chip.c5{background:#ecfdf5;color:#059669}
+.ams-ui-chip.c6{background:#eef4ff;color:#155eef}
+.ams-ui-charts{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin:0 0 16px}
+.ams-ui-chart-card{background:var(--panel,#fff);border:1px solid var(--border,#d3d3d3);border-radius:16px;padding:16px 18px;min-width:0}
+.ams-ui-chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.ams-ui-chart-head h3{font-size:15px;font-weight:700;color:var(--text,#333);margin:0}
+.ams-ui-legend{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted,#666);white-space:nowrap}
+.ams-ui-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.ams-ui-chart-body{position:relative}
+.ams-ui-chart-body svg{width:100%;height:auto;display:block}
+.ams-ui-ylab,.ams-ui-xlab{font-size:11px;fill:#98a2b3}
+.ams-ui-tip{position:absolute;display:none;pointer-events:none;background:#111827;color:#fff;font-size:12px;line-height:1.3;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-115%);z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.ams-ui-chart-empty{color:var(--muted,#666);font-size:13px;text-align:center;padding:28px 0;margin:0}
+@media (max-width:1100px){
+  .ams-ui-cards,.ams-ui-wcards{grid-template-columns:repeat(2,1fr)}
+  .ams-ui-charts{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .ams-ui-cards,.ams-ui-wcards{grid-template-columns:1fr}
+  .ams-ui-card .ams-ui-value{font-size:22px}
+}
+
+/* ===== GLOBAL SMS — button variants, tooltip contrast, circular logo, alignment =====
+   Added with the Phase-4 pass: .btn-blue / .btn-purple had no background at all
+   (transparent button, low-contrast label) and [data-tip] tooltips rendered with
+   no background/text colour. Both themes are covered. */
+body.ams-light :is(.btn-blue,.btn.blue,.ams-blue){background:linear-gradient(#2f86d6,#1f6fb8)!important;border-color:#1d63a6!important;color:#fff!important;}
+body.ams-light :is(.btn-purple,.btn.purple,.ams-purple){background:linear-gradient(#8a63d2,#6d4fc0)!important;border-color:#5f43ad!important;color:#fff!important;}
+body.ams-light :is(.btn-blue,.btn-purple,.btn-green,.btn-red):hover{filter:brightness(1.06);}
+body.ams-light :is(.btn-blue,.btn-purple,.btn-green,.btn-red):disabled,
+body.ams-light :is(.btn-blue,.btn-purple,.btn-green,.btn-red)[disabled]{opacity:.55;filter:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;text-align:center;gap:6px;line-height:1.25;}
+.exp-btns{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}
+[data-tip]:hover::after{background:#111827!important;color:#fff!important;border-color:#111827!important;box-shadow:0 4px 14px rgba(0,0,0,.22);}
+[data-tip]:hover::before{content:"";position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111827;z-index:90;pointer-events:none;}
+/* Circular logo containers (sidebar + login brand), image clipped to the circle. */
+body :is(.sb-logo,.brand .logo,.rail .logo,.sb-brand .logo,.brand-logo .logo){border-radius:50%!important;overflow:hidden!important;}
+
+/* ===== SMS CLI Limit component (management console) — presentation only ===== */
+.ams-ui-cli-form{margin-bottom:16px;}
+.ams-ui-cli-row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;}
+.ams-ui-cli-sel{flex:1 1 260px;min-width:220px;margin:0;}
+.ams-ui-cli-num{flex:0 1 190px;min-width:150px;margin:0;}
+.ams-ui-cli-num input{width:100%;}
+.ams-ui-cli-act{flex:0 0 auto;margin:0;}
+.ams-ui-cli-act .btn{min-width:130px;padding:9px 18px!important;font-size:13px!important;font-weight:700!important;}
+.ams-ui-note{margin-top:14px;padding:10px 14px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;background:var(--panel2);color:var(--muted);font-size:12.5px;line-height:1.5;}
+.ams-ui-cli-table table th{text-align:left;}
+.ams-ui-cli-table .cell-money{font-variant-numeric:tabular-nums;}
+.ams-ui-cli-table .icon-btn{width:34px;height:34px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;}
+.ams-ui-cli-table .icon-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+@media (max-width:767px){
+  .ams-ui-cli-row{flex-direction:column;align-items:stretch;}
+  .ams-ui-cli-num{flex:1 1 auto;}
+  .ams-ui-cli-act .btn{width:100%;}
+}
+
+/* =========================================================================
+   GLOBAL SMS — DARK THEME (body.ams-dark)
+   Same components, same structure: only the palette changes. The light layer
+   (ams-light.css) targets body.ams-light exclusively, so the two never fight.
+   ========================================================================= */
+html.ams-dark{background:#0b1220!important;}
+body.ams-dark{
+  --bg:#0b1220;--bg2:#0f172a;--panel:#111c2e;--panel2:#0f1a2b;--row:#111c2e;
+  --text:#e2e8f0;--text-2:#cbd5e1;--muted:#94a3b8;--text-muted:#94a3b8;--ice:#e2e8f0;
+  --border:#24344d;--border2:#31445f;--blue:#38bdf8;--accent:#38bdf8;--accent2:#0d84e0;
+  --sidebar:#0b1220;--topbar:#0f1a2b;--red:#f87171;--danger:#f87171;--green:#4ade80;--ok:#4ade80;
+  --amber:#fbbf24;--indigo:#6f9cff;--sky:#38bdf8;--cyan:#00c8b4;--mgr:#7dd3fc;--agt:#38bdf8;--cli:#7ce6dc;
+  --grad:linear-gradient(#0d84e0,#155eef);--shadow:0 1px 3px rgba(0,0,0,.4);
+  background:#0b1220!important;color:#e2e8f0!important;
+}
+body.ams-dark :is(h1,h2,h3,h4,b,strong,.title,.nm,.tb-title,.t1,.pt){color:#e2e8f0!important;}
+body.ams-dark :is(.card,.panel,.table-wrap,.toolbar,.modal-box,.ms-modal,.box,.ams-ui-chart-card,.ams-ui-wcard){background:#111c2e!important;border-color:#24344d!important;box-shadow:0 1px 3px rgba(0,0,0,.35)!important;}
+body.ams-dark :is(.card-head,.modal-head,.ms-modal-head,.ms-notif-head){background:#0f1a2b!important;border-bottom:1px solid #24344d!important;}
+body.ams-dark .card-head .sub,body.ams-dark .muted,body.ams-dark .hint,body.ams-dark .breadcrumb{color:#94a3b8!important;}
+body.ams-dark .breadcrumb{background:#0f1a2b!important;border:1px solid #24344d!important;}
+body.ams-dark :is(.toolbar,.table-controls,.table-foot){background:#0f1a2b!important;border-color:#24344d!important;}
+body.ams-dark :is(th,td){border-right:1px solid #1d2c42!important;border-bottom:1px solid #24344d!important;color:#e2e8f0;}
+body.ams-dark th{background:#0f1a2b!important;color:#94a3b8!important;}
+body.ams-dark td{background:transparent;}
+body.ams-dark tbody tr:hover td{background:#16233a;}
+body.ams-dark :is(input,select,textarea,.sd-trigger){background:#0b1626!important;border:1px solid #31445f!important;color:#e2e8f0!important;}
+body.ams-dark :is(input::placeholder,textarea::placeholder){color:#64748b;}
+body.ams-dark :is(.topbar,.tb1,.mgr-topbar,.top,.appbar){background:#0f1a2b!important;border-bottom:1px solid #24344d!important;}
+/* dark sidebar: same structure as light, darker surface, readable text/icons */
+body.ams-dark.ams-panel :is(.sidebar,.rail,.side,.appbar){background:linear-gradient(180deg,#0d1728 0%,#0b1220 60%,#0a101c 100%)!important;border-right:1px solid #1d2c42!important;}
+body.ams-dark.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab){background:transparent!important;border-bottom:1px solid #16233a!important;color:#cbd5e1!important;}
+body.ams-dark.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab) svg{stroke:#7ea6c8!important;color:#7ea6c8!important;}
+body.ams-dark.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab):hover{background:#16233a!important;color:#fff!important;}
+body.ams-dark.ams-panel :is(.nav-item,.ritem,.navtab,.side .item,.sidebar .tab,.sub-item,.rsubitem,.dropitem).active{background:#0b43be!important;color:#fff!important;box-shadow:inset 3px 0 0 #7dd3fc!important;}
+body.ams-dark.ams-panel :is(.nav-item,.ritem,.navtab,.sub-item,.rsubitem,.dropitem).active svg{stroke:#fff!important;color:#fff!important;}
+body.ams-dark.ams-panel :is(.sub-item,.rsubitem,.dropitem){background:#0d1728!important;color:#a5bfd6!important;border-bottom:1px solid #16233a!important;}
+body.ams-dark.ams-panel :is(.sb-brand,.rail>.brand,.side>.brand,.sidebar>.brand,.appbar-top){border-color:#1d2c42!important;}
+body.ams-dark.ams-panel :is(.brand h1,.sb-brand h1,.brand-text h1){color:#fff!important;}
+body.ams-dark.ams-panel :is(.brand small,.sb-brand small){color:#7ea6c8!important;}
+body.ams-dark.ams-panel :is(.sb-section,.sb-sec,.rsec){color:#64809c!important;}
+/* buttons + tooltips on dark */
+body.ams-dark :is(.btn-ghost,.btn.ghost,.exp-btns .btn,.exp-btns .ams-btn,.icon-btn,.ams-copy-num-btn,.ms-btn.ghost){background:#16233a!important;color:#cbd5e1!important;border:1px solid #31445f!important;}
+body.ams-dark :is(.btn-blue,.btn.blue,.ams-blue){background:linear-gradient(#155eef,#0b43be)!important;border-color:#0b43be!important;color:#fff!important;}
+body.ams-dark :is(.btn-purple,.btn.purple,.ams-purple){background:linear-gradient(#7c5cd6,#6346bd)!important;border-color:#5b3fb0!important;color:#fff!important;}
+body.ams-dark :is(.btn-green,.btn.green,.ams-green):not(.exp-btns *){background:linear-gradient(#15803d,#166534)!important;border-color:#14532d!important;color:#fff!important;}
+body.ams-dark :is(.btn-red,.btn.red,.ams-red,.ams-btn.danger){background:linear-gradient(#dc2626,#b91c1c)!important;border-color:#991b1b!important;color:#fff!important;}
+body.ams-dark [data-tip]:hover::after{background:#e2e8f0!important;color:#0b1220!important;border-color:#e2e8f0!important;}
+body.ams-dark [data-tip]:hover::before{border-top-color:#e2e8f0!important;}
+/* tags, chips, money, notes on dark */
+body.ams-dark :is(.tag,.tag-mgr,.tag-agt,.tag-cli,.tag-client,.tag-blue,.tag-green,.tag-amber,.tag-red,.tag-gray){background:#16233a!important;color:#cbd5e1!important;border:1px solid #31445f!important;}
+body.ams-dark .ams-ui-note{background:#0f1a2b!important;border-color:#24344d!important;color:#94a3b8!important;}
+body.ams-dark .ams-ui-wcard .ams-ui-value{color:#e2e8f0;}
+body.ams-dark .ams-ui-wcard .ams-ui-label{color:#94a3b8;}
+body.ams-dark .ams-ui-chart-card{background:#111c2e!important;}
+body.ams-dark .ams-ui-chart-head h3{color:#e2e8f0;}
+body.ams-dark :is(.ams-ui-ylab,.ams-ui-xlab){fill:#64748b;}
+body.ams-dark .ams-ui-chart-card :is(line){stroke:#1d2c42;}
+body.ams-dark .ams-ui-tip{background:#e2e8f0;color:#0b1220;}
+body.ams-dark .ams-ui-chip.c1{background:#1e2a4a;color:#a9c2ff;}
+body.ams-dark .ams-ui-chip.c2{background:#3b1a2e;color:#9fe3dc;}
+body.ams-dark .ams-ui-chip.c3{background:#2a1a4a;color:#a9c2ff;}
+body.ams-dark .ams-ui-chip.c4{background:#3b2a12;color:#fcd34d;}
+body.ams-dark .ams-ui-chip.c5{background:#12301f;color:#6ee7b7;}
+body.ams-dark .ams-ui-chip.c6{background:#12283b;color:#7dd3fc;}
+body.ams-dark :is(.ms-notif-panel,.ms-settings,.ms-modal){background:#111c2e!important;border-color:#24344d!important;color:#e2e8f0!important;}
+body.ams-dark .ms-toast{background:linear-gradient(96deg,#16233a,#111c2e)!important;border-color:#31445f!important;color:#e2e8f0!important;}
+body.ams-dark :is(.upload-box,.ams-metric-summary-icon){background:#0f1a2b!important;border-color:#31445f!important;color:#94a3b8!important;}
+body.ams-dark :is(.modal-overlay .modal-box) {background:#111c2e!important;}
+body.ams-dark .cell-money{color:#e2e8f0;}
+body.ams-dark :is(.pagination button,.table-foot .info){color:#94a3b8;}
+body.ams-dark :is(.pagination button){background:#16233a!important;border:1px solid #31445f!important;color:#cbd5e1!important;}
+body.ams-dark :is(.pagination button.active){background:#0b43be!important;color:#fff!important;}
+body.ams-dark ::-webkit-scrollbar-thumb{background:#31445f;}
+body.ams-dark :focus-visible{outline-color:#38bdf8;}
+/* login / portal pages on dark */
+body.ams-dark.ams-login{background:linear-gradient(160deg,#0b1220,#101c33)!important;}
+body.ams-dark.ams-login :is(.brand-panel,.login-card,form,.box){background:#111c2e!important;border-color:#24344d!important;}
+body.ams-dark.ams-login :is(label,h1,h2,h3,p,span,div){color:#cbd5e1;}
+body.ams-dark.ams-login input{background:#0b1626!important;border:1px solid #31445f!important;color:#e2e8f0!important;}
+body.ams-dark.ams-login form > .btn{background:#155eef!important;border-color:#0b43be!important;color:#fff!important;}
+
+/* Appearance switcher (api.js settings panel) — both themes */
+.ms-theme-row{display:flex;gap:8px;margin-top:10px;}
+.ms-theme-btn{flex:1;padding:8px 12px;border-radius:9px;border:1px solid var(--border2);background:var(--panel2);color:var(--muted);font-weight:700;font-size:12.5px;cursor:pointer;}
+.ms-theme-btn:hover{filter:brightness(1.05);}
+.ms-theme-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+body.ams-dark .ms-theme-btn{background:#16233a;border-color:#31445f;color:#cbd5e1;}
+body.ams-dark .ms-theme-btn.active{background:#0b43be;border-color:#0b43be;color:#fff;}

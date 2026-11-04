@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" class="ams-light">
+<head><script src="/assets/ams-storage.js?v=gsms-20261104"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/assets/ams-favicon.png?v=gsms-20261104"  data-brand-favicon />
+<title>GLOBAL SMS — Test Panel</title>
+<style id="route-auth-hide">html{visibility:hidden;}</style>
+<script>
+(function(){try{const t=sessionStorage.getItem('ams_token')||localStorage.getItem('ams_token'),r=sessionStorage.getItem('ams_role')||localStorage.getItem('ams_role');if(!t||r!=='test'){location.replace('/test-login');return;}fetch('/api/me',{headers:{Authorization:'Bearer '+t}}).then(x=>{if(!x.ok)throw 0;return x.json()}).then(u=>{if(!u||u.role!=='test')throw 0;document.documentElement.style.visibility='visible';}).catch(()=>{sessionStorage.clear();['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k));location.replace('/test-login')});}catch(e){sessionStorage.clear();['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k));location.replace('/test-login')}})();
+</script>
+<style>*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,Segoe UI,system-ui,sans-serif;font-size:14px;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;border-right:1px solid #ddd;z-index:60;transition:transform .22s ease;overflow:auto;}
+.brand{display:flex;align-items:center;gap:12px;padding:16px 14px;border-bottom:1px solid #ddd;}
+.logo{width:46px;height:46px;border-radius:14px;overflow:hidden;border:1px solid #ddd;}
+.logo img{width:100%;height:100%;object-fit:cover;}
+.brand h1{font-size:16px;}
+.brand small{font-size:11px;}
+.nav{padding:12px;}
+.sec{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin:14px 12px 6px;}
+.item{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:12px;cursor:pointer;}
+.item.active{font-weight:900;}
+.main{margin-left:260px;min-height:100vh;}
+.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 22px;position:sticky;top:0;z-index:40;}
+.hamb{display:none;width:38px;height:38px;border:0;border-radius:10px;font-size:22px;cursor:pointer;}
+.spacer{flex:1;}
+.tb-btn{height:38px;min-width:38px;border:0;border-radius:10px;cursor:pointer;font-weight:800;}
+.content{padding:26px 22px;}
+.page{display:none;}
+.page.active{display:block;}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:14px;}
+.head h2{font-size:24px;}
+.crumb{font-size:12.5px;margin-top:4px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:18px;}
+.card{border:1px solid var(--border);border-radius:16px;padding:18px;}
+.metric{overflow:hidden;}
+.metric h3{font-size:30px;margin-top:8px;}
+.metric p{text-transform:uppercase;font-size:12px;font-weight:900;opacity:.9;}
+.grid2{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.input,select,input{border:1px solid #ddd;border-radius:12px;padding:10px 12px;min-height:42px;}
+button.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:900;cursor:pointer;}
+.table-wrap{border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.tscroll{overflow:auto;}
+table{width:100%;border-collapse:separate;border-spacing:0;}
+th,td{padding:12px 14px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top;}
+th{font-size:12px;text-transform:uppercase;}
+.mono{font-family:Consolas,monospace;}
+.otp{font-size:18px;font-weight:950;}
+.overlay{display:none;position:fixed;inset:0;z-index:50;}
+.overlay.show{display:block;}
+@media(max-width:900px){.sidebar{transform:translateX(-105%);width:260px;}
+.sidebar.show{transform:translateX(0);}
+.main{margin-left:0;}
+.hamb{display:block;}
+.content{padding:20px 14px;}
+.grid2{grid-template-columns:1fr;}
+.topbar{padding:0 12px;}}
+.table-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid #ddd}
+.pager{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pager button{min-width:34px;height:34px;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer;font-weight:800}
+.pager button.active{background:#155eef;color:#fff;border-color:#155eef}
+.pager button:disabled{opacity:.45;cursor:not-allowed}
+.pager .pinfo{font-size:12px;font-weight:700;opacity:.75;padding:0 4px}
+@media(max-width:600px){.pager button{min-width:32px;height:32px}}</style>
+
+
+
+<link rel="stylesheet" href="/assets/ams.css?v=gsms-20261104"/><script src="/assets/ams.js?v=gsms-20261104" defer></script>
+<link rel="stylesheet" href="/assets/ams-light.css?v=gsms-20261104"/>
+<link rel="stylesheet" href="/branding/runtime.css"/><script src="/branding/runtime.js" defer></script><link rel="stylesheet" href="/assets/ams-panel.css?v=gsms-20261104"/><link rel="stylesheet" href="/assets/ams-unify.css?v=gsms-20261104"/><script src="/assets/ams-cli-search.js?v=gsms-20261104" defer></script></head>
+<body class="ams-light ams-panel">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo"><img data-brand-logo src="/assets/ams-logo-square.png?v=gsms-20261104" alt="GLOBAL SMS"></div><div><h1 data-brand="name">GLOBAL SMS</h1><small>Test Panel</small></div></div>
+  <div class="nav">
+    <div class="sec">Main</div>
+    <div class="item active" data-page="dashboard">▦ Dashboard</div>
+    <div class="sec">Test Numbers</div>
+    <div class="item" data-page="numbers">☎ SMS Numbers</div>
+    <div class="sec">Testing</div>
+    <div class="item" data-page="test">✉ SMS Test Panel</div>
+  </div>
+</aside>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="main">
+  <header class="topbar"><button class="hamb" onclick="openSidebar()">☰</button><span class="clock" id="clock">—</span><div class="spacer"></div><button class="tb-btn" onclick="API.logout()">Logout</button></header>
+  <main class="content">
+    <section class="page active" id="page-dashboard">
+      <div class="head"><div><h2>Dashboard</h2><div class="crumb">Test Panel › Dashboard</div></div></div>
+      <div class="cards"><div class="card metric"><p>Today's OTPs</p><h3 id="todayOtp">0</h3></div><div class="card metric green"><p>Total Test Numbers</p><h3 id="totalNums">0</h3></div></div>
+      <div class="card"><h3>Last 7 Days</h3><div id="dailyStats" class="toolbar" style="margin-top:14px"></div></div>
+    </section>
+
+    <section class="page" id="page-numbers">
+      <div class="head"><div><h2>SMS Numbers</h2><div class="crumb">Only Test Numbers are shown here</div></div></div>
+      <div class="exp-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button class="btn btn-blue">Copy</button><button class="btn btn-blue">CSV</button><button class="btn btn-green">Excel</button></div><div class="table-wrap"><div class="tscroll"><table><thead><tr><th>Range</th><th>Number</th></tr></thead><tbody id="numBody"></tbody></table></div>
+        <div class="table-foot"><div class="muted" id="numInfo">—</div><div class="pager" id="numPager"></div></div></div>
+    </section>
+
+    <section class="page" id="page-test">
+      <div class="head"><div><h2>SMS Test Panel</h2><div class="crumb">Recent SMS stats for test traffic</div></div><button class="btn btn-blue" onclick="loadTestNumbers();loadOtps();loadDash()">Refresh</button></div>
+      <div class="grid2"><div class="card"><h3>Test Numbers</h3><div id="testRangeContainer" style="margin:10px 0"></div><input id="numberSearch" placeholder="Search number/range" oninput="numSearchInput()" style="width:100%;margin:4px 0 12px 0"/><div class="exp-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button class="btn btn-blue">Copy</button><button class="btn btn-blue">CSV</button><button class="btn btn-green">Excel</button></div><div class="table-wrap"><div class="tscroll"><table><thead><tr><th>Range</th><th>Number</th></tr></thead><tbody id="leftNums"></tbody></table></div>
+        <div class="table-foot"><div class="muted" id="leftNumsInfo">—</div><div class="pager" id="leftNumsPager"></div></div></div></div>
+      <div class="card"><h3 id="otpTitle">Recent SMS Stats</h3><div class="toolbar" style="margin:10px 0"><input id="publicCliFilter" placeholder="Filter CLI" oninput="otpCliInput()" style="min-width:160px"><button class="btn btn-blue" onclick="selectedNumber='';otpTitle.textContent='Recent SMS Stats';publicCliFilter.value='';otpState.page=1;loadTestNumbers();loadOtps();">Show All</button></div><div class="exp-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button class="btn btn-blue">Copy</button><button class="btn btn-blue">CSV</button><button class="btn btn-green">Excel</button></div><div class="table-wrap" style="margin-top:12px"><div class="tscroll"><table><thead><tr><th>Time</th><th>Range</th><th>Number</th><th>CLI</th><th>Message</th></tr></thead><tbody id="otpBody"></tbody></table></div>
+        <div class="table-foot"><div class="muted" id="otpInfo">—</div><div class="pager" id="otpPager"></div></div></div></div></div>
+    </section>
+  </main>
+</div>
+<script src="/api.js?v=gsms-20261104"></script>
+<script>
+API.guard('test');
+let ranges=[], testNumbers=[], selectedNumber='', pollTimer=null;
+function tick(){const d=new Date(),p=n=>String(n).padStart(2,'0');clock.textContent=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}setInterval(tick,1000);tick();
+function openSidebar(){sidebar.classList.add('show');overlay.classList.add('show')}function closeSidebar(){sidebar.classList.remove('show');overlay.classList.remove('show')}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id)?.classList.add('active');document.querySelectorAll('.item').forEach(i=>i.classList.toggle('active',i.dataset.page===id));localStorage.setItem('ams_last_page_test',id);history.replaceState({msPanel:true,page:id},'',location.pathname+'#'+id);closeSidebar();if(id==='test')startPolling();else stopPolling();}
+document.querySelectorAll('.item[data-page]').forEach(i=>i.onclick=()=>showPage(i.dataset.page));
+function fillRanges(){ /* public test panel: ranges are used for display only */ }
+function otp(msg){const m=String(msg||'').match(/\b\d{4,8}\b/);return m?m[0]:'—'}
+function maskCLI(cli){cli=String(cli||'');if(!cli)return '—';if(cli.length<=2)return cli[0]+'x';return cli.slice(0,2)+'x'.repeat(Math.min(8,cli.length-2));}
+let testRangeFilter = '';
+/* =========================================================================
+ * TEST PANEL PAGINATION (P19k #1)
+ * Two INDEPENDENT server-side paginations:
+ *   numState  -> Test Numbers section (25/page)  — /api/test-numbers?paged=1
+ *   otpState  -> SMS/OTP section (25/page)       — /api/test-panel/sms?paged=1
+ * Neither one touches the other: changing an OTP page never reloads or resets
+ * the numbers page and vice-versa. Search, range filter and CLI filter are sent
+ * to the server so page counts stay correct for the whole dataset.
+ * ========================================================================= */
+const PAGE_SIZE = 25;
+let numState = {page:1, limit:PAGE_SIZE, total:0, totalPages:1};
+let otpState = {page:1, limit:PAGE_SIZE, total:0, totalPages:1};
+function pagerButtons(st, onClickName){
+  if(!st.totalPages || st.totalPages<=1) return '';
+  const cur=st.page, last=st.totalPages;
+  const nums=[];
+  nums.push(1);
+  for(let i=cur-1;i<=cur+1;i++) if(i>1&&i<last) nums.push(i);
+  if(last>1) nums.push(last);
+  const uniq=[...new Set(nums)].sort((a,b)=>a-b);
+  let html='';
+  uniq.forEach((n,i)=>{
+    if(i>0 && n-uniq[i-1]>1) html+='<span class="pinfo">…</span>';
+    html+=`<button type="button" class="${n===cur?'active':''}" onclick="${onClickName}(${n})">${n}</button>`;
+  });
+  return `<button type="button" ${cur<=1?'disabled':''} onclick="${onClickName}(${cur-1})">‹</button>`
+    + html + `<button type="button" ${cur>=last?'disabled':''} onclick="${onClickName}(${cur+1})">›</button>`;
+}
+function paintPager(infoId, pagerId, st, label, onClickName, shown){
+  const info=document.getElementById(infoId), pager=document.getElementById(pagerId);
+  if(info) info.textContent=`Showing ${shown} of ${st.total} ${label}`;
+  if(pager) pager.innerHTML=pagerButtons(st, onClickName);
+}
+function goNumPage(n){ numState.page=Math.max(1,Math.min(n||1,numState.totalPages||1)); loadTestNumbers(); }
+function goOtpPage(n){ otpState.page=Math.max(1,Math.min(n||1,otpState.totalPages||1)); loadOtps(); }
+let numSearchTimer=null;
+function numSearchInput(){ clearTimeout(numSearchTimer); numSearchTimer=setTimeout(()=>{ numState.page=1; loadTestNumbers(); },300); }
+let otpCliTimer=null;
+function otpCliInput(){ clearTimeout(otpCliTimer); otpCliTimer=setTimeout(()=>{ otpState.page=1; loadOtps(); },300); }
+/* masked CLI filter -> server-side: trailing mask chars behave like wildcards */
+function otpCliServerValue(){
+  const raw=String(document.getElementById('publicCliFilter')?.value||'').trim().toLowerCase();
+  if(!raw) return '';
+  const deMasked=raw.replace(/x+$/,'');
+  return deMasked;
+}
+/* Test Numbers: one server query feeds BOTH number tables (SMS Numbers page + Test Numbers card) */
+async function loadTestNumbers(){
+  const q=(document.getElementById('numberSearch')?.value||'').trim();
+  const params=new URLSearchParams({paged:'1',page:String(numState.page),limit:String(numState.limit)});
+  if(q) params.set('search',q);
+  if(testRangeFilter) params.set('range',testRangeFilter);
+  let d={rows:[],total:0,page:1,totalPages:1};
+  try{ d=await API.get('/test-numbers?'+params.toString()); }catch(e){ d={rows:[],total:0,page:1,totalPages:1}; }
+  if(Array.isArray(d)) d={rows:d,total:d.length,page:1,totalPages:1};
+  numState.page=Number(d.page||1); numState.total=Number(d.total||0); numState.totalPages=Number(d.totalPages||1);
+  testNumbers=d.rows||[];
+  renderNumbers(); renderTestNumbers();
+}
+async function loadAll(){
+  ranges=await API.get('/ranges').catch(()=>[]);
+  if(window.renderSearchSelect && document.getElementById('testRangeContainer')){
+    const items = [{value:'', label:'All Ranges'}].concat((ranges||[]).map(r=>({value:r.name, label:r.name})));
+    window.renderSearchSelect('testRangeContainer', {
+      id: 'testRangeSelect',
+      placeholder: 'All Ranges',
+      items: items,
+      value: testRangeFilter,
+      onChange: (val) => { testRangeFilter = val; numState.page=1; loadTestNumbers(); }
+    });
+  }
+  fillRanges(); await loadTestNumbers(); loadDash();
+  if(document.getElementById('page-test').classList.contains('active'))loadOtps();
+}
+async function loadDash(){const d=await API.get('/test-panel/dashboard').catch(()=>({today_otps:0,total_test_numbers:testNumbers.length,daily7:[]}));todayOtp.textContent=d.today_otps||0;totalNums.textContent=d.total_test_numbers||0;dailyStats.innerHTML=(d.daily7||[]).map(x=>`<div class="card" style="min-width:120px;padding:12px"><b>${(x.date||'').slice(5)}</b><div class="otp">${x.count||0}</div></div>`).join('')||'<span class="muted">No data</span>';}
+function renderNumbers(){
+  numBody.innerHTML=testNumbers.map(n=>`<tr><td>${n.range_name||''}</td><td class="mono">${n.number}</td></tr>`).join('')||'<tr><td colspan="2" class="muted">No test numbers found</td></tr>';
+  paintPager('numInfo','numPager',numState,'test numbers','goNumPage',testNumbers.length);
+}
+function renderTestNumbers(){
+  const rows=testNumbers;
+  leftNums.innerHTML=rows.map(n=>`<tr class="${selectedNumber===n.number?'selected-row':''}" onclick="selectNumber('${n.number.replace(/'/g,'\\\'')}')"><td>${n.range_name||''}</td><td class="mono">${n.number}</td></tr>`).join('')||'<tr><td colspan="2" class="muted">No test numbers</td></tr>';
+  paintPager('leftNumsInfo','leftNumsPager',numState,'test numbers','goNumPage',rows.length);
+}
+function selectNumber(n){selectedNumber=n;otpTitle.textContent='Recent SMS Stats for '+n;otpState.page=1;loadOtps();startPolling();}
+async function loadOtps(silent){
+  const params=new URLSearchParams({paged:'1',page:String(otpState.page),limit:String(otpState.limit)});
+  if(selectedNumber) params.set('number',selectedNumber);
+  const cliVal=otpCliServerValue(); if(cliVal) params.set('cli',cliVal);
+  if(testRangeFilter) params.set('range',testRangeFilter);
+  let d={rows:[],total:0,page:1,totalPages:1};
+  try{ d=await API.get('/test-panel/sms?'+params.toString()); }catch(e){ d={rows:[],total:0,page:1,totalPages:1}; }
+  if(Array.isArray(d)) d={rows:d,total:d.length,page:1,totalPages:1};
+  otpState.page=Number(d.page||1); otpState.total=Number(d.total||0); otpState.totalPages=Number(d.totalPages||1);
+  const rows=d.rows||[];
+  /* the 4s poll must not fight the user: keep the current page, just refresh data */
+  otpBody.innerHTML=rows.map(r=>`<tr><td>${(r.received_at||'').slice(0,19)}</td><td>${r.range_name||''}</td><td class="mono">${r.number||''}</td><td>${maskCLI(r.cli)}</td><td class="mono">xxxxxxxxxxxx</td></tr>`).join('')||'<tr><td colspan="5" class="muted">No recent SMS stats found</td></tr>';
+  paintPager('otpInfo','otpPager',otpState,'SMS/OTP records','goOtpPage',rows.length);
+}
+function startPolling(){clearInterval(pollTimer);pollTimer=setInterval(()=>{loadOtps(true);loadDash();},4000)}function stopPolling(){clearInterval(pollTimer)}
+window.addEventListener('popstate',e=>showPage((e.state&&e.state.page)||'dashboard'));
+const initial=(location.hash||'').replace('#','')||localStorage.getItem('ams_last_page_test')||'dashboard';showPage(initial);loadAll();
+</script>
+</body>
+</html>

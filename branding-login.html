@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head><script src="/assets/ams-storage.js?v=gsms-20261104"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow,noarchive"/>
+<title>GLOBAL SMS — Panel Branding</title>
+<link rel="icon" type="image/png" href="/assets/ams-favicon.png"/>
+<link rel="stylesheet" href="/assets/ams.css?v=gsms-20261104"/>
+<link rel="stylesheet" href="/assets/ams-login-anim.css?v=gsms-20261104"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    background:radial-gradient(1100px 620px at 50% -10%,#0f3a72 0%,#09203a 45%,#06101f 100%);
+    color:#e6edf7;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .bcard{
+    position:relative;z-index:2;width:100%;max-width:400px;padding:34px 32px 28px;
+    background:linear-gradient(155deg,rgba(255,255,255,.93) 0%,rgba(240,246,255,.89) 48%,rgba(224,237,255,.85) 100%);
+    -webkit-backdrop-filter:blur(22px) saturate(150%);backdrop-filter:blur(22px) saturate(150%);
+    border:1px solid rgba(255,255,255,.60);border-radius:22px;color:#0f1b2d;
+    box-shadow:0 28px 70px rgba(2,10,32,.55),0 2px 10px rgba(2,10,32,.28),
+               inset 0 1px 0 rgba(255,255,255,.70),0 0 30px rgba(0,200,180,.10);
+  }
+  .bcard h1{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+  .bcard .sub{font-size:13px;color:#475569;margin-bottom:22px}
+  .bcard label{display:block;font-size:12.5px;font-weight:600;color:#334155;margin:0 0 6px}
+  .bcard input{
+    width:100%;padding:11px 13px;margin-bottom:16px;font-size:14px;font-family:inherit;
+    border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#0f172a;
+  }
+  .bcard input:focus{outline:none;border-color:#0b43be;box-shadow:0 0 0 3px rgba(11,67,190,.16)}
+  .bcard button{
+    width:100%;padding:12px;font-size:14px;font-weight:600;font-family:inherit;color:#fff;
+    background:#0b43be;border:0;border-radius:10px;cursor:pointer
+  }
+  .bcard button:hover{background:#0b43be}
+  .bcard button:disabled{background:#94a3b8;cursor:not-allowed}
+  .msg{margin-top:14px;font-size:13px;text-align:center;min-height:18px}
+  .msg.err{color:#b91c1c}.msg.ok{color:#15803d}
+  .note{margin-top:18px;padding-top:14px;border-top:1px solid rgba(15,27,45,.10);font-size:11.5px;color:#64748b;line-height:1.5}
+  .brandmark{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .brandmark img{height:38px;width:auto;object-fit:contain}
+  .brandmark span{font-size:13px;font-weight:600;color:#0f1b2d}
+  @media(max-width:420px){.bcard{padding:26px 20px 22px}}
+</style>
+</head>
+<body class="ams-light">
+<div class="bcard">
+  <div class="brandmark">
+    <img id="bLogo" src="/assets/ams-logo-trim.png" alt="" data-brand-logo/>
+    <span id="bName">Appearance settings</span>
+  </div>
+  <h1 data-brand="login">Sign in</h1>
+  <p class="sub">Panel Branding — appearance settings for this installation</p>
+  <form id="f" autocomplete="off">
+    <label for="u">Username</label>
+    <input id="u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required/>
+    <label for="p">Password</label>
+    <input id="p" name="password" type="password" autocomplete="current-password" required/>
+    <button id="btn" type="submit">Sign in</button>
+  </form>
+  <div class="msg" id="m" role="status" aria-live="polite"></div>
+  <p class="note">
+    This panel is separate from the Admin, Manager, Agent and Client logins.
+    Ordinary panel accounts cannot sign in here. Access attempts are rate limited.
+  </p>
+</div>
+<script>
+(function(){
+  var f=document.getElementById('f'),m=document.getElementById('m'),btn=document.getElementById('btn');
+  var TOKEN_KEY='ams_branding_token';
+  function say(t,c){m.className='msg '+(c||'');m.textContent=t||'';}
+
+  /* branding name + logo on this page too */
+  fetch('/api/branding/public',{cache:'no-store'})
+    .then(function(r){return r.json()})
+    .then(function(c){
+      var n=(c&&c.shortName)||'';
+      if(n){document.getElementById('bName').textContent='Appearance settings';}
+      var logo=(c&&((c.assets&&c.assets.logo)||c.defaultLogo));
+      if(logo){document.getElementById('bLogo').src=logo;}
+      if(c&&c.tabTitle){document.title=c.tabTitle+' — Branding';}
+    }).catch(function(){});
+
+  /* already signed in? go straight to the panel */
+  (function(){
+    var t=null; try{t=sessionStorage.getItem(TOKEN_KEY)}catch(e){}
+    if(!t) return;
+    fetch('/api/branding/session',{headers:{Authorization:'Bearer '+t}})
+      .then(function(r){ if(r.ok){location.replace('/branding');} else { try{sessionStorage.removeItem(TOKEN_KEY)}catch(e){} } })
+      .catch(function(){});
+  })();
+
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    say('Signing in…','');btn.disabled=true;
+    fetch('/api/branding/login',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:document.getElementById('u').value.trim(),
+                           password:document.getElementById('p').value})
+    }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d}})})
+      .then(function(res){
+        if(!res.ok){ say((res.d&&res.d.error)||'Sign in failed','err'); btn.disabled=false; return; }
+        try{sessionStorage.setItem(TOKEN_KEY,res.d.token)}catch(e){}
+        say('Signed in — opening the panel…','ok');
+        setTimeout(function(){location.replace('/branding')},350);
+      }).catch(function(){
+        say('Network error — please try again','err'); btn.disabled=false;
+      });
+  });
+})();
+</script>
+</body>
+</html>

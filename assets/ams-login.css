@@ -1,0 +1,154 @@
+/* ============================================================================
+ * GLOBAL SMS — Login redesign v2 (2026-10-25)
+ * Full split-screen login: navy brand panel (left) + clean form (right);
+ * portal logins get the matching centred-card version on the same navy.
+ * Presentation only — form ids, captcha, auth, session and redirect logic in
+ * the pages are untouched. Loaded last on login.html + the 4 portal logins.
+ * ==========================================================================*/
+
+/* The animated theme's backdrop/toggle/LED decor is not part of this design */
+.ams-login-bg,.login-anim-toggle{display:none!important}
+html.ams-anim-on :is(.ams-ui-edge,.ams-ui-glow,.ams-ui-scan){display:none!important}
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login){color-scheme:light!important}
+
+/* ============================ MAIN LOGIN ================================= */
+html body:is(.ams-light,.ams-dark).ams-login{background:#fff!important;display:block!important;padding:0!important;margin:0!important;min-height:100vh}
+html body:is(.ams-light,.ams-dark).ams-login .shell{display:grid!important;grid-template-columns:47% 53%;width:100%!important;max-width:none!important;min-height:100vh;background:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;position:relative;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+/* ---- left brand panel ---- */
+html body:is(.ams-light,.ams-dark).ams-login .brand-panel{display:flex!important;flex-direction:column;justify-content:center;gap:34px;padding:56px 60px;position:relative;overflow:hidden;color:#fff;min-height:100vh;
+  background:
+   radial-gradient(560px circle at 88% 8%,rgba(0,194,176,.38),transparent 60%),
+   radial-gradient(620px circle at 6% 92%,rgba(0,198,255,.32),transparent 60%),
+   linear-gradient(158deg,#06162f 0%,#0c2c62 48%,#155eef 115%)}
+html body:is(.ams-light,.ams-dark).ams-login .brand-panel::before{content:"";position:absolute;width:520px;height:520px;border:1px solid rgba(255,255,255,.10);border-radius:50%;right:-190px;top:-160px;box-shadow:0 0 0 60px rgba(255,255,255,.03),0 0 0 130px rgba(255,255,255,.02)}
+html body:is(.ams-light,.ams-dark).ams-login .brand-panel::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(70% 60% at 50% 40%,#000 30%,transparent 100%);-webkit-mask-image:radial-gradient(70% 60% at 50% 40%,#000 30%,transparent 100%)}
+html body:is(.ams-light,.ams-dark).ams-login .login-hero-logo{position:relative;z-index:1;width:min(290px,72%)!important;height:auto!important;max-width:none!important;object-fit:contain!important;background:#fff;border-radius:20px;padding:16px 20px;box-shadow:0 22px 48px rgba(2,10,35,.45);mix-blend-mode:normal!important;mask-image:none!important;-webkit-mask-image:none!important}
+html body:is(.ams-light,.ams-dark).ams-login .ams-hero{position:relative;z-index:1;max-width:480px}
+html body:is(.ams-light,.ams-dark).ams-login .ams-hero-title{font-size:clamp(30px,3.4vw,42px);line-height:1.14;font-weight:800;letter-spacing:-.02em;margin:0 0 14px;color:#fff}
+html body:is(.ams-light,.ams-dark).ams-login .ams-hero-sub{font-size:15px;line-height:1.65;color:#c7d6f5;margin:0 0 26px}
+html body:is(.ams-light,.ams-dark).ams-login .ams-hero-feats{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+html body:is(.ams-light,.ams-dark).ams-login .ams-hero-feats li{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:600;color:#e6eefc}
+html body:is(.ams-light,.ams-dark).ams-login .ams-hero-feats li::before{content:"✓";flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#00c8b4,#155eef);color:#fff;font-size:13px;font-weight:800;display:grid;place-items:center;box-shadow:0 6px 16px rgba(0,140,255,.45)}
+html body:is(.ams-light,.ams-dark).ams-login .ams-hero-foot{position:relative;z-index:1;margin-top:auto;padding-top:26px;font-size:12px;color:#93a9d4}
+
+/* ---- right form panel ---- */
+html body:is(.ams-light,.ams-dark).ams-login .login-panel{display:flex!important;align-items:center;justify-content:center;padding:48px 44px!important;background:#fff!important}
+html body:is(.ams-light,.ams-dark).ams-login .login-card{width:100%;max-width:420px!important;position:relative}
+html body:is(.ams-light,.ams-dark).ams-login .m-brand{display:none!important}
+html body:is(.ams-light,.ams-dark).ams-login .ams-test-pill{position:absolute;top:-6px;right:0;border:1.5px solid #d7e0f2;border-radius:999px;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:.8px;color:#42506b;text-decoration:none;text-transform:uppercase;background:#fff;transition:.15s}
+html body:is(.ams-light,.ams-dark).ams-login .ams-test-pill:hover{color:#155eef;border-color:#155eef;background:#eef4ff}
+html body:is(.ams-light,.ams-dark).ams-login .login-head{text-align:left!important;margin:0 0 28px!important}
+html body:is(.ams-light,.ams-dark).ams-login .login-head .eyebrow{display:block!important;font-size:11px!important;font-weight:800!important;letter-spacing:2.2px;text-transform:uppercase;color:#155eef!important;margin-bottom:8px}
+html body:is(.ams-light,.ams-dark).ams-login .login-head h2{font-size:30px!important;font-weight:800!important;letter-spacing:-.02em!important;color:#0a2540!important;margin:0!important}
+html body:is(.ams-light,.ams-dark).ams-login .login-head::after{content:"Sign in with your panel account to continue.";display:block;margin-top:8px;font-size:13.5px;color:#7186a8}
+html body:is(.ams-light,.ams-dark).ams-login .field{margin-bottom:16px!important}
+html body:is(.ams-light,.ams-dark).ams-login .field label{position:static!important;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal;display:block;font-size:12.5px;font-weight:700;color:#33456a;margin-bottom:7px}
+html body:is(.ams-light,.ams-dark).ams-login .input-wrap{background:#fff!important;border:1.5px solid #d7e0f2!important;border-radius:12px!important;transition:border-color .15s,box-shadow .15s}
+html body:is(.ams-light,.ams-dark).ams-login .input-wrap:focus-within{border-color:#155eef!important;box-shadow:0 0 0 4px rgba(21,94,239,.13)!important}
+html body:is(.ams-light,.ams-dark).ams-login .input-wrap input{background:transparent!important;border:0!important;height:50px!important;min-height:50px!important;font-size:15px!important;color:#0a2540!important;border-radius:12px!important}
+html body:is(.ams-light,.ams-dark).ams-login .input-wrap svg{stroke:#8fa1c4!important;filter:none!important}
+html body:is(.ams-light,.ams-dark).ams-login .toggle-pass{background:#eef4ff!important;border:0!important;color:#155eef!important;font-size:12px!important;font-weight:700;border-radius:8px;padding:6px 10px;cursor:pointer}
+html body:is(.ams-light,.ams-dark).ams-login .captcha-row{gap:12px!important}
+html body:is(.ams-light,.ams-dark).ams-login .captcha-box{background:#eef2f9!important;border:1.5px dashed #b9c8e6!important;border-radius:12px!important;height:50px!important;color:#0a2540!important}
+html body:is(.ams-light,.ams-dark).ams-login #captchaText{color:#0a2540!important;font-weight:800;letter-spacing:1px}
+html body:is(.ams-light,.ams-dark).ams-login .refresh-btn{width:30px;height:30px;flex:0 0 30px;border:0;border-radius:50%;background:#155eef!important;color:#fff!important;display:grid;place-items:center;cursor:pointer}
+html body:is(.ams-light,.ams-dark).ams-login .refresh-btn svg{width:15px;height:15px;stroke:currentColor}
+html body:is(.ams-light,.ams-dark).ams-login .row-between{font-size:13px!important;color:#7186a8!important;margin:4px 0 18px!important}
+html body:is(.ams-light,.ams-dark).ams-login .row-between a{color:#155eef!important;font-weight:700;text-decoration:none}
+html body:is(.ams-light,.ams-dark).ams-login .btn,html body:is(.ams-light,.ams-dark).ams-login button[type="submit"]{width:100%;height:52px!important;border:0!important;border-radius:12px!important;background:#155eef!important;background-image:linear-gradient(92deg,#155eef 0%,#0090ff 60%,#00b4ff 100%)!important;color:#fff!important;font-size:15px!important;font-weight:800!important;letter-spacing:.5px;text-transform:none!important;box-shadow:0 12px 26px rgba(21,94,239,.35)!important;cursor:pointer;transition:transform .15s,box-shadow .15s}
+html body:is(.ams-light,.ams-dark).ams-login .btn:hover{transform:translateY(-1px);box-shadow:0 16px 32px rgba(21,94,239,.42)!important}
+html body:is(.ams-light,.ams-dark).ams-login .msg{border-radius:12px!important;font-size:13.5px!important}
+html body:is(.ams-light,.ams-dark).ams-login .msg.error{background:#fff1f2!important;border:1px solid #fecdd3!important;color:#be123c!important}
+html body:is(.ams-light,.ams-dark).ams-login .msg.success{background:#ecfdf5!important;border:1px solid #a7f3d0!important;color:#047857!important}
+html body:is(.ams-light,.ams-dark).ams-login .footer{text-align:center!important;color:#8fa1c4!important;font-size:12px!important;margin-top:26px!important}
+
+/* ========================== PORTAL LOGINS ================================ */
+html body:is(.ams-light,.ams-dark).ams-portal-login{min-height:100vh;
+  background:
+   radial-gradient(560px circle at 88% 8%,rgba(0,194,176,.38),transparent 60%),
+   radial-gradient(620px circle at 6% 92%,rgba(0,198,255,.32),transparent 60%),
+   linear-gradient(158deg,#06162f 0%,#0c2c62 48%,#155eef 115%)!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login>.card{width:min(460px,100%)!important;background:#fff!important;border:0!important;border-radius:20px!important;box-shadow:0 30px 70px rgba(2,10,35,.5)!important;padding:40px 38px 42px!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login .logo{width:auto!important;height:auto!important;border:0!important;border-radius:0!important;overflow:visible!important;display:flex;justify-content:center;margin-bottom:14px!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login .logo img{width:auto!important;height:82px!important;max-width:230px!important;object-fit:contain!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login .eyebrow{display:block!important;text-align:center;font-size:11px!important;font-weight:800;letter-spacing:2.2px;color:#155eef!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login :is(.title,.card h1){font-size:24px!important;font-weight:800!important;color:#0a2540!important;text-align:center!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login .sub{color:#7186a8!important;font-size:13px!important;text-align:center!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login .field label,html body:is(.ams-light,.ams-dark).ams-portal-login .card>form>label{position:static!important;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal;display:block;font-size:12.5px;font-weight:700;color:#33456a;margin:12px 0 7px}
+html body:is(.ams-light,.ams-dark).ams-portal-login input:not([type=checkbox]){background:#fff!important;border:1.5px solid #d7e0f2!important;border-radius:12px!important;height:50px!important;min-height:50px!important;font-size:15px!important;color:#0a2540!important;padding:0 14px!important}
+html body:is(.ams-light,.ams-dark).ams-portal-login input:not([type=checkbox]):focus{border-color:#155eef!important;box-shadow:0 0 0 4px rgba(21,94,239,.13)!important;outline:none}
+html body:is(.ams-light,.ams-dark).ams-portal-login :is(.btn,button[type="submit"],form button){width:100%;height:52px!important;margin-top:18px;border:0!important;border-radius:12px!important;background:#155eef!important;background-image:linear-gradient(92deg,#155eef 0%,#0090ff 60%,#00b4ff 100%)!important;color:#fff!important;font-size:15px!important;font-weight:800!important;letter-spacing:.5px;text-transform:none!important;box-shadow:0 12px 26px rgba(21,94,239,.35)!important;cursor:pointer}
+html body:is(.ams-light,.ams-dark).ams-portal-login :is(.hint,.footer){color:#7186a8!important;text-align:center}
+
+/* ============ wins over the animated theme when it is switched on ======== */
+html.ams-anim-on body.ams-light.ams-login .shell{background:#fff!important;overflow:visible!important}
+html.ams-anim-on body.ams-light.ams-login .login-panel{background:#fff!important}
+html.ams-anim-on body.ams-light:is(.ams-login,.ams-portal-login) :is(.login-head h2,.login-head h2 span,.title,.card h1){background:none!important;-webkit-background-clip:initial!important;background-clip:initial!important;-webkit-text-fill-color:#0a2540!important;animation:none!important}
+html.ams-anim-on body.ams-light.ams-login .ams-hero-title{-webkit-text-fill-color:#fff!important;color:#fff!important}
+html.ams-anim-on body.ams-light.ams-login .input-wrap input{background:transparent!important;border:0!important;border-radius:12px!important;height:50px!important}
+html.ams-anim-on body.ams-light.ams-portal-login input:not([type=checkbox]){background:#fff!important;border:1.5px solid #d7e0f2!important;border-radius:12px!important;height:50px!important}
+html.ams-anim-on body.ams-light:is(.ams-login,.ams-portal-login) :is(.btn,button[type="submit"],.card button,form button){background:#155eef!important;background-image:linear-gradient(92deg,#155eef 0%,#0090ff 60%,#00b4ff 100%)!important;color:#fff!important}
+html.ams-anim-on body.ams-light.ams-login .toggle-pass{background:#eef4ff!important;color:#155eef!important}
+html.ams-anim-on body.ams-light.ams-login .m-brand img{mix-blend-mode:normal!important;mask-image:none!important;-webkit-mask-image:none!important}
+
+/* ============ typed / autofilled text stays readable (2026-10-25) ======== */
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login) input:not([type=checkbox]):not(.login-anim-switch){color:#0a2540!important;-webkit-text-fill-color:#0a2540!important;caret-color:#0a2540!important}
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login) input:not([type=checkbox]):not(.login-anim-switch):-webkit-autofill,
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login) input:not([type=checkbox]):not(.login-anim-switch):-webkit-autofill:hover,
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login) input:not([type=checkbox]):not(.login-anim-switch):-webkit-autofill:focus,
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login) input:not([type=checkbox]):not(.login-anim-switch):-webkit-autofill:active{-webkit-text-fill-color:#0a2540!important;-webkit-box-shadow:0 0 0 1000px #eef2f9 inset!important;box-shadow:0 0 0 1000px #eef2f9 inset!important;caret-color:#0a2540!important;transition:background-color 600000s 0s,color 600000s 0s!important}
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login) input:not([type=checkbox]):not(.login-anim-switch):autofill{-webkit-text-fill-color:#0a2540!important;box-shadow:0 0 0 1000px #eef2f9 inset!important}
+html body:is(.ams-light,.ams-dark):is(.ams-login,.ams-portal-login) input::placeholder{color:#7488ad!important;-webkit-text-fill-color:#7488ad!important;opacity:1!important}
+
+
+
+/* Final cascade wins: existing animated/responsive layers pale the labels,
+   keep a 640px brand-panel minimum, and hide the hero logo on small screens. */
+html.ams-anim-on body.ams-light.ams-login .shell,html body:is(.ams-light,.ams-dark).ams-login .shell{min-height:100dvh!important}
+html.ams-anim-on body.ams-light.ams-login .field label,html body:is(.ams-light,.ams-dark).ams-login .field label{color:#33456a!important;-webkit-text-fill-color:#33456a!important;opacity:1!important}
+html.ams-anim-on body.ams-light.ams-login .row-between,html.ams-anim-on body.ams-light.ams-login .checkbox,html body:is(.ams-light,.ams-dark).ams-login .row-between,html body:is(.ams-light,.ams-dark).ams-login .checkbox{color:#5b6b87!important;-webkit-text-fill-color:#5b6b87!important;opacity:1!important}
+html body:is(.ams-light,.ams-dark).ams-login .login-hero-logo{filter:none!important}
+@media(max-width:960px){
+  html body:is(.ams-light,.ams-dark).ams-login .brand-panel{min-height:auto!important;height:auto!important}
+  html body:is(.ams-light,.ams-dark).ams-login .brand-panel .login-hero-logo{display:block!important;visibility:visible!important;opacity:1!important}
+}
+
+/* Portal-label contrast + remove the animated theme's violet button glow. */
+html.ams-anim-on body.ams-light.ams-portal-login :is(.field label,.card>form>label),html body:is(.ams-light,.ams-dark).ams-portal-login :is(.field label,.card>form>label){color:#33456a!important;-webkit-text-fill-color:#33456a!important;opacity:1!important}
+html.ams-anim-on body.ams-light:is(.ams-login,.ams-portal-login) :is(.btn,button[type="submit"],.card button,form button){box-shadow:0 12px 26px rgba(21,94,239,.35)!important;filter:none!important}
+
+/* ================= MOBILE LOGIN v3 (2026-10-26, owner reference) ==========
+   Clean single-column white login: no navy banner, logo on top, filled
+   fields, eye icon for password, "What is X + Y = ?" captcha question. */
+@media(max-width:960px){
+  html body:is(.ams-light,.ams-dark).ams-login{background:#fff!important}
+  html body:is(.ams-light,.ams-dark).ams-login .shell{grid-template-columns:1fr;min-height:100dvh}
+  html body:is(.ams-light,.ams-dark).ams-login .brand-panel{display:none!important}
+  html body:is(.ams-light,.ams-dark).ams-login .login-panel{align-items:flex-start;justify-content:center;padding:32px 22px 44px!important;background:#fff!important}
+  html body:is(.ams-light,.ams-dark).ams-login .login-card{max-width:430px!important}
+  html body:is(.ams-light,.ams-dark).ams-login .m-brand{display:flex!important;flex-direction:column;align-items:center;gap:10px;margin:2px 0 16px!important;text-align:center}
+  html body:is(.ams-light,.ams-dark).ams-login .m-brand img{height:78px!important;width:auto!important;max-width:240px!important;object-fit:contain!important;background:#fff}
+  html body:is(.ams-light,.ams-dark).ams-login .m-brand-t{display:none!important}
+  html body:is(.ams-light,.ams-dark).ams-login .ams-test-pill{top:-12px;right:0}
+  html body:is(.ams-light,.ams-dark).ams-login .login-head{text-align:center!important;border-bottom:1px solid #e6ecf7;padding-bottom:18px;margin-bottom:20px!important}
+  html body:is(.ams-light,.ams-dark).ams-login .login-head .eyebrow{display:none!important}
+  html body:is(.ams-light,.ams-dark).ams-login .login-head h2{font-size:23px!important}
+  html body:is(.ams-light,.ams-dark).ams-login .login-head::after{content:"Sign in to manage your numbers, ranges and services.";margin-top:7px}
+  html body:is(.ams-light,.ams-dark).ams-login .input-wrap{background:#eef2f9!important;border:1px solid #dbe3f0!important;border-radius:10px!important}
+  html body:is(.ams-light,.ams-dark).ams-login .input-wrap input{height:52px!important;min-height:52px!important;font-size:16px!important}
+  html.ams-anim-on body.ams-light.ams-login .input-wrap input{height:52px!important}
+  html body:is(.ams-light,.ams-dark).ams-login .input-wrap .toggle-pass,html.ams-anim-on body.ams-light.ams-login .input-wrap .toggle-pass{font-size:0!important;line-height:0!important;width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;padding:0!important;border:0!important;box-shadow:none!important;background-color:transparent!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2342506b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:center!important;background-size:21px!important;cursor:pointer}
+  html body:is(.ams-light,.ams-dark).ams-login .field:has(#captcha)>label{display:none!important}
+  html body:is(.ams-light,.ams-dark).ams-login .captcha-row{grid-template-columns:1fr!important;gap:8px!important}
+  html body:is(.ams-light,.ams-dark).ams-login .captcha-box{background:transparent!important;border:0!important;height:auto!important;justify-content:flex-start!important;gap:10px;padding:0 2px;font-size:15px}
+  html body:is(.ams-light,.ams-dark).ams-login #captchaText{letter-spacing:.3px}
+  html body:is(.ams-light,.ams-dark).ams-login #captchaText::before{content:"What is ";font-weight:700}
+  html body:is(.ams-light,.ams-dark).ams-login #captchaText::after{content:" = ?";font-weight:700}
+  html body:is(.ams-light,.ams-dark).ams-login .refresh-btn{width:27px;height:27px;flex-basis:27px}
+  html body:is(.ams-light,.ams-dark).ams-login .btn{border-radius:10px!important;height:52px!important}
+  /* portal logins follow the same clean white mobile style */
+  html body:is(.ams-light,.ams-dark).ams-portal-login{background:#fff!important}
+  html body:is(.ams-light,.ams-dark).ams-portal-login>.card{box-shadow:none!important;border-radius:0!important;width:100%!important;padding:30px 22px 42px!important}
+  html body:is(.ams-light,.ams-dark).ams-portal-login input:not([type=checkbox]){background:#eef2f9!important;border-color:#dbe3f0!important;border-radius:10px!important}
+}

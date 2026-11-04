@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en" class="ams-light">
+<head><script src="/assets/ams-storage.js?v=gsms-20261104"></script>
+<meta charset="UTF-8" />
+<!-- viewport-fit=cover lets the composer respect the iPhone home-indicator inset;
+     interactive-widget=resizes-content makes Android Chrome shrink the layout
+     when the keyboard opens, so the composer stays visible. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#ffffff" id="metaTheme" />
+<link rel="icon" type="image/png" href="/assets/ams-favicon.png" data-brand-favicon />
+<link rel="stylesheet" href="/assets/ams-chat-theme.css?v=gsms-20261104" />
+<title>Chat — GLOBAL SMS</title>
+<script>
+/* Auth guard — chat is for Admin / Manager / Agent only (spec 3A).
+   Opening this URL directly without a valid session bounces to the login. */
+(function(){
+  var allowed = { admin:1, manager:1, agent:1 };
+  try{
+    var token = sessionStorage.getItem('ams_token') || localStorage.getItem('ams_token');
+    var role  = sessionStorage.getItem('ams_role')  || localStorage.getItem('ams_role');
+    if(!token || !allowed[role]){ location.replace('/panel-login'); return; }
+    fetch('/api/me',{ headers:{ Authorization:'Bearer '+token } })
+      .then(function(r){ if(!r.ok) throw new Error('auth'); return r.json(); })
+      .then(function(u){
+        if(!u || !allowed[u.role]) throw new Error('role');
+        document.documentElement.style.visibility='visible';
+        window.__CHAT_BOOT = { token: token, role: u.role, me: u };
+        if (window.__chatStart) window.__chatStart();
+      })
+      .catch(function(){
+        sessionStorage.clear();
+        ['ams_token','ams_role','ams_user','ams_name'].forEach(function(k){ localStorage.removeItem(k); });
+        location.replace('/panel-login');
+      });
+  }catch(e){ location.replace('/panel-login'); }
+})();
+</script>
+<script>
+/* Theme + motion pre-apply. Runs before first paint so a Dark user never sees a
+   light flash. It writes nothing: the preference is still owned by AMSCore.theme
+   (assets/ams.js, localStorage 'ams_theme'), which applies the same classes
+   again once it loads. 'ds-lite' mirrors the shared "animations off" setting
+   (localStorage 'ams_ds_anim') and Save-Data; reduced-motion is handled in CSS. */
+(function(){
+  try{
+    var h = document.documentElement, dark = localStorage.getItem('ams_theme') === 'dark';
+    h.classList.toggle('ams-dark', dark); h.classList.toggle('ams-light', !dark);
+    var m = document.getElementById('metaTheme'); if(m) m.setAttribute('content', dark ? '#101a2e' : '#ffffff');
+    var pref = localStorage.getItem('ams_ds_anim'), sd = navigator.connection && navigator.connection.saveData;
+    if(pref === 'off' || (pref !== 'on' && sd)) h.classList.add('ds-lite');
+  }catch(e){}
+})();
+</script>
+<style id="route-auth-hide">html{visibility:hidden;}</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <img src="/assets/ams-logo-square.png" alt="" data-brand-logo />
+      <div class="brand-text"><span data-brand="name">GLOBAL SMS</span><small>Chat</small></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="tools" role="toolbar" aria-label="Chat tools">
+      <button type="button" class="tool sound" id="btnSound" title="Message notification sound" aria-pressed="true">
+        <span class="on-ico" data-ico="vol"></span><span class="off-ico" data-ico="volx"></span><span class="lbl">Sound</span>
+      </button>
+      <button type="button" class="tool" id="btnExport" title="Download this conversation">
+        <span data-ico="download"></span><span class="lbl">Export</span>
+      </button>
+      <button type="button" class="tool" id="btnPin" title="Chat lock">
+        <span data-ico="lock"></span><span class="lbl">Lock</span>
+      </button>
+      <button type="button" class="tool icon" id="btnTheme" title="Toggle theme" aria-label="Switch to dark theme" aria-pressed="false">
+        <span class="moon" data-ico="moon"></span><span class="sun" data-ico="sun"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="body" id="body">
+    <!-- conversation list -->
+    <aside class="list" aria-label="Conversations">
+      <div class="list-head">Conversations <span id="unreadTotal" class="badge" style="display:none" aria-label="Unread messages">0</span></div>
+      <div class="list-body" id="convList"></div>
+    </aside>
+
+    <!-- thread -->
+    <section class="thread" aria-label="Conversation">
+      <div class="thead" id="thead" hidden>
+        <button type="button" class="iconbtn back" id="btnBack" aria-label="Back to conversations" title="Back"><span data-ico="back"></span></button>
+        <div class="av lg" id="tAvatar" data-role=""></div>
+        <div class="tmeta">
+          <div class="tname" id="tName"></div>
+          <div class="tsub" id="tSub">
+            <span class="presence-dot" id="tPresence"></span><span class="presence-label" id="tStatus"></span>
+            <span class="role" id="tRole" data-role=""></span>
+            <span class="uname" id="tUser"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="state" id="emptyState">
+        <svg class="art" viewBox="0 0 84 84" aria-hidden="true">
+          <circle class="tile" cx="40" cy="46" r="26"/>
+          <path class="arc a" d="M56 12 A38 38 0 0 1 74 30"/><path class="arc b" d="M60 6 A46 46 0 0 1 80 26"/><path class="arc c" d="M52 18 A30 30 0 0 1 68 34"/>
+          <g class="plane" transform="translate(27 33) scale(1.05)"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></g>
+        </svg>
+        <h4>Pick someone to message</h4>
+        <p>Choose a conversation to read it and reply. New messages appear here as they arrive.</p>
+      </div>
+
+      <div class="msgs" id="msgs" role="log" aria-live="polite" aria-relevant="additions" aria-label="Messages" tabindex="-1" hidden></div>
+      <button type="button" class="jump" id="jump" hidden><span data-ico="down"></span><span>New messages</span><span class="badge" id="jumpN">0</span></button>
+
+      <div class="composer" id="composer" hidden>
+        <div class="pending" id="pending" aria-live="polite"></div>
+        <div class="cbox" id="cbox">
+          <button type="button" class="iconbtn" id="btnAttach" aria-label="Attach a file" title="Attach TXT, CSV or video"><span data-ico="clip"></span></button>
+          <textarea id="input" rows="1" placeholder="Write a message" aria-label="Message" dir="auto" enterkeyhint="send" autocapitalize="sentences"></textarea>
+          <button type="button" class="iconbtn" id="btnEmoji" aria-label="Emoji" title="Emoji" aria-haspopup="true" aria-expanded="false" aria-controls="emojiPanel"><span data-ico="smile"></span></button>
+          <button type="button" class="send" id="btnSend" aria-label="Send message" title="Send" disabled><span data-ico="send"></span><span class="spin" aria-hidden="true"></span></button>
+        </div>
+        <div class="emojipanel" id="emojiPanel" role="group" aria-label="Emoji"></div>
+        <input type="file" id="fileInput" style="display:none" accept=".txt,.text,.csv,.mp4,.webm,.mov,.avi,.mkv" />
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="errBox" role="alert" aria-live="assertive"></div>
+
+<!-- chat lock -->
+<div class="lockwrap" id="lockWrap" hidden role="dialog" aria-modal="true" aria-labelledby="lockTitle" aria-describedby="lockMsg" data-mode="locked">
+  <div class="lockcard">
+    <div class="lock-ico"><span data-ico="lock"></span></div>
+    <h3 id="lockTitle">Chat is locked</h3>
+    <p id="lockMsg">Enter your chat PIN to continue.</p>
+
+    <!-- Error text is its own element so it is styled as an error and announced. -->
+    <div class="lockerror" id="lockErr" role="alert" aria-live="assertive"></div>
+
+    <label class="locklabel" for="lockPin" id="lockPinLabel">Chat PIN</label>
+    <div class="lockfield" id="lockField">
+      <input type="password" id="lockPin" placeholder="Enter your PIN" autocomplete="off" autocapitalize="off" spellcheck="false"
+             aria-describedby="lockErr lockHint" />
+      <button type="button" class="locktoggle" id="lockToggle" aria-label="Show PIN" title="Show PIN" aria-pressed="false">
+        <span class="eye" data-ico="eye"></span><span class="eye-off" data-ico="eyeoff"></span>
+      </button>
+    </div>
+    <div class="lockhint" id="lockHint" aria-live="polite"></div>
+
+    <div class="lockactions">
+      <button type="button" class="btn primary" id="lockBtn">Unlock Chat</button>
+      <div class="row2">
+        <!-- Cancel only appears when opening the dialog was voluntary. While the
+             chat is actually locked there is deliberately no way to dismiss it. -->
+        <button type="button" class="btn" id="lockCancel" hidden>Cancel</button>
+        <button type="button" class="btn ghost" id="lockSetup">Set / change PIN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/ams.js"></script>
+<script src="/branding/runtime.js"></script>
+<script>
+(function(){
+'use strict';
+
+var TOKEN = null, ME = null, ROLE = null;
+var convs = [], current = null, es = null;
+/* Presence is read from the server, never inferred locally. Keyed by user id.
+   A missing entry means "unknown", which renders as offline rather than
+   guessing that somebody is online. */
+var presence = {};
+var listState = 'loading';            /* 'loading' | 'ready' | 'error' */
+var listError = '';
+var uiState = {};                     /* per-conversation view state, keyed by id */
+var BASE_TITLE = 'Chat \u2014 GLOBAL SMS';
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+  return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); };
+function ui(id){ return uiState[id] || (uiState[id] = { loading:false, err:'', newFromId:null, newCount:0, unseen:0, dirty:false }); }
+function convById(id){ return convs.filter(function(x){ return x.id!=null && x.id===id; })[0]; }
+function reduced(){
+  return (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
+         document.documentElement.classList.contains('ds-lite');
+}
+
+/* ---------------- icons (inline SVG, no external library) ---------------- */
+var IC = {
+  send:'<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/>',
+  clip:'<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  alert:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+  back:'<polyline points="15 18 9 12 15 6"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff:'<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>',
+  vol:'<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>',
+  volx:'<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>',
+  moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  sun:'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  table:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>',
+  video:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+  down:'<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>'
+};
+function ico(name, extra){
+  return '<svg class="ico'+(extra?' '+extra:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+(IC[name]||'')+'</svg>';
+}
+function paintStaticIcons(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ico]'), function(n){
+    n.innerHTML = ico(n.getAttribute('data-ico'));
+    if(n.className === '' ) n.style.display = 'contents';
+  });
+}
+
+/* ---------------- api ---------------- */
+function api(path, opts){
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  opts.headers.Authorization = 'Bearer ' + TOKEN;
+  if (opts.body && !(opts.body instanceof FormData)) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(opts.body);
+  }
+  return fetch(path, opts).then(function(r){
+    return r.json().catch(function(){ return null; }).then(function(j){
+      if(!r.ok) { var e = new Error((j && j.error) || ('HTTP ' + r.status)); e.status = r.status; throw e; }
+      return j;
+    });
+  });
+}
+
+/* Errors are shown as a toast: it floats above the layout, so nothing jumps. */
+var toastT = null;
+function hideErr(){ $('errBox').classList.remove('show'); }
+function showErr(m){
+  var b = $('errBox');
+  b.innerHTML = ico('alert') + '<span class="toast-msg"></span>'
+              + '<button type="button" aria-label="Dismiss message" title="Dismiss">' + ico('x') + '</button>';
+  b.querySelector('.toast-msg').textContent = m;
+  b.querySelector('button').onclick = hideErr;
+  b.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(hideErr, 6000);
+}
+
+/* ---------------- theme ----------------
+ * Delegates to AMSCore.theme (assets/ams.js) — the same helper the Admin / Manager /
+ * Agent panels use: one source of truth, same storage key ('ams_theme'), classes
+ * applied to both <html> and <body>, and the same ams:theme event. The panels'
+ * theme behaviour is untouched. */
+function initTheme(){
+  var KEY = 'ams_theme';
+  function current(){
+    try { return localStorage.getItem(KEY) === 'dark' ? 'dark' : 'light'; } catch(e){ return 'light'; }
+  }
+  function fallbackApply(mode){
+    var dark = (mode || current()) === 'dark';
+    var html = document.documentElement, body = document.body;
+    if(html){ html.classList.toggle('ams-dark', dark); html.classList.toggle('ams-light', !dark); }
+    if(body){ body.classList.toggle('ams-dark', dark); body.classList.toggle('ams-light', !dark); }
+    return dark ? 'dark' : 'light';
+  }
+  function apply(mode){
+    if(window.AMSCore && AMSCore.theme && typeof AMSCore.theme.apply === 'function') return AMSCore.theme.apply(mode);
+    try { localStorage.setItem(KEY, mode); } catch(e){}
+    return fallbackApply(mode);
+  }
+  function icon(mode){
+    var b = $('btnTheme');
+    if(b){
+      var label = mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+      b.title = label; b.setAttribute('aria-label', label);
+      b.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
+    }
+    var m = $('metaTheme'); if(m) m.setAttribute('content', mode === 'dark' ? '#101a2e' : '#ffffff');
+  }
+  var themeT = null;
+  function smooth(){
+    if(reduced()) return;
+    var h = document.documentElement; h.classList.add('ch-theming');
+    clearTimeout(themeT); themeT = setTimeout(function(){ h.classList.remove('ch-theming'); }, 340);
+  }
+
+  var mode = apply(current());
+  icon(mode);
+
+  $('btnTheme').onclick = function(){
+    var next = current() === 'dark' ? 'light' : 'dark';
+    smooth();
+    mode = apply(next);
+    icon(mode);
+  };
+
+  /* Stay in step if the theme is changed elsewhere (e.g. another tab). */
+  document.addEventListener('ams:theme', function(e){
+    var m = (e && e.detail && e.detail.theme) || current();
+    icon(m);
+  });
+  window.addEventListener('storage', function(e){
+    if(e.key === KEY){ var m = current(); smooth(); apply(m); icon(m); }
+  });
+}
+
+/* ---------------- emoji ---------------- */
+var EMOJI = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','😘',
+ '😗','😚','😙','😋','😛','😜','🤪','🤨','🧐','🤓','😎','🥳','😏','😒','😞','😔',
+ '😟','😕','🙁','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤯','😳','🥵',
+ '😱','😨','😰','😥','🤗','🤔','🤭','🤫','😶','😐','😑','😬','🙄','😯','😴','🤤',
+ '😪','😵','🤐','🥴','🤠','😷','🤒','🤕','👍','👎','👌','✌️','🤝','🙏','👏','💪',
+ '✅','❌','⭐','🔥','💯','❤️','💔','🎉','🚀','💡','📌','📎','📁','📄','📊','📞',
+ '🔔','🔒','🔓','⏰','📅','💰','💳','🏦','📱','💻','⚙️','🔍','📝','✉️','📦','🎯'];
+var EMOJI_GROUPS = [
+  { name:'Faces',          list:EMOJI.slice(0, 72) },
+  { name:'Hands',          list:EMOJI.slice(72, 80) },
+  { name:'Work and symbols', list:EMOJI.slice(80) }
+];
+/* Emoji-only messages are shown large, like a messenger. The \p{...} escape is
+   built at runtime so a browser without Unicode property escapes simply skips
+   the feature instead of failing to parse this whole script. */
+var RE_EMO = null, RE_PIC = null;
+try {
+  RE_EMO = new RegExp('^[\\p{Extended_Pictographic}\\uFE0F\\u200D\\u20E3\\s]+$', 'u');
+  RE_PIC = new RegExp('\\p{Extended_Pictographic}', 'gu');
+} catch(e){}
+function isEmojiOnly(s){
+  if(!RE_EMO) return false;
+  s = String(s == null ? '' : s).trim();
+  if(!s || s.length > 24 || !RE_EMO.test(s)) return false;
+  var n = (s.match(RE_PIC) || []).length;
+  return n >= 1 && n <= 3;
+}
+function insertAtCursor(t, s){
+  var a = t.selectionStart, b = t.selectionEnd;
+  if(typeof a !== 'number'){ t.value += s; return; }
+  t.value = t.value.slice(0, a) + s + t.value.slice(b);
+  t.selectionStart = t.selectionEnd = a + s.length;
+}
+function initEmoji(){
+  var p = $('emojiPanel'), btn = $('btnEmoji');
+  EMOJI_GROUPS.forEach(function(g){
+    var h = document.createElement('div'); h.className = 'eg'; h.textContent = g.name; p.appendChild(h);
+    g.list.forEach(function(e){
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = e; b.setAttribute('aria-label', 'Insert ' + e);
+      b.onclick = function(){ var t = $('input'); insertAtCursor(t, e); t.focus(); onInput(); closeEmoji(); };
+      p.appendChild(b);
+    });
+  });
+  btn.onclick = function(ev){ ev.stopPropagation(); if(p.classList.contains('open')) closeEmoji(); else openEmoji(); };
+  document.addEventListener('click', function(){ closeEmoji(); });
+  p.addEventListener('click', function(ev){ ev.stopPropagation(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && p.classList.contains('open')){ closeEmoji(); btn.focus(); }
+  });
+}
+function openEmoji(){ $('emojiPanel').classList.add('open'); $('btnEmoji').setAttribute('aria-expanded', 'true'); }
+function closeEmoji(){ $('emojiPanel').classList.remove('open'); $('btnEmoji').setAttribute('aria-expanded', 'false'); }
+
+/* ---------------- formatting ---------------- */
+function timeOf(iso){
+  if(!iso) return '';
+  var d = new Date(iso);
+  return isNaN(d) ? '' : d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+}
+function fullTime(iso){
+  var d = new Date(iso);
+  return isNaN(d) ? '' : d.toLocaleString([], {weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'numeric', minute:'2-digit'});
+}
+function dayLabel(iso){
+  var d = new Date(iso); if(isNaN(d)) return '';
+  var t = new Date();
+  if(d.toDateString()===t.toDateString()) return 'Today';
+  var y = new Date(t.getTime()-86400000);
+  if(d.toDateString()===y.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString([], {day:'numeric', month:'short', year:'numeric'});
+}
+function fmtSize(n){
+  n = +n || 0;
+  if(n < 1024) return n + ' B';
+  if(n < 1048576){ var k = n/1024; return (k < 10 ? k.toFixed(1) : Math.round(k)) + ' KB'; }
+  var m = n/1048576; return (m < 10 ? m.toFixed(1) : Math.round(m)) + ' MB';
+}
+function attKind(name, mime){
+  var s = String(name||'').toLowerCase(); mime = String(mime||'');
+  if(/\.csv$/.test(s) || /csv/.test(mime)) return 'csv';
+  if(/\.(mp4|webm|mov|avi|mkv)$/.test(s) || /^video\//.test(mime)) return 'video';
+  return 'txt';
+}
+var KIND_ICON = { csv:'table', video:'video', txt:'file' }, KIND_LABEL = { csv:'CSV', video:'Video', txt:'Text' };
+function firstChar(s){ var m = String(s||'').trim().match(/^[\uD800-\uDBFF][\uDC00-\uDFFF]|^[\s\S]/); return m ? m[0].toUpperCase() : '?'; }
+function cap(s){ s = String(s||''); return s.charAt(0).toUpperCase() + s.slice(1); }
+function badgeText(n){ return n > 99 ? '99+' : String(n); }
+
+/* ---------------- receipts (3F) ----------------
+ * Drawn strictly from the server's receipt state; the UI never guesses.
+ *   sent      one grey tick    stored, recipient has no live chat session
+ *   delivered two grey ticks   recipient session is online and received it
+ *   read      two blue ticks   recipient opened this conversation (server-confirmed)
+ * When the server upgrades a message the second tick slides in and the colour
+ * washes blue — CSS does that from the class change alone. */
+var RC_LABEL = { sent:'Sent', delivered:'Delivered', read:'Read' };
+function rcOf(m){ return m.receipt === 'read' ? 'read' : (m.receipt === 'delivered' ? 'delivered' : 'sent'); }
+function tickHTML(m){
+  if(!m.mine) return '';
+  var c = rcOf(m);
+  return '<span class="tick '+c+'" role="img" aria-label="'+RC_LABEL[c]+'" title="'+RC_LABEL[c]+'">'
+       + '<svg viewBox="0 0 18 12" aria-hidden="true"><path class="t1" d="M1.5 6.5 5 10 12.5 2"/><path class="t2" d="M5.5 6.5 9 10 16.5 2"/></svg></span>';
+}
+function setTick(el, c){
+  el.classList.remove('sent', 'delivered', 'read'); el.classList.add(c);
+  el.setAttribute('aria-label', RC_LABEL[c]); el.title = RC_LABEL[c];
+}
+
+/* ---------------- conversation list ----------------
+ * The list is built from two sources:
+ *   /api/chatapp/conversations  — conversations that already exist
+ *   /api/chatapp/participants   — who this account is ALLOWED to talk to,
+ *                                 from the real account records and hierarchy
+ * Merging them means an Agent sees their Manager by name immediately,
+ * before a single message has been sent, instead of an empty list. Clicking
+ * an entry that has no conversation yet opens (creates) it on demand.
+ *
+ * Rows are patched in place when the set of rows is unchanged, so selection,
+ * unread and presence changes animate instead of blinking, and a 30-second
+ * resync that changes nothing touches no DOM at all. */
+function convName(c){
+  return (c.other && (c.other.name || c.other.username)) ? (c.other.name || c.other.username) : (c._name || 'Conversation');
+}
+function convRole(c){ return c.supervised ? '' : (c.other ? c.other.role : (c._role || '')); }
+function rowKey(c){ return c.id != null ? 'c' + c.id : 'u' + c._user_id; }
+function participantsLine(c){
+  return (c.participants||[]).map(function(p){ return (p.name||p.username)+' ('+p.role+')'; }).join(' \u2194 ');
+}
+function rowInner(c){
+  var nm = convName(c), role = convRole(c), direct = !c.supervised && c.other;
+  var on = direct && presence[c.other.id] === 'online';
+  var preview = c.last_message ? (c.last_message.body || '[attachment]')
+              : (c._pending ? 'No messages yet \u2014 say hello' : 'No messages yet');
+  return '<span class="av" data-role="'+esc(role)+'">'+esc(firstChar(nm))
+       +   (direct ? '<span class="pdot'+(on?' online':'')+'"></span>' : '')+'</span>'
+       + '<span class="cmeta">'
+       +   '<span class="crow1"><span class="cname">'+esc(nm)+'</span>'
+       +     (c.supervised ? '<span class="role plain">Supervised</span>'
+                           : (role ? '<span class="role" data-role="'+esc(role)+'">'+esc(cap(role))+'</span>' : ''))
+       +     '<span class="ctime">'+esc(c.id ? timeOf(c.last_message_at) : '')+'</span></span>'
+       +   '<span class="crow2"><span class="cprev">'+esc(preview)+'</span>'
+       +     (c.unread ? '<span class="badge" aria-label="'+c.unread+' unread">'+badgeText(c.unread)+'</span>' : '')+'</span>'
+       +   (c.supervised ? '<span class="csub">'+esc(participantsLine(c))+'</span>' : '')
+       + '</span>'
+       + (direct ? '<span class="sr">'+(on ? 'Online' : 'Offline')+'</span>' : '');
+}
+function paintRow(el, c){
+  var isOn = current && c.id != null && current.id === c.id;
+  var cls = 'conv' + (c._pending ? ' conv-new' : '') + (c.unread ? ' unread' : '') + (isOn ? ' on' : '')
+          + (el.classList.contains('pending-open') ? ' pending-open' : '');
+  if(el.className !== cls) el.className = cls;
+  if(isOn) el.setAttribute('aria-current', 'true'); else el.removeAttribute('aria-current');
+  var inner = rowInner(c);
+  if(el._sig !== inner){
+    el.innerHTML = inner; el._sig = inner;
+    if((c.unread||0) > (el._unread||0)){ var b = el.querySelector('.badge'); if(b && !reduced()) b.classList.add('pop'); }
+    el._unread = c.unread || 0;
+  }
+}
+function listStateHTML(){
+  if(listState === 'loading'){
+    var s = '';
+    for(var i=0;i<6;i++) s += '<div class="skrow" aria-hidden="true"><div class="sk a"></div><div class="col"><div class="sk l1"></div><div class="sk l2"></div></div></div>';
+    return '<div role="status" aria-label="Loading conversations">'+s+'</div>';
+  }
+  if(listState === 'error'){
+    return '<div class="state err-state"><div class="ico-wrap">'+ico('alert')+'</div><h4>Couldn\u2019t load conversations</h4>'
+         + '<p>'+esc(listError || 'Check your connection and try again.')+'</p>'
+         + '<button type="button" class="btn primary" data-act="retry-list">Try again</button></div>';
+  }
+  return '<div class="state"><h4>No conversations yet</h4><p>When you can message someone, they will appear here.</p></div>';
+}
+function renderList(){
+  var el = $('convList'), total = 0;
+  convs.forEach(function(c){ total += c.unread || 0; });
+  var ut = $('unreadTotal');
+  ut.textContent = badgeText(total); ut.style.display = total ? 'inline-grid' : 'none';
+  document.title = (total ? '(' + badgeText(total) + ') ' : '') + BASE_TITLE;
+
+  if(!convs.length){ el._rows = false; el.innerHTML = listStateHTML(); return; }
+
+  var keys = convs.map(rowKey), kids = el.children;
+  var same = el._rows && kids.length === keys.length && keys.every(function(k, i){ return kids[i].getAttribute('data-key') === k; });
+  if(!same){
+    var focusKey = document.activeElement && document.activeElement.getAttribute && el.contains(document.activeElement)
+                 ? document.activeElement.getAttribute('data-key') : null;
+    var frag = document.createDocumentFragment();
+    convs.forEach(function(c){
+      var b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('data-key', rowKey(c));
+      if(c.id != null) b.setAttribute('data-id', c.id);
+      else { b.setAttribute('data-user', String(c._user_id)); b.setAttribute('data-new', '1'); }
+      paintRow(b, c); frag.appendChild(b);
+    });
+    el.innerHTML = ''; el.appendChild(frag); el._rows = true;
+    if(focusKey){ var f = el.querySelector('[data-key="'+focusKey+'"]'); if(f) f.focus(); }
+  } else {
+    convs.forEach(function(c, i){ paintRow(kids[i], c); });
+  }
+}
+
+/* One delegated handler for every row. */
+function onListClick(e){
+  var retry = e.target.closest && e.target.closest('[data-act="retry-list"]');
+  if(retry){ listState = 'loading'; renderList(); loadConvs(); return; }
+  var n = e.target.closest && e.target.closest('.conv');
+  if(!n) return;
+  if(n.getAttribute('data-new') === '1'){
+    /* No conversation row yet — create it, then open it. The server is
+       the authority on whether this pairing is allowed. */
+    var uid = parseInt(n.getAttribute('data-user'), 10);
+    n.classList.add('pending-open');
+    api('/api/chatapp/conversations/open',{method:'POST',body:{ user_id: uid }})
+      .then(function(r){
+        var id = r.conversation && r.conversation.id;
+        /* The row is brand new, so refresh the list first — openConv()
+           resolves the id out of `convs` and would otherwise find nothing. */
+        return loadConvs(true).then(function(){ openConv(id); });
+      })
+      .catch(function(err){ n.classList.remove('pending-open'); showErr(err.message); });
+    return;
+  }
+  openConv(parseInt(n.getAttribute('data-id'), 10));
+}
+
+/* ---------------- thread ---------------- */
+var view = { key:null, mode:'none', ids:[], rc:{}, els:{}, lastDay:'', lastMsg:null };
+var lastNear = true;
+
+function nearBottom(box){ return box.scrollHeight - box.scrollTop - box.clientHeight < 140; }
+function toBottom(smooth){
+  var b = $('msgs');
+  if(smooth && !reduced() && typeof b.scrollTo === 'function') b.scrollTo({ top:b.scrollHeight, behavior:'smooth' });
+  else b.scrollTop = b.scrollHeight;
+  lastNear = true;
+}
+function showJump(n){
+  var j = $('jump'); $('jumpN').textContent = badgeText(n); j.hidden = n <= 0;
+}
+
+var GROUP_MS = 5 * 60 * 1000;
+function groupKey(m){ return m.mine ? 'me' : 'u' + m.sender_id; }
+function sameGroup(a, b, st){
+  if(!a || !b) return false;
+  if(st && st.newFromId != null && b.id === st.newFromId) return false;       /* the unread divider breaks a group */
+  if(groupKey(a) !== groupKey(b)) return false;
+  var ta = Date.parse(a.created_at), tb = Date.parse(b.created_at);
+  if(isNaN(ta) || isNaN(tb)) return true;
+  if(new Date(ta).toDateString() !== new Date(tb).toDateString()) return false;
+  return Math.abs(tb - ta) <= GROUP_MS;
+}
+function posOf(msgs, i, st){
+  var p = sameGroup(msgs[i-1], msgs[i], st), n = sameGroup(msgs[i], msgs[i+1], st);
+  return !p && !n ? 'solo' : (!p && n ? 'first' : (p && n ? 'mid' : 'last'));
+}
+
+function attHTML(a){
+  var k = attKind(a.name, a.mime);
+  return '<button type="button" class="att-btn" data-att="'+esc(a.id)+'" data-name="'+esc(a.name||'')+'" data-state="idle"'
+       +   ' aria-label="Download '+esc(a.name||'file')+'">'
+       + '<span class="att-ico" data-kind="'+k+'">'+ico(KIND_ICON[k])+'</span>'
+       + '<span class="att-meta"><span class="att-name">'+esc(a.name)+'</span>'
+       +   '<span class="att-sub">'+KIND_LABEL[k]+(a.size ? ' \u00b7 '+fmtSize(a.size) : '')+'</span></span>'
+       + '<span class="att-act" aria-hidden="true"><span class="a-idle">'+ico('download')+'</span><span class="a-load"><span class="spin"></span></span>'
+       +   '<span class="a-done">'+ico('check')+'</span><span class="a-err">'+ico('alert')+'</span></span>'
+       + '<span class="att-bar" aria-hidden="true"><i></i></span></button>';
+}
+function msgHTML(m, pos, enter){
+  var hasAtt = !!(m.attachments && m.attachments.length);
+  var hasTxt = !!(m.body && String(m.body).length);
+  var emo = !hasAtt && isEmojiOnly(m.body);
+  var inline = hasTxt && !hasAtt && !emo;
+  /* A button, not an <a href>: an anchor navigation cannot carry the
+     Authorization header the download route requires, so the old markup
+     was refused by the server even for the intended recipient. */
+  var foot = '<span class="mfoot'+(inline ? '' : ' row')+'"><time datetime="'+esc(m.created_at||'')+'" title="'+esc(fullTime(m.created_at))+'">'
+           + esc(timeOf(m.created_at))+'</time>'+tickHTML(m)+'</span>';
+  var who = (!m.mine && current && current.supervised && (pos === 'first' || pos === 'solo'))
+          ? '<div class="who">'+esc(m.sender_name||('user#'+m.sender_id))+'</div>' : '';
+  return '<div class="msg'+(m.mine?' mine':'')+(emo?' emoji-only':'')+(enter?' enter':'')+'" data-id="'+esc(m.id)+'" data-pos="'+pos+'">'
+       + who
+       + (hasTxt ? '<div class="txt" dir="auto">'+esc(m.body)+(inline ? foot : '')+'</div>' : '')
+       + (hasAtt ? '<div class="att">'+m.attachments.map(attHTML).join('')+'</div>' : '')
+       + (inline ? '' : foot)
+       + '</div>';
+}
+function dayHTML(d){ return '<div class="day" role="separator">'+esc(d)+'</div>'; }
+function newDivHTML(n){ return '<div class="newdiv" id="newDivider" role="separator"><span>'+n+' new message'+(n===1?'':'s')+'</span></div>'; }
+
+function stateBox(html){
+  var box = $('msgs'); box.innerHTML = html;
+  view = { key:view.key, mode:'state', ids:[], rc:{}, els:{}, lastDay:'', lastMsg:null };
+}
+function skeletonHTML(){
+  var s = '', side = ['','me','','me','']; 
+  for(var i=0;i<side.length;i++) s += '<div class="sk skmsg '+side[i]+'" style="width:'+[58,44,70,36,52][i]+'%"></div>';
+  return '<div role="status" aria-label="Loading messages" style="display:flex;flex-direction:column;flex:1">'+s+'</div>';
+}
+
+function paintHeader(){
+  var c = current, nm = convName(c), role = convRole(c), o = c.other, sup = c.supervised;
+  var av = $('tAvatar'); av.textContent = firstChar(nm); av.setAttribute('data-role', sup ? '' : role);
+  $('tName').textContent = nm;
+  var tp = $('tPresence'), ts = $('tStatus'), tr = $('tRole'), tu = $('tUser');
+  if(sup || !o){
+    tp.hidden = ts.hidden = tr.hidden = true;
+    tu.textContent = sup ? participantsLine(c) : '';
+  } else {
+    var on = presence[o.id] === 'online';
+    tp.hidden = ts.hidden = tr.hidden = false;
+    tp.className = 'presence-dot ' + (on ? 'online' : 'offline');
+    tp.title = on ? (nm + ' is online') : (nm + ' is offline');
+    ts.className = 'presence-label' + (on ? ' online' : ''); ts.textContent = on ? 'Online' : 'Offline';
+    tr.textContent = cap(role); tr.setAttribute('data-role', role);
+    tu.textContent = o.username ? '@' + o.username : '';
+  }
+}
+
+function renderThread(){
+  var box = $('msgs');
+  if(!current){
+    box.hidden = true; $('emptyState').hidden = false; $('composer').hidden = true; $('thead').hidden = true; $('jump').hidden = true;
+    view = { key:null, mode:'none', ids:[], rc:{}, els:{}, lastDay:'', lastMsg:null };
+    return;
+  }
+  $('emptyState').hidden = true; box.hidden = false; $('composer').hidden = false; $('thead').hidden = false;
+  paintHeader();
+  paintMessages();
+}
+
+function paintMessages(){
+  var box = $('msgs'), key = 'c' + current.id, st = ui(current.id), msgs = current._msgs;
+  var switching = view.key !== key;
+  if(switching){
+    view = { key:key, mode:'none', ids:[], rc:{}, els:{}, lastDay:'', lastMsg:null };
+    st.unseen = 0; showJump(0); lastNear = true;
+    ['msgs','thead'].forEach(function(id){
+      var n = $(id); if(reduced()) return;
+      n.classList.remove('view-in'); void n.offsetWidth; n.classList.add('view-in');
+    });
+  }
+  if(!msgs){
+    if(st.err) stateBox('<div class="state err-state"><div class="ico-wrap">'+ico('alert')+'</div><h4>Couldn\u2019t load messages</h4><p>'+esc(st.err)+'</p>'
+                      + '<button type="button" class="btn primary" data-act="retry-thread">Try again</button></div>');
+    else if(view.mode !== 'state' || switching) stateBox(skeletonHTML());
+    return;
+  }
+  if(!msgs.length){
+    if(view.mode !== 'empty'){
+      stateBox('<div class="state"><h4>No messages yet</h4><p>Say hello to '+esc(convName(current))+' \ud83d\udc4b</p></div>');
+      view.mode = 'empty';
+    }
+    return;
+  }
+  var inc = !switching && view.mode === 'list' && view.ids.length <= msgs.length
+         && view.ids.every(function(id, i){ return msgs[i].id === id; });
+  if(inc){ patchReceipts(msgs); appendMessages(msgs); }
+  else rebuild(msgs, switching);
+}
+
+function rebuild(msgs, switching){
+  var box = $('msgs'), st = ui(current.id);
+  var wasNear = nearBottom(box), fromBottom = box.scrollHeight - box.scrollTop;
+  var html = '', lastDay = '';
+  msgs.forEach(function(m, i){
+    var d = dayLabel(m.created_at);
+    if(d && d !== lastDay) html += dayHTML(d);
+    if(d) lastDay = d;
+    if(st.newFromId != null && m.id === st.newFromId) html += newDivHTML(st.newCount);
+    html += msgHTML(m, posOf(msgs, i, st), false);
+  });
+  box.innerHTML = html;
+  view.mode = 'list'; view.ids = msgs.map(function(m){ return m.id; }); view.rc = {}; view.els = {};
+  view.lastDay = lastDay; view.lastMsg = msgs[msgs.length-1];
+  Array.prototype.forEach.call(box.querySelectorAll('.msg[data-id]'), function(el, i){
+    var m = msgs[i]; view.els[m.id] = el; view.rc[m.id] = rcOf(m);
+  });
+  if(switching || wasNear){
+    toBottom(false);
+    /* Land on the first unread message when there are too many to fit on screen. */
+    var nd = $('newDivider');
+    if(switching && nd && nd.offsetTop < box.scrollTop) box.scrollTop = Math.max(0, nd.offsetTop - 12);
+  } else {
+    box.scrollTop = box.scrollHeight - fromBottom;
+  }
+}
+
+function patchReceipts(msgs){
+  /* A bulk upgrade (the recipient opens the chat: every message turns blue at
+     once) must not run the tick animation on bubbles nobody can see — that cost
+     a style recalculation per frame per tick. Ticks near the viewport animate;
+     the rest switch instantly. All layout reads happen before any write. */
+  var box = $('msgs'), top = box.scrollTop - 60, bot = box.scrollTop + box.clientHeight + 60, todo = [];
+  msgs.forEach(function(m){
+    if(!m.mine) return;
+    var c = rcOf(m);
+    if(view.rc[m.id] === c) return;
+    view.rc[m.id] = c;
+    var el = view.els[m.id], t = el && el.querySelector('.tick');
+    if(t) todo.push({ t:t, c:c, vis: el.offsetTop + el.offsetHeight > top && el.offsetTop < bot });
+  });
+  var quiet = [];
+  todo.forEach(function(x){
+    if(!x.vis){ x.t.classList.add('instant'); quiet.push(x.t); }
+    setTick(x.t, x.c);
+  });
+  if(quiet.length) requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    quiet.forEach(function(t){ t.classList.remove('instant'); });
+  }); });
+}
+
+function appendMessages(msgs){
+  var from = view.ids.length;
+  if(from === msgs.length) return;
+  var box = $('msgs'), st = ui(current.id);
+  var wasNear = nearBottom(box), html = '', lastDay = view.lastDay, added = msgs.slice(from);
+  added.forEach(function(m, k){
+    var i = from + k, d = dayLabel(m.created_at);
+    if(d && d !== lastDay) html += dayHTML(d);
+    if(d) lastDay = d;
+    html += msgHTML(m, posOf(msgs, i, st), true);
+  });
+  /* The message that used to be last may now sit in the middle of a group. */
+  if(from > 0){
+    var pe = view.els[msgs[from-1].id], np = posOf(msgs, from-1, st);
+    if(pe && pe.getAttribute('data-pos') !== np) pe.setAttribute('data-pos', np);
+  }
+  box.insertAdjacentHTML('beforeend', html);
+  var els = box.querySelectorAll('.msg[data-id]'), base = els.length - added.length;
+  added.forEach(function(m, k){ var el = els[base + k]; view.els[m.id] = el; view.rc[m.id] = rcOf(m); });
+  view.ids = msgs.map(function(m){ return m.id; }); view.lastDay = lastDay; view.lastMsg = msgs[msgs.length-1];
+
+  var mine = added.some(function(m){ return m.mine; });
+  if(wasNear || mine) toBottom(true);
+  else { st.unseen += added.filter(function(m){ return !m.mine; }).length; showJump(st.unseen); }
+}
+
+function openConv(id){
+  /* Participant-only rows carry id:null until a conversation exists. Opening
+     one must create the conversation first — passing the null straight into
+     the messages URL produced a 404 on every load. */
+  if(id === null || id === undefined){ return; }
+  var c = convById(id);
+  if(!c){
+    /* Not in the cached list yet (a conversation created moments ago).
+       Refresh once, then open it. */
+    loadConvs(true).then(function(){
+      var again = convById(id);
+      if(again) openConv(id);
+    });
+    return;
+  }
+  var st = ui(id);
+  var unreadAtOpen = c.unread || 0;
+  current = c; c.unread = 0;
+  st.err = ''; st.newFromId = null; st.newCount = 0; st.dirty = false;
+  renderList();
+  $('body').classList.add('hide-list');
+  renderThread();
+  fetchMessages(id, unreadAtOpen);
+}
+function fetchMessages(id, unreadAtOpen){
+  var st = ui(id);
+  return api('/api/chatapp/conversations/'+id+'/messages?limit=100').then(function(r){
+    var tgt = convById(id) || current;
+    tgt._msgs = r.messages || [];
+    /* Mark where the unread block starts: the last N messages from the other party. */
+    if(unreadAtOpen){
+      var inbound = tgt._msgs.filter(function(m){ return !m.mine; });
+      var k = Math.min(unreadAtOpen, inbound.length);
+      if(k){ st.newFromId = inbound[inbound.length-k].id; st.newCount = k; }
+    }
+    if(current && current.id === id){ current = tgt; renderThread(); }
+    // explicit read — the ONLY thing that turns ticks blue (3F)
+    return api('/api/chatapp/conversations/'+id+'/read', {method:'POST', body:{}});
+  }).then(function(){
+    if(st.dirty){ st.dirty = false; openConvSilent(); }
+    return loadConvs(true);
+  }).catch(function(e){
+    st.err = e.message || 'Something went wrong.';
+    if(current && current.id === id && !(current._msgs)) renderThread();
+    showErr(e.message);
+  });
+}
+
+/* Merge the server's authorised participants into the conversation list.
+   A participant with no conversation yet is rendered from the real account
+   record (name, username, role) and marked _pending, so it is visible and
+   clickable before any message exists. Opening one creates the row. */
+function mergeParticipants(list, parts){
+  var have = {};
+  list.forEach(function(c){
+    (c.participants||[]).forEach(function(p){ if(p && p.id) have[p.id]=1; });
+    if(c.other && c.other.id) have[c.other.id] = 1;
+  });
+  (parts||[]).forEach(function(p){
+    if(!p || !p.user_id) return;
+    if(p.has_conversation) return;           // already in the list
+    if(have[p.user_id]) return;              // covered by an existing row
+    list.push({
+      id: null,
+      _pending: true,
+      _user_id: p.user_id,
+      _name: p.name || p.username,
+      _role: p.role,
+      other: { id: p.user_id, name: p.name || p.username, username: p.username, role: p.role },
+      unread: 0,
+      last_message: null,
+      last_message_at: null,
+      supervised: false,
+      participants: [],
+      _msgs: [],
+    });
+  });
+  return list;
+}
+
+/* Overlapping refreshes (a message, a read receipt and a poll can all land
+   together) share one follow-up request instead of firing one each. */
+var convRun = null, convNext = null;
+function loadConvs(silent){
+  if(!convRun){
+    convRun = doLoadConvs(silent).then(function(){ convRun = null; }, function(){ convRun = null; });
+    return convRun;
+  }
+  if(!convNext){
+    convNext = convRun.then(function(){ convNext = null; return loadConvs(silent); });
+  }
+  return convNext;
+}
+function doLoadConvs(silent){
+  return api('/api/chatapp/conversations').then(function(r){
+    var prev = {}; convs.forEach(function(c){ prev[c.id]=c._msgs; });
+    convs = r.conversations || [];
+    convs.forEach(function(c){ if(prev[c.id]) c._msgs = prev[c.id]; });
+    if(current){
+      var f = convById(current.id);
+      if(f){ f._msgs = current._msgs; current = f; }
+    }
+    listState = 'ready';
+    /* Add the people this account is allowed to talk to but has never
+       messaged. A failure here must not hide the existing conversations. */
+    return api('/api/chatapp/participants').then(function(pr){
+      convs = mergeParticipants(convs, pr.participants);
+    }).catch(function(){ /* participants are an enhancement, not a requirement */ })
+     .then(function(){ return refreshPresence(); })
+     .then(function(){ renderList(); });
+  }).catch(function(e){
+    if(!convs.length){ listState = 'error'; listError = e.message; renderList(); }
+    if(!silent) showErr(e.message);
+  });
+}
+
+/* Pull the server's presence state for everyone I can talk to. This is the
+   single source of truth for the online indicator and for what the ticks
+   mean; the stream pushes changes, this just resynchronises. */
+function refreshPresence(){
+  return api('/api/chatapp/presence').then(function(r){
+    presence = (r && r.presence) || {};
+  }).catch(function(){ /* keep the last known state */ });
+}
+/* Periodic resync, so a silently dropped connection cannot leave someone
+   shown as online forever. The server's own stale sweep is the real guard;
+   this only shortens the window. */
+setInterval(function(){ if(document.visibilityState !== 'hidden') refreshPresence().then(function(){ renderList(); if(current) paintHeader(); }); }, 30000);
+
+/* ---------------- send ---------------- */
+var sending = false, failedSend = null;
+function readyAtts(){ return uploads.filter(function(u){ return u.state === 'ready'; }); }
+function isUploading(){ return uploads.some(function(u){ return u.state === 'uploading'; }); }
+function paintSend(){
+  var b = $('btnSend');
+  var has = $('input').value.trim().length > 0 || readyAtts().length > 0;
+  b.disabled = sending || isUploading() || !has;
+  b.classList.toggle('busy', sending);
+  b.setAttribute('aria-busy', sending ? 'true' : 'false');
+  b.title = isUploading() ? 'Waiting for the upload to finish' : 'Send';
+}
+function onInput(){
+  var t = $('input');
+  t.style.height = 'auto'; t.style.height = Math.min(120, t.scrollHeight) + 'px';
+  paintSend();
+}
+function shake(id){
+  if(reduced()) return;
+  var n = $(id); n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake');
+}
+function send(){
+  if(!current || current.id == null || sending) return;
+  if(isUploading()){ showErr('A file is still uploading. Send once it finishes.'); return; }
+  var txt = $('input').value.trim(), ready = readyAtts();
+  if(!txt && !ready.length) return;
+  var ids = ready.map(function(u){ return u.attachment.id; }), convId = current.id;
+  /* client_msg_id de-duplicates retries. If the last attempt failed and this is
+     the same message again, reuse its key so a request that did reach the
+     server cannot be stored twice. */
+  var cKey = (failedSend && failedSend.convId === convId && failedSend.txt === txt && failedSend.ids.join() === ids.join())
+           ? failedSend.key : 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+  sending = true; paintSend();
+  api('/api/chatapp/conversations/'+convId+'/messages', {
+    method:'POST',
+    body:{ body: txt, attachment_ids: ids, client_msg_id: cKey }
+  }).then(function(r){
+    failedSend = null;
+    if(current && current.id === convId){
+      $('input').value = ''; onInput(); clearUploads();
+    }
+    var tgt = convById(convId);
+    if(tgt){
+      tgt._msgs = tgt._msgs || [];
+      /* the stream may already have delivered our own message; never add it twice */
+      if(!tgt._msgs.some(function(x){ return x.id === r.message.id; })) tgt._msgs.push(r.message);
+    }
+    if(current && current.id === convId){ renderThread(); }
+    var sb = $('btnSend'); sb.classList.remove('sent'); void sb.offsetWidth; if(!reduced()) sb.classList.add('sent');
+    loadConvs(true);
+  }).catch(function(e){
+    failedSend = { key:cKey, convId:convId, txt:txt, ids:ids };
+    showErr(e.message); shake('cbox');
+  }).then(function(){
+    sending = false; paintSend();
+    if(window.matchMedia && matchMedia('(pointer:fine)').matches) $('input').focus();
+  });
+}
+
+/* ---------------- attachments ----------------
+ * Uploads use XMLHttpRequest because fetch() cannot report upload progress.
+ * The request is the same one as before: POST /api/chatapp/upload,
+ * multipart/form-data, field name "file", bearer header. */
+var uploads = [], upSeq = 0;
+function clearUploads(){ uploads = []; $('pending').innerHTML = ''; paintSend(); }
+function chipSub(u){
+  if(u.state === 'uploading') return 'Uploading\u2026 ' + Math.round(u.pct * 100) + '%';
+  if(u.state === 'ready') return 'Ready \u00b7 ' + fmtSize(u.size);
+  return u.error || 'Upload failed';
+}
+function paintChip(u){
+  var d = u.el; if(!d) return;
+  d.setAttribute('data-state', u.state);
+  d.style.setProperty('--p', String(u.pct));
+  d.querySelector('.att-sub').textContent = chipSub(u);
+  d.querySelector('.chip-act').innerHTML =
+      (u.state === 'error' ? '<button type="button" class="cretry" data-act="retry">Retry</button>' : '')
+    + '<button type="button" class="cx" data-act="rm" aria-label="'+(u.state === 'uploading' ? 'Cancel upload of ' : 'Remove ')+esc(u.name)+'">'+ico('x')+'</button>';
+}
+function addChip(u){
+  var k = attKind(u.name, u.file && u.file.type);
+  var d = document.createElement('div');
+  d.className = 'chip'; d.setAttribute('data-uid', u.uid);
+  d.innerHTML = '<span class="att-ico" data-kind="'+k+'">'+ico(KIND_ICON[k])+'</span>'
+              + '<span class="att-meta"><span class="att-name"></span><span class="att-sub"></span></span>'
+              + '<span class="chip-act" style="display:flex;align-items:center"></span>'
+              + '<span class="cbar" aria-hidden="true"><i></i></span>';
+  d.querySelector('.att-name').textContent = u.name;
+  u.el = d; $('pending').appendChild(d); paintChip(u);
+}
+function uploadFile(f){
+  var u = { uid:++upSeq, name:f.name, size:f.size, file:f, pct:0, state:'uploading', error:'', attachment:null, xhr:null, el:null };
+  uploads.push(u); addChip(u); paintSend();
+  sendUpload(u);
+}
+function sendUpload(u){
+  u.state = 'uploading'; u.pct = 0; u.error = ''; paintChip(u); paintSend();
+  var fd = new FormData(); fd.append('file', u.file);
+  var x = new XMLHttpRequest(); u.xhr = x;
+  x.open('POST', '/api/chatapp/upload');
+  x.setRequestHeader('Authorization', 'Bearer ' + TOKEN);
+  x.upload.onprogress = function(e){ if(e.lengthComputable){ u.pct = e.loaded / e.total; paintChip(u); } };
+  function fail(msg){ u.state = 'error'; u.error = msg; paintChip(u); paintSend(); showErr(msg); }
+  x.onload = function(){
+    var j = null; try { j = JSON.parse(x.responseText); } catch(e){}
+    if(x.status >= 200 && x.status < 300 && j && j.attachment){
+      u.state = 'ready'; u.pct = 1; u.attachment = j.attachment; paintChip(u); paintSend();
+    } else fail((j && j.error) || ('Upload failed (HTTP ' + x.status + ')'));
+  };
+  x.onerror = function(){ fail('Upload failed. Check your connection and try again.'); };
+  x.send(fd);
+}
+function removeUpload(uid){
+  var i = -1; uploads.forEach(function(u, n){ if(u.uid === uid) i = n; });
+  if(i < 0) return;
+  var u = uploads[i];
+  if(u.state === 'uploading' && u.xhr){ u.xhr.onload = u.xhr.onerror = null; try { u.xhr.abort(); } catch(e){} }
+  uploads.splice(i, 1); paintSend();
+  if(u.el){
+    if(reduced()){ u.el.remove(); }
+    else { u.el.classList.add('leaving'); setTimeout(function(){ if(u.el) u.el.remove(); }, 160); }
+  }
+}
+
+/* ---------------- live stream ---------------- */
+function startStream(){
+  if(typeof EventSource === 'undefined') return;
+  // EventSource cannot set headers, so the server accepts ?token for this route.
+  try { es = new EventSource('/api/chatapp/stream?token=' + encodeURIComponent(TOKEN)); } catch(e){ return; }
+  var helloSeen = false;
+  /* 'hello' fires on every (re)connect. After the first one, a reconnect means
+     events may have been missed, so resynchronise the list and the open thread. */
+  es.addEventListener('hello', function(){
+    if(helloSeen){ loadConvs(true); if(current) openConvSilent(); }
+    helloSeen = true;
+  });
+  es.addEventListener('message', function(ev){
+    try{
+      var m = JSON.parse(ev.data);
+      /* Sound only for a live inbound message from the other party. The
+         dedupe below also stops a reconnect replay from sounding twice. */
+      Sound.incoming(m);
+      if(!current || m.conversation_id !== current.id){ loadConvs(true); return; }
+      if(!current._msgs){ ui(current.id).dirty = true; return; }   /* still loading: the fetch will be repeated */
+      if(current._msgs.some(function(x){ return x.id===m.id; })) return;
+      current._msgs.push(m); renderThread();
+      api('/api/chatapp/conversations/'+current.id+'/read',{method:'POST',body:{}}).then(function(){ loadConvs(true); });
+    }catch(e){}
+  });
+  es.addEventListener('read', function(){ loadConvs(true); if(current) openConvSilent(); });
+  es.addEventListener('delivered', function(){ if(current) openConvSilent(); });
+  /* Presence is pushed by the server; the UI never guesses. */
+  es.addEventListener('presence', function(ev){
+    try{
+      var d = JSON.parse(ev.data);
+      if(!d || !d.user_id) return;
+      presence[d.user_id] = d.online ? 'online' : 'offline';
+      renderList(); if(current) paintHeader();
+    }catch(e){}
+  });
+  es.onerror = function(){ /* EventSource reconnects on its own */ };
+}
+var silentRun = null, silentNext = false;
+function openConvSilent(){
+  if(!current) return;
+  if(silentRun){ silentNext = true; return; }
+  var id = current.id;
+  silentRun = api('/api/chatapp/conversations/'+id+'/messages?limit=100').then(function(r){
+    var tgt = convById(id);
+    if(tgt){ tgt._msgs = r.messages || []; if(current && current.id === id){ current = tgt; renderThread(); } }
+  }).catch(function(){}).then(function(){
+    silentRun = null;
+    if(silentNext){ silentNext = false; openConvSilent(); }
+  });
+}
+
+/* ==================================================================
+ * NOTIFICATION SOUND (task 2)
+ * ------------------------------------------------------------------
+ * The tone is synthesised with the Web Audio API, so there is no asset
+ * to ship, nothing to preload and no network request on first message.
+ *
+ * Rules enforced here:
+ *   - Only for messages whose sender is NOT me.
+ *   - Only for messages that arrive live over the stream. Messages loaded
+ *     from history (initial load, openConvSilent, refresh) never sound.
+ *   - Played at most once per message id, so a reconnect, a duplicate
+ *     event or a re-render cannot make it fire twice.
+ *   - Mute preference is remembered.
+ *   - Browsers block audio until the page has been interacted with; the
+ *     context is resumed on the first real user gesture and a blocked
+ *     play is swallowed rather than throwing.
+ * ================================================================== */
+var Sound = (function(){
+  var MUTE_KEY = 'ams_chat_mute';
+  var ctx = null, muted = false, played = {}, lastAt = 0;
+  try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch(e){}
+
+  function ensure(){
+    if(ctx) return ctx;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      ctx = new AC();
+    } catch(e){ ctx = null; }
+    return ctx;
+  }
+  /* Browsers start the context suspended until a gesture; latch on to the
+     first one so the very next message can sound. */
+  function unlock(){
+    var c = ensure();
+    if(c && c.state === 'suspended'){ try { c.resume(); } catch(e){} }
+  }
+  try {
+    ['click','keydown','touchstart','pointerdown'].forEach(function(t){
+      document.addEventListener(t, unlock, { once:true, passive:true });
+    });
+  } catch(e){}
+
+  /* Two short notes — brief, clear, and quiet enough not to startle. */
+  function tone(c, startAt, freq, dur, gainPeak){
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, startAt);
+    g.gain.setValueAtTime(0.0001, startAt);
+    g.gain.exponentialRampToValueAtTime(gainPeak, startAt + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, startAt + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(startAt); o.stop(startAt + dur + 0.02);
+  }
+
+  function play(msgId){
+    if(muted) return false;
+    if(msgId){
+      if(played[msgId]) return false;         // one sound per message, ever
+      played[msgId] = 1;
+    }
+    var now = Date.now();
+    if(now - lastAt < 400) return false;      // guard against event bursts
+    lastAt = now;
+    var c = ensure();
+    if(!c) return false;
+    try {
+      if(c.state === 'suspended'){ c.resume(); }
+      var t = c.currentTime + 0.01;
+      tone(c, t,        880, 0.10, 0.16);
+      tone(c, t + 0.11, 1245, 0.14, 0.13);
+      return true;
+    } catch(e){ return false; }               // blocked by autoplay policy
+  }
+
+  return {
+    /* Called only for live inbound messages from someone else. */
+    incoming: function(m){
+      if(!m) return false;
+      if(m.sender_id && window.__CHAT_BOOT && window.__CHAT_BOOT.me
+         && m.sender_id === window.__CHAT_BOOT.me.id) return false;
+      return play(m.id);
+    },
+    isMuted: function(){ return muted; },
+    setMuted: function(v){
+      muted = !!v;
+      try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch(e){}
+    },
+    /* Lets the user confirm the control works, and doubles as the gesture
+       that unlocks audio in browsers that require one. */
+    preview: function(){ var was = muted; muted = false; var r = play(null); muted = was; return r; }
+  };
+})();
+
+/* ==================================================================
+ * ATTACHMENT DOWNLOAD (task 3)
+ * ------------------------------------------------------------------
+ * The download route is protected by authRequired, but a plain
+ * <a href="..."> navigation sends no Authorization header — the browser
+ * just issues a bare GET, which the server rejects.
+ *
+ * The file is fetched with the session token, turned into a Blob and
+ * saved through an object URL. The filename is preserved (from the
+ * Content-Disposition header when present, otherwise the stored original
+ * name), and the server's error statuses are surfaced as real messages
+ * instead of a dead tab.
+ *
+ * Returns the promise: it resolves when the file has been handed to the
+ * browser and rejects (after showing the message) when it failed, so the
+ * card can show its done / error state. Earlier this function returned
+ * nothing, and the click handler's .then() threw a TypeError that left the
+ * button stuck on "Downloading…" for good.
+ * ================================================================== */
+function readBody(r, onProgress){
+  var total = parseInt(r.headers.get('Content-Length') || '0', 10);
+  if(!r.body || !r.body.getReader || !total) return r.blob();
+  var reader = r.body.getReader(), chunks = [], got = 0, type = r.headers.get('Content-Type') || '';
+  return (function pump(){
+    return reader.read().then(function(x){
+      if(x.done) return new Blob(chunks, { type:type });
+      chunks.push(x.value); got += x.value.length; onProgress(Math.min(1, got / total));
+      return pump();
+    });
+  })();
+}
+function downloadAttachment(id, fallbackName, onProgress){
+  var url = '/api/chatapp/attachments/' + id + '/download';
+  return fetch(url, { headers: { Authorization: 'Bearer ' + TOKEN } })
+    .then(function(r){
+      if(r.ok) return readBody(r, onProgress || function(){}).then(function(b){ return { blob:b, res:r }; });
+      /* 404 not found · 410 file gone · 403 not authorised */
+      return r.json().catch(function(){ return null; }).then(function(j){
+        var e = new Error((j && j.error) || ('Download failed (HTTP ' + r.status + ').'));
+        e.status = r.status; throw e;
+      });
+    })
+    .then(function(pair){
+      var name = fallbackName || 'download';
+      var cd = pair.res.headers.get('Content-Disposition') || '';
+      var m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+      if(m && m[1]) name = decodeURIComponent(m[1].trim());
+      var href = URL.createObjectURL(pair.blob);
+      var a = document.createElement('a');
+      a.href = href; a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(href); a.remove(); }, 0);
+    })
+    .catch(function(e){
+      showErr(e && e.message ? e.message : 'Download failed.');
+      throw e;
+    });
+}
+function setAttState(b, s, p){
+  b.setAttribute('data-state', s);
+  var bar = b.querySelector('.att-bar');
+  if(bar){
+    bar.classList.toggle('ind', s === 'loading' && p == null);
+    if(p != null) b.style.setProperty('--p', String(p));
+  }
+}
+
+/* ---------------- lock ---------------- */
+function checkLock(){
+  return api('/api/chatapp/pin/status').then(function(s){
+    if(s.locked){ showLock(false); }   /* mandatory — no cancel */
+    else { closeLockUI(); }
+    $('btnPin').querySelector('.lbl').textContent = s.has_pin ? 'Lock' : 'Set PIN';
+  }).catch(function(){});
+}
+var lockOpen = false, lockReturn = null, lockCloseT = null;
+function openLockUI(mode){
+  var w = $('lockWrap');
+  w.setAttribute('data-mode', mode);
+  clearTimeout(lockCloseT);
+  if(!lockOpen){
+    lockReturn = document.activeElement;
+    w.hidden = false; void w.offsetWidth;
+    /* The chat behind the dialog can neither be reached by keyboard nor read by a screen reader. */
+    $('app').inert = true; $('app').setAttribute('aria-hidden', 'true');
+    w.classList.add('open'); lockOpen = true;
+  }
+}
+function closeLockUI(){
+  if(!lockOpen){ $('lockWrap').hidden = true; return; }
+  var w = $('lockWrap'); lockOpen = false;
+  w.classList.remove('open');
+  $('app').inert = false; $('app').removeAttribute('aria-hidden');
+  lockCloseT = setTimeout(function(){ if(!lockOpen) w.hidden = true; }, reduced() ? 0 : 260);
+  if(lockReturn && lockReturn.focus && document.body.contains(lockReturn)){ try { lockReturn.focus(); } catch(e){} }
+  lockReturn = null;
+}
+/* showLock(setup, opts)
+ *   mode 'unlock' — the chat IS locked. Mandatory: no Cancel, cannot dismiss.
+ *   mode 'setup'  — choosing/changing a PIN. Voluntary when opts.cancellable,
+ *                   in which case Cancel restores the previous screen.
+ * Verification is unchanged and lives entirely on the server: an incorrect
+ * PIN still fails and still leaves the chat locked. */
+function setLockError(msg){
+  var e = $('lockErr'), pin = $('lockPin');
+  if(msg){
+    e.innerHTML = ico('alert') + '<span></span>'; e.lastChild.textContent = msg;
+    pin.setAttribute('aria-invalid', 'true');
+  } else { e.textContent = ''; pin.removeAttribute('aria-invalid'); }
+  e.classList.toggle('show', !!msg);
+}
+function showLock(setup, opts){
+  opts = opts || {};
+  var cancellable = !!opts.cancellable;
+  openLockUI(cancellable ? 'voluntary' : 'locked');
+  $('lockTitle').textContent = setup ? 'Set your chat PIN' : 'Chat is locked';
+  $('lockMsg').textContent = setup ? 'Choose a PIN (6\u201364 characters).' : 'Enter your chat PIN to continue.';
+  $('lockPinLabel').textContent = setup ? 'New PIN' : 'Chat PIN';
+  $('lockBtn').textContent = setup ? 'Confirm PIN' : 'Unlock Chat';
+  $('lockPin').value = '';
+  $('lockPin').setAttribute('autocomplete', setup ? 'new-password' : 'off');
+  $('lockPin').placeholder = setup ? 'Choose a PIN' : 'Enter your PIN';
+  $('lockSetup').hidden = !!setup;
+  $('lockCancel').hidden = !cancellable;
+  $('lockHint').textContent = ''; $('lockHint').classList.remove('warn');
+  setLockError('');
+  /* Focus the field so the dialog is immediately usable from the keyboard. */
+  setTimeout(function(){ try { $('lockPin').focus(); } catch(e){} }, 30);
+
+  function close(){ closeLockUI(); }
+
+  $('lockBtn').onclick = function(){
+    var pin = $('lockPin').value;
+    if(!pin){ setLockError('Enter your PIN to continue.'); shake('lockField'); $('lockPin').focus(); return; }
+    /* Convenience check only — the server remains the authority. It mirrors the
+       rule already stated in the dialog text (6–64 characters). */
+    if(setup && (pin.length < 6 || pin.length > 64)){
+      setLockError('Your PIN must be 6\u201364 characters. Yours is ' + pin.length + '.'); shake('lockField'); $('lockPin').focus(); return;
+    }
+    var btn = $('lockBtn'), label = btn.textContent;
+    btn.disabled = true; btn.textContent = setup ? 'Saving\u2026' : 'Unlocking\u2026';
+    setLockError('');
+    var path = setup ? '/api/chatapp/pin/set' : '/api/chatapp/pin/unlock';
+    api(path,{method:'POST',body:{pin:pin}})
+      .then(function(){
+        btn.disabled = false; btn.textContent = label;
+        close();
+        if(setup) checkLock();
+      })
+      .catch(function(e){
+        btn.disabled = false; btn.textContent = label;
+        setLockError(e.message || 'That PIN was not accepted.'); shake('lockField');
+        $('lockPin').value='';
+        try { $('lockPin').focus(); } catch(err){}
+      });
+  };
+
+  $('lockSetup').onclick = function(){ showLock(true, { cancellable: cancellable }); };
+
+  /* Cancel is only wired when the dialog is dismissible; a locked chat is not. */
+  $('lockCancel').onclick = function(){
+    if(!cancellable) return;
+    close();
+    checkLock();
+  };
+}
+
+/* Escape closes the dialog only when Cancel is offered. */
+document.addEventListener('keydown', function(e){
+  var w = $('lockWrap');
+  if(!w || w.hidden) return;
+  if(e.key === 'Escape'){
+    var c = $('lockCancel');
+    if(c && !c.hidden) c.click();
+    return;
+  }
+  /* Keep Tab inside the dialog. */
+  if(e.key === 'Tab'){
+    var f = Array.prototype.filter.call($('lockWrap').querySelectorAll('button, input'), function(n){
+      return !n.hidden && !n.disabled && n.offsetParent !== null;
+    });
+    if(!f.length) return;
+    var first = f[0], last = f[f.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    else if(f.indexOf(document.activeElement) < 0){ e.preventDefault(); first.focus(); }
+  }
+});
+
+/* ---------------- phone keyboard ----------------
+ * On touch devices the app is sized to the visual viewport, so when the
+ * on-screen keyboard opens the composer rides above it instead of being covered. */
+function initViewport(){
+  var vv = window.visualViewport;
+  if(!vv || !window.matchMedia || !matchMedia('(pointer:coarse)').matches) return;
+  var root = document.documentElement, raf = 0;
+  function sync(){
+    raf = 0;
+    root.classList.add('vv');
+    root.style.setProperty('--vvh', vv.height + 'px');
+    root.style.setProperty('--vvt', vv.offsetTop + 'px');
+    if(lastNear && !$('msgs').hidden) $('msgs').scrollTop = $('msgs').scrollHeight;
+  }
+  function sched(){ if(!raf) raf = requestAnimationFrame(sync); }
+  vv.addEventListener('resize', sched); vv.addEventListener('scroll', sched);
+}
+
+/* ---------------- boot ---------------- */
+function start(){
+  TOKEN = window.__CHAT_BOOT.token;
+  ME    = window.__CHAT_BOOT.me;
+  ROLE  = window.__CHAT_BOOT.role;
+
+  paintStaticIcons();
+  initTheme(); initEmoji(); initViewport();
+  renderList();
+
+  $('convList').addEventListener('click', onListClick);
+  $('btnSend').onclick = send;
+  $('input').addEventListener('keydown', function(e){
+    if(e.key==='Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229){ e.preventDefault(); send(); }
+  });
+  $('input').addEventListener('input', onInput);
+  $('btnAttach').onclick = function(){ $('fileInput').click(); };
+  $('fileInput').onchange = function(){
+    Array.prototype.forEach.call(this.files, function(f){ uploadFile(f); });
+    this.value = '';
+  };
+  $('pending').addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('[data-act]'); if(!b) return;
+    var chip = b.closest('.chip'), uid = chip && parseInt(chip.getAttribute('data-uid'), 10);
+    var u = uploads.filter(function(x){ return x.uid === uid; })[0]; if(!u) return;
+    if(b.getAttribute('data-act') === 'rm') removeUpload(uid);
+    else if(b.getAttribute('data-act') === 'retry') sendUpload(u);
+  });
+  $('btnBack').onclick = function(){ $('body').classList.remove('hide-list'); };
+  $('btnExport').onclick = function(){
+    if(!current){ showErr('Open a conversation first.'); return; }
+    window.open('/api/chatapp/conversations/'+current.id+'/export?token='+encodeURIComponent(TOKEN), '_blank');
+  };
+  $('btnPin').onclick = function(){
+    api('/api/chatapp/pin/status').then(function(s){
+      if(!s.has_pin){
+        /* No PIN yet and the user asked for one — voluntary, so cancellable. */
+        showLock(true, { cancellable: true });
+      }
+      else if(s.locked){
+        showLock(false);                       /* already locked — mandatory */
+      }
+      else {
+        /* User asked to lock. Once locked the dialog is mandatory, otherwise
+           Cancel would strand them behind a lock they cannot pass. */
+        api('/api/chatapp/pin/lock',{method:'POST',body:{}}).then(function(){ showLock(false); checkLock(); });
+      }
+    });
+  };
+  $('lockPin').addEventListener('keydown', function(e){ if(e.key==='Enter') $('lockBtn').click(); });
+  /* Caps Lock warning: a common reason a correct PIN is "rejected". */
+  function caps(e){
+    var on = !!(e.getModifierState && e.getModifierState('CapsLock')), h = $('lockHint');
+    h.textContent = on ? 'Caps Lock is on' : ''; h.classList.toggle('warn', on);
+  }
+  $('lockPin').addEventListener('keydown', caps); $('lockPin').addEventListener('keyup', caps);
+
+  /* Reveal/hide the PIN — purely a typing aid; nothing about storage changes. */
+  $('lockToggle').onclick = function(){
+    var i = $('lockPin'), b = $('lockToggle');
+    var showing = i.type === 'text';
+    i.type = showing ? 'password' : 'text';
+    b.setAttribute('aria-pressed', showing ? 'false' : 'true');
+    b.setAttribute('aria-label', showing ? 'Show PIN' : 'Hide PIN');
+    b.title = showing ? 'Show PIN' : 'Hide PIN';
+    i.focus();
+  };
+
+  /* ---- sound toggle (task 2) ------------------------------------
+   * Muted state is remembered per browser. Clicking the control also
+   * counts as the user gesture browsers need before they will let a page
+   * play audio, so un-muting plays a confirmation tone immediately. */
+  function paintSound(){
+    var b = $('btnSound'); if(!b) return;
+    var muted = Sound.isMuted();
+    b.classList.toggle('muted', muted);
+    b.querySelector('.lbl').textContent = muted ? 'Muted' : 'Sound';
+    b.setAttribute('aria-pressed', muted ? 'false' : 'true');
+    b.title = muted ? 'Message sound is off \u2014 click to turn on'
+                    : 'Message sound is on \u2014 click to mute';
+  }
+  paintSound();
+  $('btnSound').onclick = function(){
+    Sound.setMuted(!Sound.isMuted());
+    paintSound();
+    if(!Sound.isMuted()) Sound.preview();   /* also unlocks audio */
+  };
+
+  /* ---- attachment downloads (task 3) ----------------------------
+   * Delegated, so cards created by later re-renders work too. */
+  document.addEventListener('click', function(e){
+    var retry = e.target && e.target.closest ? e.target.closest('[data-act="retry-thread"]') : null;
+    if(retry){ if(current){ ui(current.id).err = ''; renderThread(); fetchMessages(current.id, 0); } return; }
+    var b = e.target && e.target.closest ? e.target.closest('.att-btn') : null;
+    if(!b) return;
+    e.preventDefault();
+    var id = b.getAttribute('data-att');
+    if(!id || b.getAttribute('data-state') === 'loading') return;
+    setAttState(b, 'loading');
+    downloadAttachment(id, b.getAttribute('data-name'), function(p){ setAttState(b, 'loading', p); }).then(function(){
+      setAttState(b, 'done');
+      setTimeout(function(){ setAttState(b, 'idle'); }, 1800);
+    }, function(){
+      setAttState(b, 'error');
+      setTimeout(function(){ setAttState(b, 'idle'); }, 2800);
+    });
+  });
+
+  /* ---- scrolling: unseen-message jump control ---- */
+  var scrollRaf = 0;
+  $('msgs').addEventListener('scroll', function(){
+    if(scrollRaf) return;
+    scrollRaf = requestAnimationFrame(function(){
+      scrollRaf = 0;
+      var near = nearBottom($('msgs')); lastNear = near;
+      if(near && current){ ui(current.id).unseen = 0; showJump(0); }
+    });
+  }, { passive:true });
+  $('jump').onclick = function(){ if(current) ui(current.id).unseen = 0; showJump(0); toBottom(true); };
+  /* Drop the entry animation once it has played, so a node never replays it. */
+  $('msgs').addEventListener('animationend', function(e){
+    if(e.target.classList && e.target.classList.contains('enter')) e.target.classList.remove('enter');
+  });
+  $('msgs').addEventListener('animationend', function(e){
+    if(e.target === this) this.classList.remove('view-in');
+  });
+  $('thead').addEventListener('animationend', function(e){ if(e.target === this) this.classList.remove('view-in'); });
+  ['cbox','lockField'].forEach(function(id){
+    $(id).addEventListener('animationend', function(){ this.classList.remove('shake'); });
+  });
+  $('btnSend').addEventListener('animationend', function(e){ if(e.target.closest) this.classList.remove('sent'); });
+
+  /* Coming back to a tab (or waking a phone) resynchronises: a background tab
+     can have missed stream events. */
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible' && listState !== 'loading'){ loadConvs(true); if(current) openConvSilent(); }
+  });
+
+  checkLock().then(function(){
+    return loadConvs();
+  }).then(function(){
+    // open the single natural counterpart automatically, like a messenger would
+    // (only a real conversation — a participant row has no id yet)
+    if(convs.length === 1 && convs[0].id != null) openConv(convs[0].id);
+    startStream();
+    setInterval(function(){ if(document.visibilityState !== 'hidden') loadConvs(true); }, 30000);
+  }).catch(function(e){ showErr(e.message); });
+}
+
+if (window.__CHAT_BOOT) start();
+else window.__chatStart = start;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+/* ==========================================================================
+   GLOBAL SMS — Unified design layer (load LAST, after ams-panel.css)
+   Frontend-only. Same look for Admin / Manager / Agent / Client / Management /
+   Payment / Panel Sharing / Test. Branding runtime vars (--br-*) still win
+   when set, because every colour below is var(--br-x, fallback).
+   ========================================================================== */
+:root{
+  --u-bg:#f3f5f9;
+  --u-surface:#ffffff;
+  --u-surface-2:#f8fafc;
+  --u-soft:#eef2f7;
+  --u-line:#e2e8f0;
+  --u-line-2:#cbd5e1;
+  --u-ink:#0f172a;
+  --u-ink-2:#334155;
+  --u-muted:#64748b;
+
+  --u-brand:#155eef;
+  --u-brand-d:#0b43be;
+  --u-brand-soft:#e8f0fe;
+
+  --u-side:#ffffff;
+  --u-side-2:#f8fafc;
+  --u-side-text:#334155;
+  --u-side-muted:#64748b;
+  --u-side-hover:#eef2f7;
+  --u-side-line:#e2e8f0;
+
+  /* semantic: solid (white text) + tint (dark text) — all >= 4.5:1 */
+  --u-ok:#047857;     --u-ok-bg:#e6f7ef;   --u-ok-bd:#b6e6cf;   --u-ok-tx:#065f46;
+  --u-warn:#b45309;   --u-warn-bg:#fff3d9; --u-warn-bd:#f5d89a; --u-warn-tx:#8a4b08;
+  --u-bad:#dc2626;    --u-bad-bg:#fdecee;  --u-bad-bd:#f4c0c6;  --u-bad-tx:#b42318;
+  --u-info:#155eef;   --u-info-bg:#e8f0fe; --u-info-bd:#c3d5fb; --u-info-tx:#0b43be;
+  --u-pur:#0b43be;    --u-pur-bg:#eafaf7;  --u-pur-bd:#c7ece7;  --u-pur-tx:#0a9e93;
+  --u-teal:#0f766e;   --u-teal-bg:#e0f5f2; --u-teal-bd:#b0e3dc;
+  --u-gray-bg:#f1f5f9;--u-gray-bd:#dde3ec; --u-gray-tx:#475569;
+
+  --u-r:14px; --u-r-sm:10px;
+  --u-shadow:0 1px 2px rgba(15,23,42,.05),0 6px 18px rgba(15,23,42,.05);
+  --u-shadow-lg:0 24px 60px rgba(15,23,42,.22);
+}
+
+/* ---------- page + typography ---------- */
+html body.ams-panel.ams-light{
+  background:var(--br-general-content-bg,var(--u-bg))!important;
+  color:var(--br-general-text,var(--u-ink))!important;
+  font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;
+}
+html body.ams-panel.ams-light .page-head h2,html body.ams-panel.ams-light .head h2,
+html body.ams-panel.ams-light .card-head h3{color:var(--br-general-heading,var(--u-ink))!important;}
+html body.ams-panel.ams-light .breadcrumb,html body.ams-panel.ams-light .crumb,
+html body.ams-panel.ams-light .muted,html body.ams-panel.ams-light .cell-sub,
+html body.ams-panel.ams-light .stat-info p,html body.ams-panel.ams-light .card-head .sub,
+html body.ams-panel.ams-light .form-group .hint,html body.ams-panel.ams-light .table-foot .info,
+html body.ams-panel.ams-light .bulk-bar .info,html body.ams-panel.ams-light .tb-date,html body.ams-panel.ams-light .clock{
+  color:var(--br-general-text-muted,var(--u-muted))!important;
+}
+html body.ams-panel.ams-light .page-head,html body.ams-panel.ams-light .head{border-bottom:1px solid var(--u-line)!important;}
+
+/* ---------- sidebar / rail (dark navy, readable) ---------- */
+html body.ams-panel.ams-light .sidebar,html body.ams-panel.ams-light .rail,html body.ams-panel.ams-light .side{
+  background:var(--br-sidebar-bg,var(--u-side))!important;
+  border-right:1px solid var(--u-side-line)!important;
+  color:var(--br-sidebar-text,var(--u-side-text))!important;
+}
+html body.ams-panel.ams-light .sb-brand,html body.ams-panel.ams-light .rail-brand,html body.ams-panel.ams-light .brand,
+html body.ams-panel.ams-light .brand-text{border-bottom:1px solid var(--u-side-line)!important;}
+html body.ams-panel.ams-light :is(.sidebar,.rail,.side) :is(.sb-brand h1,.brand h1,.brand b,.brand-text h1){color:var(--u-ink)!important;}
+html body.ams-panel.ams-light :is(.sidebar,.rail,.side) :is(.sb-brand small,.brand small,.brand .muted,.brand-text small){color:var(--u-side-muted)!important;}
+html body.ams-panel.ams-light .sb-section,html body.ams-panel.ams-light .sb-sec,html body.ams-panel.ams-light .sec{color:var(--u-side-muted)!important;}
+html body.ams-panel.ams-light :is(.sidebar,.rail,.side) :is(.sb-logo,.logo){background:transparent!important;border:0!important;}
+html body.ams-panel.ams-light .sidebar .nav-item,html body.ams-panel.ams-light .sidebar .sub-item,
+html body.ams-panel.ams-light .sidebar .tab,html body.ams-panel.ams-light .sidebar .item,
+html body.ams-panel.ams-light .rail .ritem,html body.ams-panel.ams-light .rail .rsubitem,
+html body.ams-panel.ams-light .side .item{
+  color:var(--br-sidebar-text,var(--u-side-text))!important;background:transparent!important;
+}
+html body.ams-panel.ams-light .sidebar .nav-item svg,html body.ams-panel.ams-light .sidebar .sub-item svg,
+html body.ams-panel.ams-light .sidebar .tab svg,html body.ams-panel.ams-light .rail .ritem svg,
+html body.ams-panel.ams-light .rail .rsubitem svg{stroke:currentColor!important;}
+html body.ams-panel.ams-light .sidebar .nav-item:hover,html body.ams-panel.ams-light .sidebar .sub-item:hover,
+html body.ams-panel.ams-light .sidebar .tab:hover,html body.ams-panel.ams-light .sidebar .item:hover,
+html body.ams-panel.ams-light .rail .ritem:hover,html body.ams-panel.ams-light .rail .rsubitem:hover,
+html body.ams-panel.ams-light .side .item:hover{
+  background:var(--br-sidebar-hover-bg,var(--u-side-hover))!important;color:var(--u-ink)!important;
+}
+html body.ams-panel.ams-light .sidebar .nav-item.active,html body.ams-panel.ams-light .sidebar .sub-item.active,
+html body.ams-panel.ams-light .sidebar .tab.active,html body.ams-panel.ams-light .sidebar .item.active,
+html body.ams-panel.ams-light .rail .ritem.active,html body.ams-panel.ams-light .rail .rsubitem.active,
+html body.ams-panel.ams-light .side .item.active{
+  background:var(--br-sidebar-active-bg,var(--u-brand))!important;
+  color:var(--br-sidebar-active-text,#fff)!important;
+  box-shadow:0 4px 12px rgba(21,94,239,.35);
+}
+html body.ams-panel.ams-light .sidebar .nav-item.active svg,html body.ams-panel.ams-light .sidebar .sub-item.active svg,
+html body.ams-panel.ams-light .sidebar .tab.active svg,html body.ams-panel.ams-light .rail .ritem.active svg{stroke:#fff!important;}
+html body.ams-panel.ams-light .sub-item .dot{background:var(--u-side-muted)!important;}
+html body.ams-panel.ams-light .sub-item.active .dot{background:#fff!important;}
+
+/* ---------- top bar + horizontal tabs ---------- */
+html body.ams-panel.ams-light .topbar,html body.ams-panel.ams-light .tb1,html body.ams-panel.ams-light .top,html body.ams-panel.ams-light .appbar{
+  background:var(--br-header-bg,var(--u-surface))!important;
+  color:var(--br-header-text,var(--u-ink))!important;
+  border-bottom:1px solid var(--u-line)!important;
+}
+html body.ams-panel.ams-light .tb-btn,html body.ams-panel.ams-light .hamburger,html body.ams-panel.ams-light .hamb{
+  background:var(--u-soft)!important;color:var(--u-ink-2)!important;}
+html body.ams-panel.ams-light .tb-btn:hover{background:var(--u-line)!important;}
+html body.ams-panel.ams-light .tb-btn .badge{background:var(--u-bad)!important;border-color:var(--u-surface)!important;}
+html body.ams-panel.ams-light .avatar,html body.ams-panel.ams-light .who .av{
+  background:var(--u-brand-soft)!important;color:var(--u-brand-d)!important;border:2px solid var(--u-line-2)!important;}
+html body.ams-panel.ams-light .navtab{color:var(--u-muted)!important;background:transparent!important;}
+html body.ams-panel.ams-light .navtab:hover{color:var(--u-ink)!important;}
+html body.ams-panel.ams-light .navtab.active{color:var(--u-brand-d)!important;border-bottom-color:var(--u-brand)!important;}
+html body.ams-panel.ams-light .navtab svg{stroke:currentColor!important;}
+
+/* ---------- surfaces ---------- */
+html body.ams-panel.ams-light .card,html body.ams-panel.ams-light .toolbar,html body.ams-panel.ams-light .table-wrap,
+html body.ams-panel.ams-light .stat-card:not(.dash-metric),html body.ams-panel.ams-light .box,
+html body.ams-panel.ams-light .metric,html body.ams-panel.ams-light .table{
+  background:var(--br-card-bg,var(--u-surface))!important;
+  color:var(--u-ink)!important;
+  border:1px solid var(--br-card-border,var(--u-line))!important;
+  border-radius:var(--u-r)!important;
+  box-shadow:var(--br-card-shadow,var(--u-shadow));
+}
+html body.ams-panel.ams-light .stat-card:not(.dash-metric):hover{box-shadow:0 10px 28px rgba(15,23,42,.10);}
+html body.ams-panel.ams-light .stat-info h3,html body.ams-panel.ams-light .metric h3{color:var(--u-ink)!important;}
+
+/* gradient KPI tiles: deep tones so the white text always reads */
+html body.ams-panel.ams-light .stat-card.dash-metric{color:#fff!important;border:0!important;box-shadow:0 10px 24px rgba(15,23,42,.14)!important;}
+html body.ams-panel.ams-light .stat-card.dash-metric.d-blue{background:linear-gradient(135deg,#155eef,#0b43be)!important;}
+html body.ams-panel.ams-light .stat-card.dash-metric.d-green{background:linear-gradient(135deg,#059669,#047857)!important;}
+html body.ams-panel.ams-light .stat-card.dash-metric.d-orange{background:linear-gradient(135deg,#ea580c,#c2410c)!important;}
+html body.ams-panel.ams-light .stat-card.dash-metric.d-pink{background:linear-gradient(135deg,#0a9e93,#be185d)!important;}
+html body.ams-panel.ams-light .stat-card.dash-metric .stat-info p,
+html body.ams-panel.ams-light .stat-card.dash-metric .stat-info h3,
+html body.ams-panel.ams-light .stat-card.dash-metric .stat-info span{color:#fff!important;}
+html body.ams-panel.ams-light .stat-card.dash-metric .stat-info p{opacity:.9;}
+html body.ams-panel.ams-light .stat-card.dash-metric::before,html body.ams-panel.ams-light .stat-card.dash-metric::after{background:rgba(255,255,255,.13)!important;}
+html body.ams-panel.ams-light .dash-go{color:#fff!important;border-color:rgba(255,255,255,.55)!important;}
+
+/* ---------- stat icons: dark-theme pastels -> readable tones on tint ---------- */
+html body.ams-panel.ams-light .stat-icon,html body.ams-panel.ams-light .si{background:var(--u-info-bg)!important;}
+html body.ams-panel.ams-light .si-blue,html body.ams-panel.ams-light .si.bl,html body.ams-panel.ams-light .si.b{background:#e8f0fe!important;}
+html body.ams-panel.ams-light .si-purple,html body.ams-panel.ams-light .si.v,html body.ams-panel.ams-light .si.in{background:#eafaf7!important;}
+html body.ams-panel.ams-light .si-green,html body.ams-panel.ams-light .si.gr,html body.ams-panel.ams-light .si.e{background:#e6f7ef!important;}
+html body.ams-panel.ams-light .si-amber,html body.ams-panel.ams-light .si.am,html body.ams-panel.ams-light .si.a{background:#fff3d9!important;}
+html body.ams-panel.ams-light .si-cyan,html body.ams-panel.ams-light .si.sk,html body.ams-panel.ams-light .si.t{background:#e0f5f2!important;}
+html body.ams-panel.ams-light .si-red,html body.ams-panel.ams-light .si.rd,html body.ams-panel.ams-light .si.ro,html body.ams-panel.ams-light .si.r{background:#fdecee!important;}
+html body.ams-panel.ams-light .si-blue svg,html body.ams-panel.ams-light .si.bl svg,html body.ams-panel.ams-light .si.b svg{stroke:#0b43be!important;}
+html body.ams-panel.ams-light .si-purple svg,html body.ams-panel.ams-light .si.v svg,html body.ams-panel.ams-light .si.in svg{stroke:#0a9e93!important;}
+html body.ams-panel.ams-light .si-green svg,html body.ams-panel.ams-light .si.gr svg,html body.ams-panel.ams-light .si.e svg{stroke:#047857!important;}
+html body.ams-panel.ams-light .si-amber svg,html body.ams-panel.ams-light .si.am svg,html body.ams-panel.ams-light .si.a svg{stroke:#b45309!important;}
+html body.ams-panel.ams-light .si-cyan svg,html body.ams-panel.ams-light .si.sk svg,html body.ams-panel.ams-light .si.t svg{stroke:#0f766e!important;}
+html body.ams-panel.ams-light .si-red svg,html body.ams-panel.ams-light .si.rd svg,html body.ams-panel.ams-light .si.ro svg,html body.ams-panel.ams-light .si.r svg{stroke:#b42318!important;}
+
+/* ---------- buttons ---------- */
+html body.ams-panel.ams-light .btn{border-radius:10px!important;font-weight:650!important;border:1px solid transparent;
+  background:var(--u-brand);color:#fff!important;transition:background .15s,transform .14s,box-shadow .15s;}
+html body.ams-panel.ams-light .btn:hover{background:var(--u-brand-d);box-shadow:0 6px 16px rgba(21,94,239,.28);}
+html body.ams-panel.ams-light .btn-blue{background:#155eef!important;color:#fff!important;}
+html body.ams-panel.ams-light .btn-blue:hover{background:#0b43be!important;}
+html body.ams-panel.ams-light .btn-green,html body.ams-panel.ams-light .btn.green{background:#047857!important;color:#fff!important;}
+html body.ams-panel.ams-light .btn-green:hover,html body.ams-panel.ams-light .btn.green:hover{background:#065f46!important;box-shadow:0 6px 16px rgba(4,120,87,.28);}
+html body.ams-panel.ams-light .btn-red,html body.ams-panel.ams-light .btn.red{background:#dc2626!important;color:#fff!important;}
+html body.ams-panel.ams-light .btn-red:hover,html body.ams-panel.ams-light .btn.red:hover{background:#b91c1c!important;box-shadow:0 6px 16px rgba(220,38,38,.28);}
+html body.ams-panel.ams-light .btn-purple{background:#0b43be!important;color:#fff!important;}
+html body.ams-panel.ams-light .btn-purple:hover{background:#0a9e93!important;box-shadow:0 6px 16px rgba(0,194,176,.28);}
+html body.ams-panel.ams-light .btn-teal{background:#0f766e!important;color:#fff!important;}
+html body.ams-panel.ams-light .btn-teal:hover{background:#115e59!important;}
+html body.ams-panel.ams-light .btn-rose{background:#e11d48!important;color:#fff!important;}
+html body.ams-panel.ams-light .btn-rose:hover{background:#be123c!important;}
+html body.ams-panel.ams-light .btn-amber{background:#f59e0b!important;color:#1c1100!important;}
+html body.ams-panel.ams-light .btn-amber:hover{background:#d98a06!important;box-shadow:0 6px 16px rgba(245,158,11,.30);}
+html body.ams-panel.ams-light .btn-ghost,html body.ams-panel.ams-light .btn.ghost{
+  background:var(--u-surface)!important;color:var(--u-ink-2)!important;border:1px solid var(--u-line-2)!important;box-shadow:none;}
+html body.ams-panel.ams-light .btn-ghost:hover,html body.ams-panel.ams-light .btn.ghost:hover{background:var(--u-soft)!important;color:var(--u-ink)!important;box-shadow:none;}
+html body.ams-panel.ams-light .btn:disabled,html body.ams-panel.ams-light .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+html body.ams-panel.ams-light .btn:focus-visible,html body.ams-panel.ams-light .icon-btn:focus-visible,
+html body.ams-panel.ams-light .nav-item:focus-visible{outline:3px solid rgba(21,94,239,.35);outline-offset:2px;}
+
+html body.ams-panel.ams-light .icon-btn{border-radius:8px!important;}
+html body.ams-panel.ams-light .icon-btn svg{stroke:#fff!important;}
+html body.ams-panel.ams-light .icon-btn.btn-amber svg,html body.ams-panel.ams-light .icon-btn.ib-amber svg{stroke:#1c1100!important;}
+html body.ams-panel.ams-light .icon-btn.ib-blue{background:#155eef!important;}
+html body.ams-panel.ams-light .icon-btn.ib-red{background:#dc2626!important;}
+html body.ams-panel.ams-light .icon-btn.ib-amber{background:#f59e0b!important;}
+html body.ams-panel.ams-light .copy-otp-btn{background:var(--u-surface)!important;color:var(--u-brand-d)!important;border:1px solid var(--u-info-bd)!important;}
+html body.ams-panel.ams-light .copy-otp-btn:hover{background:var(--u-info-bg)!important;}
+
+/* ---------- forms ---------- */
+html body.ams-panel.ams-light input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),
+html body.ams-panel.ams-light select,html body.ams-panel.ams-light textarea{
+  background:var(--br-form-input-bg,var(--u-surface))!important;
+  color:var(--br-form-input-text,var(--u-ink))!important;
+  border:1px solid var(--br-form-input-border,var(--u-line-2))!important;
+  border-radius:10px!important;
+}
+html body.ams-panel.ams-light input::placeholder,html body.ams-panel.ams-light textarea::placeholder{color:var(--br-form-placeholder,#94a3b8)!important;opacity:1;}
+html body.ams-panel.ams-light input:focus,html body.ams-panel.ams-light select:focus,html body.ams-panel.ams-light textarea:focus{
+  border-color:var(--br-form-focus,var(--u-brand))!important;box-shadow:0 0 0 3px rgba(21,94,239,.18)!important;outline:none!important;}
+html body.ams-panel.ams-light input:disabled,html body.ams-panel.ams-light select:disabled,html body.ams-panel.ams-light textarea:disabled{background:var(--u-soft)!important;color:var(--u-muted)!important;}
+html body.ams-panel.ams-light label,html body.ams-panel.ams-light .form-group label,html body.ams-panel.ams-light .filter-row label,
+html body.ams-panel.ams-light .tc-left label,html body.ams-panel.ams-light .tc-right label{color:var(--br-form-label,var(--u-ink-2))!important;}
+html body.ams-panel.ams-light .upload-box{background:var(--u-surface-2)!important;border-color:var(--u-line-2)!important;color:var(--u-ink-2)!important;}
+html body.ams-panel.ams-light .upload-box:hover{border-color:var(--u-brand)!important;background:var(--u-brand-soft)!important;}
+
+/* ---------- tables ---------- */
+html body.ams-panel.ams-light table{color:var(--br-table-text,var(--u-ink))!important;}
+html body.ams-panel.ams-light thead th{background:var(--br-table-header-bg,var(--u-surface-2))!important;
+  color:var(--br-table-header-text,var(--u-ink-2))!important;border-bottom:1px solid var(--u-line-2)!important;}
+html body.ams-panel.ams-light tbody tr td{background:var(--br-table-row-bg,var(--u-surface))!important;border-bottom:1px solid var(--u-line)!important;}
+html body.ams-panel.ams-light tbody tr:nth-child(even) td{background:var(--br-table-row-alt-bg,#fbfcfe)!important;}
+html body.ams-panel.ams-light tbody tr:hover td{background:var(--br-table-row-hover-bg,#f1f6ff)!important;}
+html body.ams-panel.ams-light tbody tr.sel td,html body.ams-panel.ams-light tbody tr.selected-row td{background:var(--br-table-row-selected-bg,#dbe8ff)!important;}
+html body.ams-panel.ams-light .table-foot{border-top:1px solid var(--u-line)!important;background:var(--u-surface)!important;}
+html body.ams-panel.ams-light .pagination button,html body.ams-panel.ams-light .pager button{
+  background:var(--u-surface)!important;color:var(--u-ink-2)!important;border:1px solid var(--u-line-2)!important;}
+html body.ams-panel.ams-light .pagination button:hover:not(:disabled),html body.ams-panel.ams-light .pager button:hover:not(:disabled){background:var(--u-soft)!important;}
+html body.ams-panel.ams-light .pagination button.active,html body.ams-panel.ams-light .pager button.active{
+  background:var(--u-brand)!important;color:#fff!important;border-color:var(--u-brand)!important;}
+html body.ams-panel.ams-light .drill .dchip{background:var(--u-surface)!important;color:var(--u-ink-2)!important;border-color:var(--u-line-2)!important;}
+html body.ams-panel.ams-light .drill .dchip:hover{background:var(--u-brand-soft)!important;color:var(--u-brand-d)!important;border-color:var(--u-info-bd)!important;}
+html body.ams-panel.ams-light .chip,html body.ams-panel.ams-light .ams-chip{background:var(--u-soft)!important;color:var(--u-ink-2)!important;border:1px solid var(--u-line)!important;}
+html body.ams-panel.ams-light tfoot.ams-tot td{background:var(--u-surface-2)!important;color:var(--u-ink)!important;}
+html body.ams-panel.ams-light .money,html body.ams-panel.ams-light .cell-money{color:var(--u-ink)!important;font-variant-numeric:tabular-nums;}
+html body.ams-panel.ams-light .mono{color:inherit;}
+
+/* ---------- tags / status pills (tint bg + dark text) ---------- */
+html body.ams-panel.ams-light .tag{background:var(--u-gray-bg);color:var(--u-gray-tx);border:1px solid var(--u-gray-bd)!important;}
+html body.ams-panel.ams-light .tag-green{background:var(--u-ok-bg)!important;color:var(--u-ok-tx)!important;border-color:var(--u-ok-bd)!important;}
+html body.ams-panel.ams-light .tag-red{background:var(--u-bad-bg)!important;color:var(--u-bad-tx)!important;border-color:var(--u-bad-bd)!important;}
+html body.ams-panel.ams-light .tag-amber{background:var(--u-warn-bg)!important;color:var(--u-warn-tx)!important;border-color:var(--u-warn-bd)!important;}
+html body.ams-panel.ams-light .tag-blue,html body.ams-panel.ams-light .tag-cli,html body.ams-panel.ams-light .tag-client{
+  background:var(--u-info-bg)!important;color:var(--u-info-tx)!important;border-color:var(--u-info-bd)!important;}
+html body.ams-panel.ams-light .tag-mgr{background:var(--u-pur-bg)!important;color:var(--u-pur-tx)!important;border-color:var(--u-pur-bd)!important;}
+html body.ams-panel.ams-light .tag-agt{background:var(--u-teal-bg)!important;color:var(--u-teal)!important;border-color:var(--u-teal-bd)!important;}
+html body.ams-panel.ams-light .tag-gray{background:var(--u-gray-bg)!important;color:var(--u-gray-tx)!important;border-color:var(--u-gray-bd)!important;}
+html body.ams-panel.ams-light .tag-client .x{color:inherit!important;}
+/* JS-injected solid tags (panel-sharing etc.): keep white text only on dark fills */
+html body.ams-panel.ams-light .tag[style*="background:#"][style*="color:#fff"]{border-color:transparent!important;}
+
+/* ---------- modals ---------- */
+html body.ams-panel.ams-light .modal-overlay,html body.ams-panel.ams-light .modal:has(>.box){background:var(--br-modal-overlay,rgba(15,23,42,.55))!important;backdrop-filter:blur(2px);}
+html body.ams-panel.ams-light .modal:has(>.box){border:0!important;box-shadow:none!important;border-radius:0!important;}
+html body.ams-panel.ams-light .modal-overlay .modal,html body.ams-panel.ams-light .box{
+  background:var(--br-modal-bg,var(--u-surface))!important;color:var(--br-modal-text,var(--u-ink))!important;
+  border:1px solid var(--u-line)!important;border-radius:16px!important;box-shadow:var(--u-shadow-lg)!important;}
+html body.ams-panel.ams-light .modal-head,html body.ams-panel.ams-light .modal-foot{border-color:var(--u-line)!important;background:var(--u-surface)!important;}
+html body.ams-panel.ams-light .modal-head h3{color:var(--u-ink)!important;}
+html body.ams-panel.ams-light .modal-close{color:var(--u-muted)!important;}
+html body.ams-panel.ams-light .modal-close:hover{background:var(--u-soft)!important;color:var(--u-ink)!important;}
+
+/* ---------- OTP / code ---------- */
+html body.ams-panel.ams-light .otp-code,html body.ams-panel.ams-light .otp{color:var(--u-brand-d)!important;}
+html body.ams-panel.ams-light .otp-empty{color:var(--u-muted)!important;}
+html body.ams-panel.ams-light pre{background:#0f172a!important;color:#e2e8f0!important;border-radius:10px;}
+html body.ams-panel.ams-light .ig-doc code{color:var(--u-ink)!important;}
+
+/* ---------- scrollbar ---------- */
+html body.ams-panel.ams-light ::-webkit-scrollbar-thumb{background:var(--u-line-2);}
+html body.ams-panel.ams-light ::-webkit-scrollbar-track{background:transparent;}
+
+@media (prefers-reduced-motion:reduce){
+  html body.ams-panel.ams-light .btn,html body.ams-panel.ams-light .stat-card{transition:none!important;}
+  html body.ams-panel.ams-light .btn:hover{transform:none!important;}
+}
+
+/* ==========================================================================
+   GLOBAL SMS — brand row (2026-11-04)
+   The sidebar/top-bar mark is now a standalone badge instead of a logo image
+   with the wordmark baked in, so the panel name is shown next to it again.
+   Presentation only: no markup, class or behaviour is changed.
+   ========================================================================== */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sb-brand h1,.brand h1,.side .brand b){
+  display:block!important;
+  font-size:13.5px!important;
+  font-weight:800!important;
+  line-height:1.18!important;
+  letter-spacing:-.01em!important;
+  margin:0!important;
+  white-space:nowrap!important;
+}
+/* colour is inherited from the surrounding chrome so the same rule works on a
+   white sidebar, the navy Payment rail and the dark theme alike */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sb-brand h1,.brand h1,.side .brand b){
+  color:inherit!important;
+}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sb-brand,.brand,.brand-text,.rail>.brand-text){
+  min-width:0!important;
+}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sb-brand small,.brand small,.brand-text small){
+  display:block!important;
+  color:inherit!important;
+  opacity:.72;
+  font-size:11px!important;
+  letter-spacing:.02em!important;
+  line-height:1.25!important;
+}
+
+/* Icon-rail (Agent) keeps its centred caption block above the mark, so the
+   panel name is shown there too, in the same 2-line stack as before. */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .rail>.brand-text h1{
+  display:block!important;
+  font-size:12.5px!important;
+  font-weight:800!important;
+  line-height:1.2!important;
+  letter-spacing:.01em!important;
+  text-align:center!important;
+  margin:0 0 1px!important;
+  white-space:nowrap!important;
+}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .rail>.brand-text h1{color:inherit!important;}

@@ -1,0 +1,259 @@
+/* GLOBAL SMS design system v1 (admin first). Opt-in: only applies to html body.ams-panel.ams-ui:is(.ams-light,.ams-dark).
+   Login is untouched. Load AFTER ams.css / ams-light.css / ams-chrome.css / ams-layout.css. */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark){
+  --ds-bg:#f4f6fa;--ds-surface:#fff;--ds-ink:#0f1b2d;--ds-text:#1e293b;--ds-muted:#64748b;
+  --ds-line:#e3e8f0;--ds-line2:#cfd7e3;--ds-brand:#0b43be;--ds-brand-d:#0b43be;--ds-brand-t:#eaf1ff;
+  --ds-side:#0c1730;--ds-side-hi:#16264a;--ds-ok:#0f9d6b;--ds-warn:#c77d0a;--ds-bad:#d6364a;
+  --ds-r:12px;--ds-icon:#0b43be;--ds-side2:#0a1226;--ds-s2:#f8fafc;--ds-hov:#f3f6fb;--ds-row2:#eef1f6;--ds-gbg:#e3f6ee;--ds-gfg:#0a7a54;--ds-rbg:#fde8eb;--ds-rfg:#b72a3c;--ds-abg:#fdf1dc;--ds-afg:#9a5f05;--ds-pbg:#efeafd;--ds-cbg:#e0f4f8;color-scheme:light;--ds-r-lg:16px;--ds-sh:0 1px 2px rgba(15,27,45,.05),0 4px 14px rgba(15,27,45,.05);
+  --ds-ease:cubic-bezier(.22,.8,.24,1);
+  --accent:var(--ds-brand);--border:var(--ds-line);--border2:var(--ds-line2);--text:var(--ds-text);--muted:var(--ds-muted);--bg2:var(--ds-surface);--row:#f8fafc;
+  background:var(--ds-bg)!important;color:var(--ds-text)!important;font-size:14px;
+  font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) *:focus-visible{outline:2px solid var(--ds-brand);outline-offset:2px;border-radius:8px}
+
+/* ---- Sidebar ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sidebar,.rail,.appbar){background:var(--ds-side)!important;border-right:0!important;color:#c5d0e6;
+  transition:transform .32s var(--ds-ease),box-shadow .32s var(--ds-ease);will-change:transform}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-brand{padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-brand h1{color:#fff!important;font-size:16px;font-weight:700;letter-spacing:-.01em}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-brand small{color:#8fa1c4!important;font-size:12px;letter-spacing:0;text-transform:none}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-nav{padding:10px 10px 24px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:#2a3b61 transparent}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-section,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-sec{color:#6f83ab!important;font-size:11.5px;font-weight:600;letter-spacing:.02em;text-transform:none;padding:16px 12px 6px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sub-item{position:relative;display:flex;align-items:center;gap:11px;color:#c5d0e6!important;
+  border-radius:10px;padding:9px 12px;margin:1px 0;font-weight:500;cursor:pointer;background:transparent;
+  transition:background .16s ease,color .16s ease}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item svg{width:18px;height:18px;stroke:currentColor!important;opacity:.85;flex-shrink:0}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item:hover,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sub-item:hover{background:rgba(255,255,255,.06)!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item.active,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sub-item.active{background:var(--ds-side-hi)!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item.active::before{content:"";position:absolute;left:-10px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:#5b8cff}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item .chev{margin-left:auto;width:14px;height:14px;transition:transform .25s var(--ds-ease)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item.open .chev{transform:rotate(90deg)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sub-item .dot{width:5px;height:5px;border-radius:50%;background:#4d628f}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sub-item.active .dot{background:#5b8cff}
+
+/* ---- Main shell / topbar ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .main{min-width:0;transition:margin .32s var(--ds-ease)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .topbar{position:sticky;top:0;z-index:30;height:60px;display:flex;align-items:center;gap:12px;padding:0 24px;
+  background:var(--ds-surface)!important;border-bottom:1px solid var(--ds-line)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .hamburger{width:38px;height:38px;align-items:center;justify-content:center;border-radius:10px;background:transparent!important;color:var(--ds-ink)!important;transition:background .16s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .hamburger:hover{background:var(--ds-brand-t)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .content{padding:24px 28px 48px;max-width:1600px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .overlay{position:fixed;inset:0;background:rgba(8,16,34,.5);opacity:0;pointer-events:none;transition:opacity .28s ease;z-index:40;}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .overlay.show,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .overlay.open{opacity:1;pointer-events:auto}
+
+/* ---- Page header ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page{animation:ds-in .28s var(--ds-ease)}
+@keyframes ds-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--ds-line)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page-head h2{color:var(--ds-ink)!important;font-size:22px;font-weight:700;letter-spacing:-.02em}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page-head p,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .hint,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .cell-sub{color:var(--ds-muted)!important}
+
+/* ---- Cards, stats, toolbars ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .card,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .table-wrap,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .toolbar,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .dash-metric{background:var(--ds-surface)!important;
+  border:1px solid var(--ds-line)!important;border-radius:var(--ds-r-lg)!important;box-shadow:var(--ds-sh)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .toolbar{padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .dash-metric{padding:16px 18px;display:flex;align-items:center;gap:14px;transition:transform .18s var(--ds-ease),box-shadow .18s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(15,27,45,.06),0 10px 24px rgba(15,27,45,.09)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-icon svg{width:20px;height:20px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .si-blue{background:#eaf1ff!important;color:var(--ds-icon)!important}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .si-green{background:var(--ds-gbg)!important;color:#0f9d6b!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .si-amber{background:var(--ds-abg)!important;color:#c77d0a!important}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .si-red{background:var(--ds-rbg)!important;color:#d6364a!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .si-purple{background:var(--ds-pbg)!important;color:#6d44d6!important}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .si-cyan{background:var(--ds-cbg)!important;color:#0b7f96!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-info .val,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card .val{color:var(--ds-ink)!important;font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-info .lbl,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card .lbl{color:var(--ds-muted)!important;font-size:12.5px;font-weight:500}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--ds-line)!important;font-weight:650;color:var(--ds-ink)}
+
+/* ---- Tables ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .table-wrap{overflow:hidden}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tscroll,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) thead th{position:sticky;top:0;background:var(--ds-s2)!important;color:var(--ds-muted)!important;font-size:12px;font-weight:600;letter-spacing:.01em;
+  text-transform:none;text-align:left;padding:11px 14px;border-bottom:1px solid var(--ds-line)!important;white-space:nowrap}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody td{padding:12px 14px;border-bottom:1px solid var(--ds-row2)!important;color:var(--ds-text)!important;vertical-align:middle}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr{transition:background .12s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr:hover td{background:var(--ds-hov)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr:last-child td{border-bottom:0!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .table-foot,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .pagination{padding:12px 16px;border-top:1px solid var(--ds-line)!important;color:var(--ds-muted)}
+
+/* ---- Buttons ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 15px;border-radius:10px!important;
+  border:1px solid var(--ds-brand)!important;background:var(--ds-brand)!important;color:#fff!important;font-weight:600;font-size:13.5px;cursor:pointer;
+  box-shadow:0 1px 2px rgba(11,67,190,.25);transition:background .16s,transform .14s var(--ds-ease),box-shadow .16s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn:hover,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tb-btn:hover{background:var(--ds-brand-d)!important;transform:translateY(-1px);box-shadow:0 4px 12px rgba(11,67,190,.28)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn:active{transform:scale(.98)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn-ghost,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn.ghost,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .icon-btn{background:var(--ds-surface)!important;color:var(--ds-ink)!important;border:1px solid var(--ds-line2)!important;box-shadow:none}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn-ghost:hover,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn.ghost:hover,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .icon-btn:hover{background:var(--ds-hov)!important;box-shadow:none}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn.red,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn-red{background:var(--ds-bad)!important;border-color:var(--ds-bad)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn.green,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn-green{background:var(--ds-ok)!important;border-color:var(--ds-ok)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn-sm{min-height:32px;padding:5px 11px;font-size:12.5px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn[disabled]{opacity:.5;pointer-events:none}
+
+/* ---- Forms ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) input:not([type=checkbox]):not([type=radio]),html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) select,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) textarea{background:var(--ds-surface)!important;color:var(--ds-ink)!important;
+  border:1px solid var(--ds-line2)!important;border-radius:10px!important;padding:9px 12px;min-height:38px;font:inherit;transition:border-color .15s,box-shadow .15s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) input:focus,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) select:focus,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) textarea:focus{outline:none!important;border-color:var(--ds-brand)!important;box-shadow:0 0 0 3px rgba(11,67,190,.15)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) ::placeholder{color:#94a3b8}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .form-group label{display:block;font-size:12.5px;font-weight:600;color:var(--ds-ink);margin-bottom:6px}
+
+/* ---- Badges ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tag,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;border:0!important;background:var(--ds-row2);color:var(--ds-text)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tag-green{background:var(--ds-gbg)!important;color:var(--ds-gfg)!important}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tag-red{background:var(--ds-rbg)!important;color:var(--ds-rfg)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tag-amber{background:var(--ds-abg)!important;color:var(--ds-afg)!important}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tag-blue,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tag-mgr{background:#eaf1ff!important;color:var(--ds-icon)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tag-gray{background:var(--ds-row2)!important;color:var(--ds-text)!important}
+
+/* ---- Modals ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .modal-overlay{background:rgba(8,16,34,.55)!important;animation:ds-fade .2s ease}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .modal{background:var(--ds-surface)!important;border:1px solid var(--ds-line)!important;border-radius:18px!important;box-shadow:0 24px 60px rgba(8,16,34,.28)!important;animation:ds-pop .26s var(--ds-ease);max-height:92vh}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .modal-head{padding:16px 20px;border-bottom:1px solid var(--ds-line)!important;font-weight:650;color:var(--ds-ink)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .modal-body{padding:20px}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .modal-foot{padding:14px 20px;border-top:1px solid var(--ds-line)!important;display:flex;justify-content:flex-end;gap:10px}
+@keyframes ds-fade{from{opacity:0}}@keyframes ds-pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+
+/* ---- Responsive ---- */
+@media(max-width:900px){html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .grid2,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .two-col{grid-template-columns:1fr!important}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .content{padding:18px 16px 40px!important}}
+@media(max-width:620px){
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .topbar{padding:0 12px}
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page-head h2{font-size:19px}
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card{padding:12px;gap:10px}
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-info .val{font-size:20px}
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .modal{width:calc(100vw - 20px)!important;max-width:none!important}
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tb-btn{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) *,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) *::before{animation:none!important;transition:none!important}}
+
+/* ---- Overrides for forced rules in ams.css / ams-layout.css / ams-light.css ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-brand{flex-direction:row!important;justify-content:flex-start!important;align-items:center!important;text-align:left!important;min-height:0!important;padding:16px 18px!important;gap:12px!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-logo{width:40px!important;height:40px!important;border-radius:11px!important;margin:0!important;background:var(--ds-surface)!important;border:0!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.nav-item,.sub-item){border-radius:10px!important;border-top-width:0!important;border-bottom-width:0!important;min-height:38px;padding:9px 12px!important;margin:2px 0!important;font-weight:500!important;box-shadow:none!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item:not(.active):not(:hover){background:transparent!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sub-item{background:transparent!important;color:#aebcd8!important;min-height:34px;font-size:13px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sub-item.active{background:var(--ds-side-hi)!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .submenu{transition:max-height .3s var(--ds-ease)!important;margin:0 0 0 20px!important;padding-left:6px;border-left:1px solid rgba(255,255,255,.1);background:transparent!important;border-color:rgba(255,255,255,.1)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item.active svg,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item:hover svg{stroke:#fff!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item svg{stroke:#9fb2d6!important;color:#9fb2d6!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(th,td){border-right-width:0!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .topbar{height:auto!important;min-height:60px!important;padding-top:8px!important;padding-bottom:8px!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .topbar :is(.tb-title,.clock,.tb-date){color:var(--ds-ink)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tb-btn{background:var(--ds-surface)!important;color:var(--ds-ink)!important;border:1px solid var(--ds-line2)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tb-btn svg{stroke:var(--ds-icon)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.hamburger){background:transparent!important;border-color:transparent!important;color:var(--ds-ink)!important;border-radius:10px!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card::before,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card::after{display:none!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.toolbar,.table-controls,.table-foot,.card-head,.modal-head){background:var(--ds-surface)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.card-head,.modal-head){border-radius:var(--ds-r-lg) var(--ds-r-lg) 0 0}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .breadcrumb{background:transparent!important;border:0!important;color:var(--ds-muted)!important}
+
+/* ---- Fixes after in-browser check ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tb-btn{padding:8px 10px!important;min-width:38px;flex-shrink:0}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .tb-btn svg{width:18px!important;height:18px!important;flex-shrink:0}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sb-section,.sb-sec){text-transform:none!important;letter-spacing:.02em!important;font-size:12px!important;font-weight:600!important;padding:14px 12px 4px!important;margin:0!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .section-title{text-transform:none!important;letter-spacing:0!important;font-size:13px!important;font-weight:650!important;color:var(--ds-ink)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .breadcrumb{padding:0!important;margin-top:2px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-brand small{font-size:13px!important;font-weight:600!important;color:#c5d0e6!important}
+
+/* Off-canvas sidebar on narrow screens: open via admin's .show OR the shared ams-ui-sb-open class */
+@media(max-width:900px){
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sidebar.show,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark).ams-ui-sb-open .sidebar{transform:translateX(0)!important;box-shadow:12px 0 40px rgba(8,16,34,.35)!important}
+  html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .overlay{z-index:49}
+}
+
+/* ---- Runtime-built controls (.ams-btn family), pagination, card titles ---- */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:38px;min-height:38px;padding:8px 12px;border-radius:10px!important;font-weight:600;cursor:pointer;
+  background:var(--ds-surface)!important;color:var(--ds-ink)!important;border:1px solid var(--ds-line2)!important;box-shadow:none!important;transition:background .16s,transform .14s var(--ds-ease)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn:hover{background:var(--ds-hov)!important;transform:translateY(-1px)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn svg{width:17px;height:17px;flex-shrink:0;stroke:currentColor!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn:is(.ams-blue,.ams-primary){background:var(--ds-brand)!important;border-color:var(--ds-brand)!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn:is(.ams-blue,.ams-primary):hover{background:var(--ds-brand-d)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn:is(.ams-red,.danger){background:var(--ds-bad)!important;border-color:var(--ds-bad)!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn:is(.ams-green){background:var(--ds-ok)!important;border-color:var(--ds-ok)!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .exp-btns .ams-btn,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .exp-btns .btn{background:var(--ds-surface)!important;color:var(--ds-ink)!important;border:1px solid var(--ds-line2)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .pagination button{min-width:34px;min-height:34px;border-radius:9px!important;background:var(--ds-surface)!important;border:1px solid var(--ds-line2)!important;color:var(--ds-ink)!important;box-shadow:none!important;cursor:pointer;transition:background .14s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .pagination button:hover:not(:disabled){background:var(--ds-brand-t)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .pagination button.active{background:var(--ds-brand)!important;border-color:var(--ds-brand)!important;color:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .card-head :is(h3,h4),html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .table-wrap>.card-head h3{text-transform:none!important;letter-spacing:-.01em!important;font-size:15px!important;font-weight:650!important;color:var(--ds-ink)!important;margin:0!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .card-head{padding:14px 18px!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .table-controls{padding:12px 16px!important;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.table-controls,.toolbar) label{font-size:12.5px;font-weight:600;color:var(--ds-ink)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .table-controls select{min-width:84px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ds-card-title{font-size:15px;font-weight:650;letter-spacing:-.01em;color:var(--ds-ink);padding:2px 4px 6px;text-transform:capitalize}
+
+/* ================= DARK THEME ================= */
+html body.ams-dark.ams-panel.ams-ui{--ds-bg:#0a1120;--ds-surface:#111a2d;--ds-ink:#eaf0fc;--ds-text:#c7d2e6;--ds-muted:#8c9cb8;--ds-line:#1d2a42;--ds-line2:#2a3a57;
+ --ds-brand:#2f66f0;--ds-brand-d:#2556d6;--ds-brand-t:#16294f;--ds-icon:#8fb0ff;--ds-side:#08101f;--ds-side2:#0b1528;--ds-side-hi:#15264a;
+ --ds-s2:#152138;--ds-hov:#182640;--ds-row2:#1a2740;--ds-gbg:#0f3a2c;--ds-gfg:#5ee0a9;--ds-rbg:#45202a;--ds-rfg:#ff8fa0;--ds-abg:#43320f;--ds-afg:#f5c46a;
+ --ds-pbg:#2a2150;--ds-cbg:#0e3340;--row:#152138;--ds-sh:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.25);color-scheme:dark}
+html body.ams-dark.ams-panel.ams-ui .ams-theme-btn svg{stroke:#f5b83d!important}
+html body.ams-dark.ams-panel.ams-ui :is(.si-blue,.si-green,.si-amber,.si-red,.si-purple,.si-cyan){filter:brightness(1.35) saturate(.9)}
+html body.ams-dark.ams-panel.ams-ui ::placeholder{color:#5d6f8d}
+html body.ams-dark.ams-panel.ams-ui .stat-card:hover{box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+html body.ams-dark.ams-panel.ams-ui .ams-btn:hover,html body.ams-dark.ams-panel.ams-ui .btn-ghost:hover,html body.ams-dark.ams-panel.ams-ui .btn.ghost:hover{border-color:#3a4d72!important}
+/* shared (both themes) */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) td{background:transparent!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .modal{color:var(--ds-text)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-logo{background:#fff!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sidebar,.rail,.appbar){background:linear-gradient(180deg,var(--ds-side) 0%,var(--ds-side2) 100%)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.ams-theme-btn,.tb-btn){background:var(--ds-surface)!important;border:1px solid var(--ds-line2)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .who{background:transparent!important;border-color:transparent!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .who .av{background:var(--ds-brand-t)!important;color:var(--ds-icon)!important;border:1px solid var(--ds-line2)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .who :is(.nm,.rl){color:var(--ds-ink)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.tscroll,.table-wrap,.sb-nav){scrollbar-width:thin}
+/* ================= PREMIUM MOTION (compositor-only: opacity/transform) ================= */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page{animation:ds-fade .2s ease}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page.active :is(.stats-grid,.dash-metrics)>*{animation:ds-rise .42s var(--ds-ease) backwards}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page.active :is(.stats-grid,.dash-metrics)>:nth-child(2){animation-delay:.04s}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page.active :is(.stats-grid,.dash-metrics)>:nth-child(3){animation-delay:.08s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page.active :is(.stats-grid,.dash-metrics)>:nth-child(4){animation-delay:.12s}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page.active :is(.stats-grid,.dash-metrics)>:nth-child(n+5){animation-delay:.16s}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page.active>.table-wrap{animation:ds-rise .38s var(--ds-ease) .05s backwards}
+@keyframes ds-rise{from{opacity:0;transform:translateY(10px)}}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .nav-item.active::before{animation:ds-bar .32s var(--ds-ease);transform-origin:center}
+@keyframes ds-bar{from{transform:scaleY(0)}}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.nav-item,.sub-item){transition:background .16s,color .16s,transform .18s var(--ds-ease)!important}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.nav-item,.sub-item):hover{transform:translateX(3px)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .btn:focus-visible,html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ams-btn:focus-visible{box-shadow:0 0 0 3px rgba(91,140,255,.35)!important}
+/* smooth theme switch (class added by ams-ds.js for ~350ms only) */
+html.ds-theming body.ams-ui *{transition:background-color .3s ease,color .3s ease,border-color .3s ease!important}
+/* LITE mode: low-end device / reduced motion / slow frames -> no animation, flat shadows */
+/* The exclusions below preserve the sidebar's own slide/open transition even in
+   LITE mode. Previously only `.sidebar` was excluded, so the Manager (.appbar)
+   and Agent (.rail) sidebars lost their transition and jumped open, while the
+   Admin sidebar still animated. All three sidebar elements are now excluded. */
+html.ds-lite body.ams-ui :not(.sidebar):not(.submenu):not(.rail):not(.appbar),html.ds-lite body.ams-ui ::before,html.ds-lite body.ams-ui ::after{animation:none!important;transition:none!important}
+html.ds-lite body.ams-ui :is(.card,.table-wrap,.toolbar,.stat-card,.dash-metric,.modal){box-shadow:none!important}
+html.ds-lite body.ams-ui :is(.nav-item,.sub-item):hover{transform:none}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page>:is(.toolbar,.table-wrap,.card,.grid2)::before{display:none!important}
+
+/* ================= MOTION PACK 2 (all disabled automatically in LITE mode) ================= */
+/* 1) Signal line: a slow RGB sweep under the topbar (same cyan->indigo->pink family as the login page) */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .topbar{position:sticky}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .topbar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,#00c8b4,#3b7bf5,#00c2b0,#3b7bf5,#00c8b4) 0 0/640px 2px repeat-x;opacity:.85;animation:ds-sweep 9s linear infinite}
+@keyframes ds-sweep{to{background-position-x:640px}}
+/* 2) Sidebar ambient glow that drifts slowly (transform only) */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sidebar,.rail,.appbar){overflow:hidden}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sidebar,.rail,.appbar)::after{content:"";position:absolute;left:-30%;bottom:-18%;width:160%;height:46%;pointer-events:none;z-index:0;will-change:transform;
+  background:radial-gradient(closest-side,rgba(21,94,239,.26),rgba(21,94,239,.10) 60%,transparent);animation:ds-drift 16s ease-in-out infinite alternate}
+/* the glow must sit above the rail background but below the nav */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.rail,.appbar){position:relative;z-index:0}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.rail-nav,.rail-brand,.appbar-top,.appbar-nav,.navtabs,.navtab){position:relative;z-index:1}
+@keyframes ds-drift{from{transform:translate3d(-8%,0,0) scale(1)}to{transform:translate3d(10%,-12%,0) scale(1.15)}}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.sb-brand,.sb-nav){position:relative;z-index:1}
+/* 3) Light sheen sweeping across stat cards on hover */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card{position:relative;overflow:hidden}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) :is(.stats-grid,.dash-metrics,.ams-dash-grid) .stat-card::after{display:block!important;content:""!important;position:absolute!important;inset:0!important;right:auto!important;bottom:auto!important;
+  width:100%!important;height:100%!important;border-radius:0!important;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%)!important;
+  transform:translate3d(-120%,0,0);transition:transform .75s var(--ds-ease)}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .stat-card:hover::after{transform:translate3d(120%,0,0)}
+/* 4) Page title underline grows in on every page open */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page-head{position:relative}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .page-head::after{content:"";position:absolute;left:0;bottom:-1px;width:84px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--ds-brand),#00c8b4);transform-origin:left;animation:ds-grow .6s var(--ds-ease) backwards}
+@keyframes ds-grow{from{transform:scaleX(0)}}
+/* 5) First rows of every table glide in (max 12 rows, so big tables stay fast) */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr:nth-child(-n+12){animation:ds-row .24s ease backwards}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr:nth-child(n+2){animation-delay:.03s}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr:nth-child(n+4){animation-delay:.06s}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr:nth-child(n+6){animation-delay:.09s}html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) tbody tr:nth-child(n+8){animation-delay:.12s}
+@keyframes ds-row{from{opacity:0;transform:translate3d(0,5px,0)}}
+/* 6) Dark theme: soft static colour glow behind the page (no animation, no blur) */
+html body.ams-dark.ams-panel.ams-ui{background-image:radial-gradient(55% 100% at 88% 0,rgba(47,102,240,.17),transparent 70%),radial-gradient(45% 80% at 0 100%,rgba(21,94,239,.10),transparent 70%)!important;background-size:100% 900px!important;background-repeat:no-repeat!important}
+/* animation toggle button + pause when tab hidden */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ds-anim-btn svg{width:18px;height:18px}
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .ds-anim-btn[aria-pressed=false]{opacity:.6}
+html.ds-paused body.ams-ui *,html.ds-paused body.ams-ui ::before,html.ds-paused body.ams-ui ::after{animation-play-state:paused!important}

@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en" class="ams-light">
+<head><script src="/assets/ams-storage.js?v=gsms-20261104"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/assets/ams-favicon.png?v=gsms-20261104"  data-brand-favicon />
+<title>GLOBAL SMS — Client Panel</title>
+<style id="route-auth-hide">html{visibility:hidden;}
+.copy-otp-btn{border:1px solid #ddd;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.otp-code{font-family:"SFMono-Regular",Consolas,monospace;font-weight:800;border:1px solid #ddd;border-radius:8px;padding:5px 9px;display:inline-block;}
+.otp-empty{font-weight:600;}
+.last-sms{font-weight:700;}
+.client-welcome-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.client-welcome-card{width:min(420px,96vw);border:1px solid #ddd;border-radius:20px;padding:22px;}
+.client-welcome-card h3{font-size:22px;margin-bottom:8px;}
+.client-welcome-card p{margin-bottom:14px;}
+.welcome-step{display:flex;gap:10px;align-items:flex-start;border:1px solid #ddd;border-radius:12px;padding:11px;margin-bottom:9px;}
+.welcome-step b:first-child{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;flex:0 0 auto;}
+.page-head{border-bottom:1px solid #ddd!important;padding-bottom:14px!important;}
+.page > .toolbar,.page > .table-wrap,.page > .card,.page > .grid2{position:relative!important;}
+.page > .toolbar:not(:first-child)::before,.page > .table-wrap:not(:first-child)::before,.page > .card:not(:first-child)::before,.page > .grid2:not(:first-child)::before{content:"";position:absolute;left:0;right:0;top:-10px;height:1px;opacity:.95;}
+.table-wrap + .table-wrap{margin-top:18px!important;}
+.toolbar + .table-wrap,.card + .table-wrap,.stats-grid + .toolbar,.stats-grid + .grid2{margin-top:18px!important;}</style>
+<script>
+(function(){
+  var expected='client';
+  try{
+    var token=sessionStorage.getItem('ams_token')||localStorage.getItem('ams_token');
+    var role=sessionStorage.getItem('ams_role')||localStorage.getItem('ams_role');
+    if(!token || role!==expected){ location.replace('/panel-login'); return; }
+    fetch('/api/me',{headers:{Authorization:'Bearer '+token}})
+      .then(function(r){ if(!r.ok) throw new Error('auth'); return r.json(); })
+      .then(function(u){ if(!u || u.role!==expected) throw new Error('role'); document.documentElement.style.visibility='visible'; })
+      .catch(function(){ sessionStorage.clear(); ['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k)); location.replace('/panel-login'); });
+  }catch(e){ sessionStorage.clear(); ['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k)); location.replace('/panel-login'); }
+})();
+</script>
+<style>tfoot.ams-tot td{position:sticky;bottom:0;border-top:2px solid #ddd;font-weight:700;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:.1px;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{border-radius:6px;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:236px;flex-shrink:0;border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:50;display:flex;flex-direction:column;transition:transform .25s ease;}
+.sb-brand{display:flex;align-items:center;gap:11px;padding:18px 20px;border-bottom:1px solid var(--border);}
+.sb-brand .logo{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.sb-brand .logo svg{width:22px;height:22px;stroke:#1a0d10;}
+.sb-brand h1{font-size:15px;font-weight:700;}
+.sb-brand small{display:block;font-size:11px;margin-top:1px;}
+.sb-nav{flex:1;overflow-y:auto;padding:14px 12px;}
+.sb-sec{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;margin:6px 12px 8px;font-weight:600;}
+.tab{display:flex;align-items:center;gap:13px;padding:12px 14px;cursor:pointer;font-size:13.5px;font-weight:500;border-radius:11px;transition:.15s;margin-bottom:3px;white-space:nowrap;}
+.tab svg{width:19px;height:19px;stroke:currentColor;flex-shrink:0;}
+.main{flex:1;margin-left:236px;display:flex;flex-direction:column;min-width:0;transition:margin .25s;}
+.topbar{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--border);}
+.tb1{display:flex;align-items:center;gap:14px;padding:11px 24px;}
+.hamburger{border:none;cursor:pointer;display:none;}
+.hamburger svg{width:22px;height:22px;stroke:currentColor;}
+.tb1 .sp{flex:1;}
+.clock{font-size:12.5px;padding:7px 12px;border-radius:9px;border:1px solid var(--border);}
+.tb-btn{width:36px;height:36px;border-radius:9px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:.15s;}
+.tb-btn svg{width:18px;height:18px;stroke:currentColor;}
+.tb-btn .dot{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;border:2px solid var(--bg2);}
+.who{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 6px;border:1px solid var(--border);border-radius:24px;}
+.who .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;}
+.who .nm{font-size:13px;font-weight:600;}
+.who .rl{font-size:10.5px;}
+.content{padding:24px;flex:1;}
+.sb-overlay{display:none;position:fixed;inset:0;z-index:45;}
+.sb-overlay.show{display:block;}
+@media(max-width:900px){.sidebar{transform:translateX(-100%);}
+.sidebar.show{transform:translateX(0);}
+.main{margin-left:0;}
+.hamburger{display:flex;}}
+.page-head{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.page-head h2{font-size:22px;font-weight:600;}
+.breadcrumb{font-size:12.5px;margin-top:4px;}
+.breadcrumb b{font-weight:500;}
+.head-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.page{display:none;}
+.page.active{display:block;animation:fade .3s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}
+to{opacity:1;transform:translateY(0);}}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:20px;}
+.stat-card{border:1px solid var(--border);border-radius:16px;padding:19px;display:flex;align-items:center;gap:15px;transition:.2s;position:relative;overflow:hidden;}
+.stat-card:hover{transform:translateY(-3px);}
+.stat-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;}
+.si{width:46px;height:46px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.si svg{width:22px;height:22px;}
+.si.ro svg{stroke:#fda4af;}
+.si.am svg{stroke:#fbbf24;}
+.si.bl svg{stroke:#93c5fd;}
+.si.gr svg{stroke:#6ee7b7;}
+.stat-info h3{font-size:24px;font-weight:700;line-height:1;}
+.stat-info p{font-size:12.5px;margin-top:6px;}
+.stat-info .trend{font-size:11.5px;margin-top:5px;}
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:20px;}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr;}}
+.card{border:1px solid var(--border);border-radius:16px;padding:20px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-head h3{font-size:15px;font-weight:600;}
+.card-head .sub{font-size:12px;}
+.chip{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);}
+.chart{display:flex;align-items:flex-end;gap:12px;height:190px;padding-top:10px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;}
+.bar-track{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;}
+.bar{width:58%;max-width:32px;border-radius:7px 7px 0 0;position:relative;cursor:pointer;transition:.4s;}
+.bar .val{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:10px;}
+.bar-label{font-size:11px;}
+.li{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.li:last-child{border-bottom:none;}
+.li .l{display:flex;align-items:center;gap:11px;}
+.li .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.li .ic svg{width:18px;height:18px;}
+.li .t1{font-size:13px;}
+.li .t2{font-size:11.5px;margin-top:2px;}
+.toolbar{border:1px solid var(--border);border-radius:14px;padding:15px 17px;margin-bottom:16px;}
+.filter-row{display:flex;gap:11px;align-items:center;flex-wrap:wrap;}
+select,input[type=text]{border:1px solid var(--border2);border-radius:9px;padding:10px 12px;font-size:13px;outline:none;transition:.15s;width:100%;font-family:inherit;}
+.filter-row select,.filter-row input{width:auto;}
+.sel-lg{min-width:210px;}
+.btn{border:none;border-radius:9px;padding:10px 17px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap;}
+.btn:hover{transform:translateY(-1px);}
+.btn-ghost{border:1px solid var(--border2);}
+.table-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.tc-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.tc-left label{font-size:13px;}
+.exp-btns{display:flex;gap:6px;}
+.exp-btns .btn{padding:7px 12px;font-size:12px;}
+.tc-right{display:flex;align-items:center;gap:8px;}
+.tc-right label{font-size:13px;}
+.table-wrap{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:16px;}
+.tscroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+thead th{text-align:left;padding:13px 16px;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--border2);user-select:none;}
+th.sortable{cursor:pointer;}
+thead th .sort{opacity:.4;margin-left:5px;}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+.cell-money{font-weight:600;}
+.mono{font-family:"Courier New",monospace;letter-spacing:.5px;}
+.msg-body{white-space:normal;max-width:360px;min-width:260px;line-height:1.55;font-size:13px;}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:11.5px;font-weight:600;}
+.table-foot{display:flex;align-items:center;justify-content:space-between;padding:13px 17px;flex-wrap:wrap;gap:10px;}
+.table-foot .info{font-size:12.5px;}
+.pagination{display:flex;gap:5px;}
+.pagination button{border:1px solid var(--border2);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12.5px;}
+.masknote{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 11px;border-radius:8px;border:1px solid #ddd;}
+.dash-metrics{grid-template-columns:repeat(4,minmax(210px,1fr))!important;gap:20px!important;margin-bottom:20px!important;}
+@media(max-width:1100px){.dash-metrics{grid-template-columns:repeat(2,minmax(210px,1fr))!important;}}
+@media(max-width:620px){.dash-metrics{grid-template-columns:1fr!important;}}
+.stat-card.dash-metric{border:0!important;border-radius:18px!important;min-height:92px!important;padding:16px 18px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;overflow:hidden!important;position:relative!important;transform:none!important;}
+.stat-card.dash-metric::before{content:""!important;display:block!important;position:absolute!important;width:140px!important;height:140px!important;right:-58px!important;top:-62px!important;border-radius:50%!important;}
+.stat-card.dash-metric::after{content:"";position:absolute;width:72px;height:72px;right:34px;bottom:-34px;border-radius:50%;}
+.stat-card.dash-metric .stat-info{position:relative;z-index:1;}
+.stat-card.dash-metric .stat-info p{text-transform:uppercase!important;font-size:10.5px!important;font-weight:800!important;letter-spacing:.42px!important;margin:0 0 9px!important;}
+.stat-card.dash-metric .stat-info h3{font-size:22px!important;font-weight:850!important;margin:0!important;letter-spacing:.2px;}
+.stat-card.dash-metric .stat-info span{font-size:11px!important;display:block!important;margin-top:2px!important;}
+.dash-go{width:24px;height:24px;border-radius:50%;border:1px solid #ddd;display:grid;place-items:center;font-size:12px;font-weight:900;position:relative;z-index:1;}
+.dash-note-card{padding:18px!important;border-radius:18px!important;}
+.dash-note-card .card-head{margin-bottom:12px!important;}
+.bar{border-radius:9px 9px 0 0!important;}
+.tag-mgr{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-agt{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-cli,.tag-client{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-blue{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-green{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-amber{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-red{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-gray{border:1px solid #ddd!important;font-weight:800!important;}
+body{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;font-size:14px!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+table{font-size:13.5px!important;line-height:1.6!important;border-collapse:separate!important;border-spacing:0 3px!important;}
+thead th{font-weight:600!important;letter-spacing:.25px!important;}
+table td{font-weight:500!important;}
+.page-head h2{font-weight:600!important;}
+.card-head h3{font-weight:600!important;}
+.tag,.tag-mgr,.tag-agt,.tag-cli,.tag-client,.tag-blue,.tag-green,.tag-amber,.tag-red,.tag-gray{border:1px solid #ddd!important;border-radius:8px!important;padding:5px 10px!important;font-weight:600!important;font-size:12px!important;line-height:1.15!important;letter-spacing:0!important;display:inline-flex;align-items:center;gap:4px;}
+.cell-money{font-weight:700!important;}
+.payout-rate,.rate-cell{font-weight:700!important;}
+.msg-body{line-height:1.6!important;}
+.mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace!important;font-weight:600!important;}
+.filter-row label{font-weight:600;font-size:13px;}
+body{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;}
+.sidebar,.rail{border-right:1px solid #ddd!important;}
+.topbar,.tb1,.navshell{border-bottom:1px solid #ddd!important;}
+.sidebar::before,.rail::before,.topbar::before,.tb1::before,.navshell::before{display:none!important;}
+.sb-brand,.rail-brand{border-bottom:1px solid #ddd!important;}
+.sb-section,.sb-sec{font-weight:700!important;letter-spacing:.08em!important;}
+.nav-item svg,.tab svg,.ritem svg,.navtab svg,.sub-item svg,.rsubitem svg{stroke:currentColor!important;}
+.nav-item.active svg,.tab.active svg,.ritem.active svg{stroke:#FFFFFF!important;}
+.sub-item.active,.rsubitem.active{font-weight:700!important;}
+.page-head h2,.card-head h3{font-weight:700!important;}
+table{border-collapse:separate!important;border-spacing:0 3px!important;}
+thead th{font-weight:700!important;border-top:1px solid #ddd!important;border-bottom:1px solid #ddd!important;}
+tbody tr td{border-bottom:1px solid #ddd!important;}
+.dash-metric{border-radius:16px!important;}
+.btn{border-radius:10px!important;min-height:38px!important;font-weight:700!important;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.1!important;}
+.btn-ghost{border:1px solid #ddd!important;}
+.btn:hover{transform:translateY(-1px);}
+.avatar,.who .av{border:2px solid #ddd!important;}
+.tag,.tag-mgr,.tag-agt,.tag-cli,.tag-client,.tag-blue,.tag-green,.tag-amber,.tag-red,.tag-gray{border:1px solid #ddd!important;border-radius:8px!important;font-weight:600!important;}
+.cell-money{font-weight:700!important;}
+.payout-rate,.rate-cell{font-weight:700!important;}
+body{font-family:Inter,Roboto,"Segoe UI",Arial,sans-serif!important;letter-spacing:0!important;font-size:14px!important;}
+.sidebar{width:260px!important;}
+.main{margin-left:260px!important;}
+.content{padding:26px 22px!important;}
+.nav-item,.sub-item,.tab,.ritem,.rsubitem,.navtab{font-size:13.25px!important;letter-spacing:0!important;line-height:1.35!important;gap:12px!important;}
+.nav-item span,.sub-item span,.tab span,.ritem .lbl,.rsubitem .lbl,.navtab .lbl{white-space:normal!important;word-break:normal!important;}
+.sb-brand h1,.sb-brand small{letter-spacing:0!important;}
+.sb-section,.sb-sec{letter-spacing:.07em!important;font-size:10.5px!important;}
+.topbar,.tb1{height:56px!important;padding-left:22px!important;padding-right:20px!important;}
+.tb-date,.clock{font-size:12.5px!important;letter-spacing:0!important;}
+.page-head{margin-bottom:20px!important;}
+.page-head h2{font-size:23px!important;letter-spacing:-.02em!important;line-height:1.2!important;}
+.breadcrumb{font-size:12.5px!important;letter-spacing:0!important;}
+.dash-metrics{gap:20px!important;}
+.stat-card.dash-metric{min-height:96px!important;padding:17px 18px!important;border-radius:16px!important;}
+.stat-card.dash-metric .stat-info p{font-size:11.5px!important;letter-spacing:.18px!important;margin-bottom:8px!important;}
+.stat-card.dash-metric .stat-info h3{font-size:24px!important;line-height:1!important;}
+.stat-card.dash-metric .stat-info span{font-size:11.5px!important;}
+.card{border-radius:16px!important;}
+.card-head h3{font-size:15px!important;letter-spacing:0!important;}
+.card-head .sub{font-size:12.5px!important;letter-spacing:0!important;}
+.chart{height:205px!important;}
+.bar .val{font-size:11px!important;}
+.bar-label{font-size:11.5px!important;}
+table{font-family:Inter,Roboto,"Segoe UI",Arial,sans-serif!important;font-size:13.5px!important;}
+thead th{font-size:11.5px!important;letter-spacing:.25px!important;}
+.table-controls label,.tc-right label,.tc-left label{font-size:12.5px!important;}
+.btn{min-height:38px!important;padding:9px 15px!important;font-size:12.5px!important;}
+.btn-sm{min-height:32px!important;padding:6px 11px!important;}
+@media(max-width:900px){.sidebar{width:260px!important;}
+.main{margin-left:0!important;}
+.content{padding:20px 14px!important;}}
+.sb-logo svg,.brand .logo svg,.rail .logo svg,.sb-brand .logo svg,.brand-logo .logo svg{stroke:#fff!important;}
+.sb-brand h1,.brand h1,.brand-text h1,.brand-logo h1{font-weight:700!important;letter-spacing:-.01em!important;}
+.ams-sms-logo-img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;border-radius:inherit!important;}
+.sb-logo,.brand .logo,.rail .logo,.sb-brand .logo,.brand-logo .logo{padding:0!important;overflow:hidden!important;border:1px solid #ddd!important;}
+.brand-logo .logo{width:92px!important;height:92px!important;border-radius:22px!important;margin-bottom:16px!important;}
+.sb-logo{width:44px!important;height:44px!important;border-radius:13px!important;}
+.brand .logo,.sb-brand .logo{width:46px!important;height:46px!important;border-radius:13px!important;}
+.rail .logo{width:50px!important;height:50px!important;border-radius:14px!important;}
+.brand-panel .brand-logo{align-items:flex-start!important;}
+.brand-panel .brand-logo h1{font-size:24px!important;}
+.sidebar,.rail{border-right:1px solid #ddd!important;}
+.sb-brand,.rail-brand,.brand-text{border-bottom:1px solid #ddd!important;}
+.nav-item svg,.sub-item svg,.ritem svg,.rsubitem svg{stroke:currentColor!important;}
+.nav-item.active svg,.ritem.active svg,.tab.active svg{stroke:#0F172A!important;}
+.appbar{border-bottom:1px solid #ddd!important;}
+.sb-logo,.brand .logo,.rail .logo,.sb-brand .logo{border:1px solid #ddd!important;}
+.topbar,.tb1{border-bottom:1px solid #ddd!important;}
+.copy-otp-btn{border:1px solid #ddd;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.otp-code{font-family:"SFMono-Regular",Consolas,monospace;font-weight:800;border:1px solid #ddd;border-radius:8px;padding:5px 9px;display:inline-block;}
+.otp-empty{font-weight:600;}
+.last-sms{font-weight:700;}
+.client-welcome-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.client-welcome-card{width:min(420px,96vw);border:1px solid #ddd;border-radius:20px;padding:22px;}
+.client-welcome-card h3{font-size:22px;margin-bottom:8px;}
+.client-welcome-card p{margin-bottom:14px;}
+.welcome-step{display:flex;gap:10px;align-items:flex-start;border:1px solid #ddd;border-radius:12px;padding:11px;margin-bottom:9px;}
+.welcome-step b:first-child{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;flex:0 0 auto;}
+.page-head{border-bottom:1px solid #ddd!important;padding-bottom:14px!important;}
+.page > .toolbar,.page > .table-wrap,.page > .card,.page > .grid2{position:relative!important;}
+.page > .toolbar:not(:first-child)::before,.page > .table-wrap:not(:first-child)::before,.page > .card:not(:first-child)::before,.page > .grid2:not(:first-child)::before{content:"";position:absolute;left:0;right:0;top:-10px;height:1px;opacity:.95;}
+.table-wrap + .table-wrap{margin-top:18px!important;}
+.toolbar + .table-wrap,.card + .table-wrap,.stats-grid + .toolbar,.stats-grid + .grid2{margin-top:18px!important;}
+/* ---- Client panel: brand block ------------------------------------
+   The shared sheet hides .sb-brand h1 outright and forces the logo to
+   150x92 inside a 210px rail, which left the title with no room at all.
+   Here the title is restored and stacked under the logo.
+   NOTE on specificity: assets/ams-layout.css:95/98 wrap their arguments
+   in :is(), and :is() takes the specificity of its MOST SPECIFIC argument
+   (.rail > .brand > .logo = 0,3,0), so those rules are 0,4,1 / 0,3,2.
+   These selectors are 0,4,2 / 0,3,3 and must stay at least that strong. */
+/* .sb-brand.sb-brand (0,5,2) is deliberate: assets/ams-ds.css:127 pins
+   flex-direction:row at 0,4,2, so a plain 0,4,2 selector would tie and lose
+   on order. Repeating the class is the smallest reliable bump. */
+html body.ams-panel.ams-ui:is(.ams-light,.ams-dark) .sb-brand.sb-brand{flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:10px!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .sb-brand.sb-brand{flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:10px!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .sb-brand .logo{width:58px!important;height:58px!important;flex:0 0 auto!important;border-radius:12px!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .sb-brand > div:not(.logo){width:100%!important;min-width:0!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .sb-brand h1{display:block!important;font-size:15.5px!important;line-height:1.22!important;color:#fff!important;white-space:normal!important;overflow-wrap:anywhere!important;margin:0!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .sb-brand small{display:block!important;color:#8fa1c4!important;font-size:11px!important;}
+/* ---- Client panel: top-right toolbar ------------------------------
+   .tb1 was sizing to its content, so the controls sat mid-bar instead of
+   flush right. It now fills the bar and .sp pushes them to the edge. */
+html body.ams-panel:is(.ams-light,.ams-dark) .topbar{display:flex!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .topbar > .tb1{flex:1 1 auto!important;width:100%!important;min-width:0!important;justify-content:flex-start!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .topbar .tb1 .sp{flex:1 1 auto!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .tb1 .who{cursor:pointer;flex:0 0 auto!important;}
+html body.ams-panel:is(.ams-light,.ams-dark) .tb1 .tb-btn{flex:0 0 auto!important;}
+</style>
+
+
+
+<link rel="stylesheet" href="/assets/ams.css?v=gsms-20261104"/><script src="/assets/ams.js?v=gsms-20261104" defer></script>
+<link rel="stylesheet" href="/assets/ams-light.css?v=gsms-20261104"/>
+<!-- FINAL POLISH 2C: shared theme-neutral geometry. Loaded LAST so Light and Dark
+     share exactly one layout (sizes, spacing, flex/grid, font metrics) while each
+     theme keeps painting its own colours. Generated by scripts/split-theme-geometry.py. -->
+<link rel="stylesheet" href="/assets/ams-layout.css?v=gsms-20261104"/>
+<!-- FINAL POLISH 2A/2B/2C/2D/2E: shared panel chrome (hamburger + sidebar,
+     sun/moon theme toggle, filter alignment contract, heading contrast,
+     Terms and Conditions dialog, dark dropdown paint). Loaded last. -->
+<link rel="stylesheet" href="/assets/ams-chrome.css?v=gsms-20261104"/>
+<link rel="stylesheet" href="/assets/ams-ds.css?v=gsms-20261104"/>
+<script src="/assets/ams-ds.js?v=gsms-20261104" defer></script>
+<script src="/assets/dashboard-ui.js?v=gsms-20261104"></script>
+
+<script src="/assets/number-copy.js?v=gsms-20261104"></script>
+<link rel="stylesheet" href="/assets/ams-sidebar-unify.css?v=gsms-20261104"/>
+<link rel="stylesheet" href="/assets/ams-motion.css?v=gsms-20261104"/><script src="/assets/ams-motion.js?v=gsms-20261104" defer></script>
+<link rel="stylesheet" href="/branding/runtime.css"/><script src="/branding/runtime.js" defer></script><link rel="stylesheet" href="/assets/ams-panel.css?v=gsms-20261104"/><link rel="stylesheet" href="/assets/ams-unify.css?v=gsms-20261104"/></head>
+<body class="ams-light ams-panel ams-ui">
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="logo"><img class="ams-sms-logo-img" data-brand-logo src="/assets/ams-logo-square.png?v=gsms-20261104" alt="GLOBAL SMS" /></div>
+      <div><h1 data-brand="name">GLOBAL SMS</h1><small>Client Panel</small></div>
+    </div>
+    <nav class="sb-nav" id="tabs">
+      <div class="sb-sec">Menu</div>
+      <div class="tab active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+      <div class="tab" data-page="numbers"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>SMS Numbers</div>
+      <div class="tab" data-page="stats"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>SMS Detailed Report</div>
+            <div class="tab" data-page="test"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18v-6a3 3 0 0 1 6 0v6"/><rect x="4" y="18" width="16" height="3"/><path d="M12 3v3"/></svg>SMS Test Panel</div>
+    </nav>
+  </aside>
+  <div class="sb-overlay" id="sbOverlay" onclick="closeSb()"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="tb1">
+        <button class="hamburger" onclick="openSb()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <span class="clock" id="clock">Fri, 2026-07-03 05:33:57</span>
+        <div class="sp"></div>
+        <button class="tb-btn" title="Fullscreen" onclick="toggleFull()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+        <div class="who"><div class="av">A</div><div><div class="nm">Client</div><div class="rl">Client</div></div></div>
+        <button class="tb-btn" title="Logout" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      </div>
+    </header>
+
+    <div class="content">
+    <!-- DASHBOARD -->
+    <!-- DASHBOARD -->
+<section class="page active" id="page-dashboard">
+      <div class="page-head"><div><h2>Dashboard</h2><div class="breadcrumb"><b>Home</b> » Dashboard</div></div></div>
+      <!-- GLOBAL-style dashboard top (client scope; money cards are this client's dashboard payout sums) -->
+      <div class="ams-panel-dash-meta-row"><span class="ams-panel-meta" id="amsDashMeta" style="display:none"></span></div>
+      <div id="amsKpis"></div>
+      <div class="ams-panel-middle"><div id="amsVolume"></div><aside id="amsRail"></aside></div>
+      <div id="amsSmsCards" style="display:none"></div>
+      <div id="amsSmsChart"></div>
+      <div class="card dash-note-card dashboard-recent"><div class="card-head"><div><h3>Recent Activity</h3></div></div><div class="muted" style="padding:18px">No recent activity yet</div></div>
+      <div class="ams-metric-rankings"></div>
+    </section>
+
+    <!-- SMS NUMBERS (assigned, view only) -->
+    <section class="page" id="page-numbers">
+      <div class="page-head"><div><h2>SMS Numbers <span class="ams-num-page-badge" style="font-size:14px;font-weight:600;color:var(--text,#0f172a);background:var(--u-soft,#eef2f7);padding:3px 9px;border-radius:6px;margin-left:10px;vertical-align:middle;display:inline-flex;align-items:center;gap:6px">Numbers: <span id="numPageCount">0</span> </span></h2><div class="breadcrumb"><b>My Panel</b> › Allocated Numbers</div></div>
+        <div class="head-actions"><span class="masknote">Only numbers allocated to you</span></div></div>
+      <div class="toolbar"><div class="filter-row">
+        <div id="numRangeContainer" style="display:inline-block;min-width:180px"><select class="sel-lg" id="numRange"><option value="">Select Range</option></select></div>
+        <button type="button" class="ams-btn ams-blue"  onclick="renderNumbers()" data-tip="Filters" title="Filters" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
+        <button type="button" class="ams-btn"  onclick="if(window.setSearchDropdownValue) setSearchDropdownValue('numRange','','Select Range'); const nr=document.getElementById('numRange'); if(nr) nr.value=''; document.getElementById('numSearch').value=''; renderNumbers()" data-tip="Reset" title="Reset" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+      </div></div>
+      <div class="table-wrap" style="padding:15px 17px;margin-top:0"><div class="table-controls">
+        <div class="tc-left"><label>Show Records:</label><select id="numLen" onchange="renderNumbers()"><option>10</option><option selected>25</option><option>50</option><option>100</option><option>500</option><option value="All">All</option></select>
+        <div class="exp-btns"><button type="button" class="ams-btn ams-blue" onclick="copyCurrentPageNumbers(this)" data-tip="Copy numbers" title="Copy numbers" aria-label="Copy numbers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button type="button" class="ams-btn ams-blue"  data-tip="Download CSV" title="Download CSV" aria-label="Download CSV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="ams-btn ams-green"  data-tip="Download Excel" title="Download Excel" aria-label="Download Excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></div></div>
+        <div class="tc-right"><label>Search:</label><input type="text" id="numSearch" oninput="renderNumbers()" placeholder="Search..."/></div></div></div>
+      <div class="table-wrap"><div class="tscroll"><table>
+        <thead><tr><th class="sortable" onclick="sortNum('range')">Range <span class="sort">⇅</span></th><th class="sortable" onclick="sortNum('number')">Number <span class="sort" id="nSortHint">⇅</span></th><th>Payterm</th><th>Status</th><th>Payout</th><th>Last SMS Time</th><th>Limits</th></tr></thead>
+        <tbody id="numBody"></tbody></table></div>
+        <div class="table-foot"><div class="info" id="numInfo"></div><div class="pagination"><button>‹</button><button class="active">1</button><button>2</button><button>›</button></div></div></div>
+    </section>
+
+    <!-- SMS STATS (received SMS / OTP records, full CLI + message) -->
+    <section class="page" id="page-stats">
+      <div class="page-head"><div><h2>SMS Detailed Report</h2><div class="breadcrumb"><b>My Panel</b> › Received SMS &amp; OTP</div></div></div>
+      <div class="toolbar">
+        <div class="filter-row">
+          <label>From</label><input type="date" id="stFrom" onchange="renderStats();loadRanges()"/>
+          <label>To</label><input type="date" id="stTo" onchange="renderStats();loadRanges()"/>
+          <div id="stRangeContainer" style="display:inline-block;min-width:180px"></div>
+          <input type="text" id="stNumber" list="stNumDl" placeholder="Search number…" style="min-width:150px" oninput="clearTimeout(window.__stNT);window.__stNT=setTimeout(renderStats,450)"/>
+          <input type="text" id="stCliSearch" placeholder="Search CLI…" style="min-width:120px" oninput="clearTimeout(window.__stCT);window.__stCT=setTimeout(renderStats,450)"/>
+          <button class="btn btn-rose" onclick="renderStats()">Apply</button>
+          <button type="button" class="ams-btn"  onclick="stResetFilters()" data-tip="Reset" title="Reset" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+        </div>
+        <!-- P20 CDR REBUILD: Group by (client-allowed dims only — provider/manager/agent/client
+             dims backend se drop hote hain). Client ko sirf SMS count dikhta hai (no payout). -->
+        <div class="filter-row" style="margin-top:6px;flex-wrap:wrap">
+          <span style="font-weight:600;align-self:center;margin-right:2px">Group by</span>
+          <label style="width:auto"><input type="checkbox" id="stGb_hour" style="width:auto" onchange="renderStats()"> Hour</label>
+          <label style="width:auto"><input type="checkbox" id="stGb_day" style="width:auto" onchange="renderStats()"> Day</label>
+          <label style="width:auto"><input type="checkbox" id="stGb_month" style="width:auto" onchange="renderStats()"> Month</label>
+          <label style="width:auto"><input type="checkbox" id="stGb_range" style="width:auto" onchange="renderStats()"> Range</label>
+          <label style="width:auto"><input type="checkbox" id="stGb_number" style="width:auto" onchange="renderStats()"> Number</label>
+          <label style="width:auto"><input type="checkbox" id="stGb_cli" style="width:auto" onchange="renderStats()"> CLI</label>
+          <label style="width:auto"><input type="checkbox" id="stGb_currency" style="width:auto" onchange="renderStats()"> Currency</label>
+        </div>
+        <!-- FINAL POLISH 6B: the explanatory default-date hint that sat under Group By
+             is removed. Only that hint changed — the Hour / Day / Month / Range /
+             Number / CLI / Currency options, the UK grouping logic and every date
+             calculation stay exactly as they were. -->
+      </div>
+      <div class="table-wrap" style="padding:15px 17px;margin-top:0"><div class="table-controls">
+        <div class="tc-left"><label>Show Records:</label><select id="stLen" onchange="renderStats()"><option>10</option><option selected>25</option><option>50</option><option value="All">All</option></select>
+        <div class="exp-btns"><button type="button" class="ams-btn ams-blue"  data-tip="Copy" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button type="button" class="ams-btn ams-blue"  data-tip="Download CSV" title="Download CSV" aria-label="Download CSV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="ams-btn ams-green"  data-tip="Download Excel" title="Download Excel" aria-label="Download Excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></div></div>
+        <div class="tc-right"><label>Search:</label><input type="text" id="stSearch" oninput="renderStats()" placeholder="Search..."/></div></div></div>
+      <div class="table-wrap"><div class="tscroll"><table>
+        <thead id="stHead"></thead><tbody id="statsBody"></tbody><tfoot id="stFoot" class="ams-tot"></tfoot></table></div>
+        <div class="table-foot"><div class="info" id="statsInfo"></div><div class="pagination"></div></div></div>
+    </section>
+
+    <!-- SMS TEST PANEL (masked CLI + masked SMS body) -->
+    <section class="page" id="page-test">
+      <div class="page-head"><div><h2>SMS Test Panel</h2><div class="breadcrumb"><b>Home</b> › Test Panel</div></div>
+        <div class="head-actions"><span class="masknote">CLI &amp; SMS masked (Client)</span></div></div>
+      <div class="toolbar"><div class="filter-row">
+        <div id="testRangeContainer" style="display:inline-block;min-width:180px"></div>
+        <button type="button" class="ams-btn ams-blue"  onclick="renderTest()" data-tip="Filters" title="Filters" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
+        <button type="button" class="ams-btn"  onclick="if(window.setSearchDropdownValue) setSearchDropdownValue('testRange','','Select Range'); const tr=document.getElementById('testRange'); if(tr) tr.value=''; renderTest()" data-tip="Reset" title="Reset" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+        <span class="muted" style="font-size:11.5px">(Range filter applies only to Test Numbers)</span>
+      </div></div>
+      <div class="grid2" style="grid-template-columns:1fr 1.3fr">
+        <div><h3 style="margin-bottom:12px;font-size:15px">SMS Test Numbers</h3>
+          <div class="table-wrap" style="margin-top:0"><div class="tscroll"><table>
+            <thead><tr><th>Range</th><th>Test Number</th></tr></thead><tbody id="tnBody"></tbody></table></div>
+          <div class="table-foot"><div class="info" id="tnInfo"></div><div class="pagination" id="tnPager"></div></div></div></div>
+        <div><h3 style="margin-bottom:12px;font-size:15px">Recent SMS Test</h3>
+          <div class="toolbar" style="margin-bottom:12px;padding:12px 14px"><div class="filter-row" style="margin:0"><input type="text" id="testCli" placeholder="Filter by CLI" oninput="renderTest()" style="min-width:180px"/></div></div>
+          <div class="table-wrap" style="margin-top:0"><div class="tscroll"><table>
+            <thead><tr><th>Date</th><th>Range</th><th>Number</th><th>CLI</th><th>SMS</th></tr></thead><tbody id="trBody"></tbody></table></div>
+          <div class="table-foot"><div class="info" id="trInfo"></div><div class="pagination" id="trPager"></div></div></div></div>
+      </div>
+    </section>
+    </div>
+  </div>
+</div>
+
+
+<div class="client-welcome-overlay" id="clientWelcome" style="display:none">
+  <div class="client-welcome-card">
+    <h3><span data-brand-replace="name">Welcome to GLOBAL SMS</span></h3>
+    <p>Here is the simple workflow:</p>
+    <div class="welcome-step"><b>1</b><span>View your allocated numbers in <b>SMS Numbers</b>.</span></div>
+    <div class="welcome-step"><b>2</b><span>Open <b>SMS Detailed Report</b> to see your latest OTP messages.</span></div>
+    <div class="welcome-step"><b>3</b><span>Use <b>Copy OTP</b> to quickly copy verification codes.</span></div>
+    <button class="btn btn-rose" onclick="closeClientWelcome()" style="width:100%;margin-top:14px">Got it</button>
+  </div>
+</div>
+
+<script src="/api.js?v=gsms-20261104"></script>
+<script>
+if(window.API){ API.guard('client'); }
+/* NAV */
+function showPage(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const pg=document.getElementById('page-'+id)||document.getElementById('page-dashboard');if(pg)pg.classList.add('active');
+  document.querySelectorAll('.tab').forEach(n=>n.classList.remove('active'));if(el)el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});if(typeof loadClientPageData==='function')loadClientPageData(id);}
+document.querySelectorAll('.tab[data-page]').forEach(n=>n.addEventListener('click',()=>{showPage(n.dataset.page,n);/* only the off-canvas (mobile) menu closes on navigation; the desktop rail stays put */if(window.matchMedia('(max-width:900px)').matches)closeSb();}));
+function openSb(){document.getElementById('sidebar').classList.add('show');document.getElementById('sbOverlay').classList.add('show');}
+function closeSb(){document.getElementById('sidebar').classList.remove('show');document.getElementById('sbOverlay').classList.remove('show');}
+function toggleFull(){if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}else{document.exitFullscreen&&document.exitFullscreen();}}
+function logout(){ if(confirm('Do you want to logout?')){ if(window.API&&API.logout){API.logout();}else{try{sessionStorage.clear();['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k));}catch(e){} window.location.href='/panel-login';} } }
+function tick(){const d=new Date();const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const p=n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent=days[d.getDay()]+', '+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
+/* P14: UK report-day roll watcher */
+if(window.API&&API.onUkDayChange){ API.onUkDayChange(()=>{ try{ const p=document.querySelector('.page.active'); if(!p) return; const id=(p.id||'').replace('page-','');
+  if(id==='stats'&&document.getElementById('statsBody')) renderStats();
+  if(id==='dashboard'){ loadDashboard(); }
+}catch(e){} }); }
+setInterval(tick,1000);tick();
+function drawWeek(data){const el=document.getElementById('wk');if(!el)return;const max=Math.max(1,...(data||[]).map(d=>d.v||0));el.innerHTML=(data||[]).map(d=>`<div class="bar-col"><div class="bar-track"><div class="bar" style="height:${((d.v||0)/max*100)}%"><span class="val">${d.v||0}</span></div></div><div class="bar-label">${d.l}</div></div>`).join('')||'<div class="muted" style="padding:20px">No chart data</div>';}
+
+/* ===== LIVE DATA ONLY (no dummy data) ===== */
+let CLIENT=sessionStorage.getItem('ams_name')||sessionStorage.getItem('ams_user')||'Client';
+let rangeNames=[];
+let numData=[];
+let stats=[];
+let smsRecords=[];
+let testNumbers=[];
+let recentTests=[];
+
+/* CLI masking (test panel) */
+function maskCLI(cli){if(!cli)return '';if(cli.length<=2)return cli;return cli.slice(0,2)+'x'.repeat(cli.length-2);}
+
+/* fill selects */
+function fillSel(id,arr){const s=document.getElementById(id);if(!s)return;s.innerHTML=s.children[0].outerHTML+arr.map(x=>`<option>${x}</option>`).join('');}
+fillSel('numRange',rangeNames);fillSel('stRange',rangeNames);fillSel('testRange',rangeNames);
+
+/* NUMBERS */
+let nSort={k:null,d:1};
+function sortNum(k){if(nSort.k===k)nSort.d*=-1;else{nSort.k=k;nSort.d=1;}if(k==='number')document.getElementById('nSortHint').textContent=nSort.d===1?'▲':'▼';renderNumbers();}
+function extractOTP(message){
+  const text=String(message||'');
+  let m=text.match(/\b\d{4,8}\b/);
+  if(m) return m[0];
+  m=text.match(/\b(?=[A-Z0-9]*\d)[A-Z0-9]{4,10}\b/i);
+  return m ? m[0] : '';
+}
+function copyText(value){
+  if(!value){return;}
+  if(navigator.clipboard){navigator.clipboard.writeText(value).then(()=>showCopyToast('OTP copied'));}
+  else{const t=document.createElement('textarea');t.value=value;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();showCopyToast('OTP copied');}
+}
+function showCopyToast(msg){
+  let el=document.getElementById('copyToast');
+  if(!el){el=document.createElement('div');el.id='copyToast';el.style.cssText='position:fixed;right:18px;bottom:18px;background:#1E293B;color:white;padding:10px 14px;border-radius:10px;z-index:99999;font-weight:700;box-shadow:0 12px 28px rgba(10,10,11,.24)';document.body.appendChild(el);}
+  el.textContent=msg;el.style.display='block';clearTimeout(window.__copyToastTimer);window.__copyToastTimer=setTimeout(()=>el.style.display='none',1400);
+}
+function lastSmsForNumber(number){
+  const rows=(stats||[]).filter(s=>String(s.number)===String(number));
+  if(!rows.length) return '—';
+  return rows.map(s=>s.date).sort().pop() || '—';
+}
+function toggleAdvancedFilters(){
+  const el=document.getElementById('advancedFilters');
+  if(el) el.style.display = el.style.display==='none' ? 'flex' : 'none';
+}
+function showClientWelcome(){
+  if(localStorage.getItem('ams_client_welcome_seen')==='1') return;
+  const el=document.getElementById('clientWelcome');
+  if(el) el.style.display='flex';
+}
+function closeClientWelcome(){
+  localStorage.setItem('ams_client_welcome_seen','1');
+  const el=document.getElementById('clientWelcome');
+  if(el) el.style.display='none';
+}
+
+/* P19c FIX#2: Client ko apne number par AGENT ka assigned EXACT payout dikhna hai
+   (numbers.payout — agent allocation se set hota hai). Koi range-rate / global-rate
+   fallback NAHI: 0 => $0.00, 1 => $1.00, 2 => $2.00, 0.013 => $0.013 (exact). */
+function cliPay(v){const s=String(v==null?'':v).trim();if(s==='')return'$0.00';const dp=(s.split('.')[1]||'').length;const n=Number(s);return (Number.isFinite(n)&&dp<=2)?'$'+n.toFixed(2):'$'+s;}
+async function loadNumbers(){ try{ numData=(await API.get('/numbers')).map(r=>({range:r.range_name||'',number:r.number,payterm:r.payterm||'Weekly',status:'Active',payout:r.payout,sd:r.sd_limit||0,sw:r.sw_limit||0})); }catch(e){ numData=[]; } renderNumbers(); }
+function renderNumbers(){const rf=document.getElementById('numRange').value,len=document.getElementById('numLen').value,q=(document.getElementById('numSearch').value||'').toLowerCase();
+  let rows=numData.filter(r=>(!rf||r.range===rf)&&[r.range,r.number].join(' ').toLowerCase().includes(q));
+  if(nSort.k)rows.sort((a,b)=>((a[nSort.k]||'')+'').localeCompare((b[nSort.k]||'')+'',undefined,{numeric:true})*nSort.d);
+  const pag=API.paginateRows('cliNumbers',rows,len,'numInfo',renderNumbers);const t=pag.total;rows=pag.rows;
+  document.getElementById('numBody').innerHTML=rows.map(r=>`<tr><td data-label="Range">${r.range}</td><td data-label="Number" class="ams-num"><b>${r.number}</b></td><td data-label="Pay"><span class="tag tag-gray">${(window.AMSCore&&AMSCore.payterm?AMSCore.payterm(r.payterm):r.payterm)||'—'}</span></td><td data-label="Status"><span class="tag tag-green">${r.status}</span></td><td data-label="Payout"><b>${cliPay(r.payout)}</b></td><td data-label="Last SMS"><span class="last-sms">${lastSmsForNumber(r.number)}</span></td><td data-label="Limits" class="muted">SD : ${r.sd} | SW : ${r.sw}</td></tr>`).join('')||`<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No allocated numbers found</td></tr>`;
+  document.getElementById('numInfo').textContent=`Showing ${rows.length} of ${t} numbers`;}
+
+/* SMS STATS (API) */
+/* Test Panel pagination (client): Numbers and SMS sections page independently through
+   the real paged endpoints — no more "load up to 100 rows and filter in the browser". */
+const TEST_PAGE_SIZE=25;
+let tnState={page:1,limit:TEST_PAGE_SIZE,total:0,totalPages:1};
+let trState={page:1,limit:TEST_PAGE_SIZE,total:0,totalPages:1};
+function testPagerButtons(st,n){
+  if(!st.totalPages||st.totalPages<=1) return '';
+  const cur=st.page,last=st.totalPages,list=[1];
+  for(let i=cur-1;i<=cur+1;i++) if(i>1&&i<last) list.push(i);
+  if(last>1) list.push(last);
+  const uniq=[...new Set(list)].sort((a,b)=>a-b);
+  let html='<button type="button" data-tp="prev"'+(cur<=1?' disabled':'')+'>‹</button>';
+  uniq.forEach((p,i)=>{ if(i>0&&p-uniq[i-1]>1) html+='<button type="button" disabled>…</button>';
+    html+=`<button type="button" data-tp="${p}" class="${p===cur?'active':''}">${p}</button>`; });
+  html+='<button type="button" data-tp="next"'+(cur>=last?' disabled':'')+'>›</button>';
+  return html;
+}
+function paintTestPager(infoId,pagerId,st,label,fn){
+  const info=document.getElementById(infoId),pg=document.getElementById(pagerId);
+  if(info) info.textContent=`Showing ${(st.page-1)*st.limit+ (st.shown||0)} of ${st.total} ${label}`.replace(/^Showing 0 of 0/, 'Showing 0 of 0');
+  if(pg){ pg.innerHTML=testPagerButtons(st,fn); pg.querySelectorAll('button[data-tp]').forEach(btn=>{ btn.onclick=()=>{ const v=btn.dataset.tp;
+    if(v==='prev') st.page=Math.max(1,st.page-1); else if(v==='next') st.page=Math.min(st.totalPages,st.page+1); else st.page=parseInt(v,10)||1;
+    fn(); }; }); }
+}
+function paintTestNumbers(){
+  const tnRows=testNumbers||[];
+  document.getElementById('tnBody').innerHTML=tnRows.map(r=>`<tr><td>${r.range||''}</td><td class="mono">${r.num||''}</td></tr>`).join('')||`<tr><td colspan="2" class="muted" style="text-align:center;padding:22px">No test numbers found</td></tr>`;
+  tnState.shown=tnRows.length; paintTestPager('tnInfo','tnPager',tnState,'test numbers',()=>tnGoPage(tnState.page));
+}
+async function tnGoPage(n){ tnState.page=Math.max(1,Math.min(n||1,tnState.totalPages||1)); await loadTestNumbers(); paintTestNumbers(); }
+function trGoPage(n){ trState.page=Math.max(1,Math.min(n||1,trState.totalPages||1)); renderTest(true); }
+async function loadTestNumbers(page){
+  if(page) tnState.page=page;
+  const rf=(document.getElementById('testRange')?.value)||'';
+  const params=new URLSearchParams({paged:'1',page:String(tnState.page),limit:String(tnState.limit)});
+  if(rf) params.set('range',rf);
+  let data={rows:[],total:0,page:1,totalPages:1};
+  try{ data=await API.get('/test-numbers?'+params.toString()); }catch(e){}
+  if(Array.isArray(data)) data={rows:data,total:data.length,page:1,totalPages:1};
+  tnState.page=Number(data.page||1); tnState.total=Number(data.total||0); tnState.totalPages=Number(data.totalPages||1);
+  testNumbers=(data.rows||[]).map(t=>({range:t.range_name,num:t.number,payout:t.payout||'Ask'}));
+  if(!testPanelRangeList.length) await loadTestPanelRangeList();
+  renderTestRangeSelect();}
+
+async function loadStats(){ try{ smsRecords=await API.get('/sms'); stats=smsRecords.map(r=>{const msg=r.message||'';return {range:r.range_name||'',number:r.number,cli:r.cli||'',msg,date:(r.received_at||'').slice(0,19),otp:extractOTP(msg)};}); }catch(e){ smsRecords=[]; stats=[]; } renderStats(); renderNumbers(); }
+
+
+
+/* TEST PANEL (masked CLI + masked SMS; range filter only on test numbers) */
+/* TEST PANEL RANGE FILTER — options come from the Test Panel's own data.
+   A client keeps every range it already owns numbers in (the existing /api/ranges
+   scope is untouched) and additionally gets the ranges of the active test numbers
+   this panel is already showing it (/api/test-numbers = the same rows listed in the
+   SMS Test Numbers table below). No new endpoint, no new permission and no widened
+   scope: a range with neither the client's numbers nor test numbers stays absent. */
+let testPanelRangeList=[];
+async function loadTestPanelRangeList(){
+  try{ const d=await API.get('/test-numbers?ranges_only=1'); testPanelRangeList=(d&&d.ranges)||[]; }catch(e){ testPanelRangeList=[]; }
+}
+function testPanelRangeNames(){
+  const names=[...new Set([...(rangeNames||[]),...(testPanelRangeList||[])].filter(Boolean))];
+  return names.sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}));
+}
+function renderTestRangeSelect(){
+  const list=testPanelRangeNames();
+  const cur=(document.getElementById('testRange')?.value)||'';
+  const value=list.includes(cur)?cur:'';
+  if (window.renderSearchSelect && document.getElementById('testRangeContainer')) {
+    window.renderSearchSelect('testRangeContainer', {
+      id: 'testRange', placeholder: 'Select Range', searchPlaceholder: 'Search range...',
+      items: list.map(r => ({ value: r, label: r })),
+      value: value,
+      onChange: () => renderTest()
+    });
+  } else {
+    fillSel('testRange', list);
+  }
+}
+function normPhone(v){return String(v||'').replace(/[^0-9]/g,'');}
+let testFilterSig='';
+async function renderTest(keepPages){
+  const rf=document.getElementById('testRange').value,cf=(document.getElementById('testCli').value||'').trim().toLowerCase();
+  const sig=JSON.stringify({rf,cf});
+  if(!keepPages && sig!==testFilterSig){ testFilterSig=sig; tnState.page=1; trState.page=1; }
+  /* --- Test Numbers section (own page + own pager) --- */
+  if(!keepPages) await loadTestNumbers();
+  paintTestNumbers();
+  /* --- Recent SMS section (independent page/pager, server-side filters) --- */
+  const params=new URLSearchParams({paged:'1',page:String(trState.page),limit:String(trState.limit)});
+  if(rf) params.set('range',rf);
+  const cliServer=cf.replace(/x+$/,'');
+  if(cliServer) params.set('cli',cliServer);
+  let data={rows:[],total:0,page:1,totalPages:1};
+  try{ data=await API.get('/test-panel/sms?'+params.toString()); }catch(e){}
+  if(Array.isArray(data)) data={rows:data,total:data.length,page:1,totalPages:1};
+  trState.page=Number(data.page||1); trState.total=Number(data.total||0); trState.totalPages=Number(data.totalPages||1);
+  const rows=(data.rows||[]).map(r=>({date:(r.received_at||'').slice(0,19),range:r.range_name||'',num:r.number||'',cli:r.cli||''}));
+  document.getElementById('trBody').innerHTML=rows.map(r=>`<tr><td class="muted">${r.date}</td><td>${r.range}</td><td class="mono">${r.num}</td><td class="mono">${maskCLI(r.cli)}</td><td class="mono">xxxxxxxxxxxx</td></tr>`).join('')||`<tr><td colspan="5" class="muted" style="text-align:center;padding:22px">No test panel SMS found</td></tr>`;
+  trState.shown=rows.length; paintTestPager('trInfo','trPager',trState,'test SMS',()=>trGoPage(trState.page));
+}
+
+/* NEWS (API) */
+function cleanDec(v){let s=String(v??'').replace(/[$,\s]/g,'');const m=s.match(/-?\d+(?:\.\d+)?/);if(!m)return '0';s=m[0];if(!s.includes('.'))return String(BigInt(s));let[a,b]=s.split('.');b=(b||'').replace(/0+$/,'');a=String(BigInt(a||'0'));return b?`${a}.${b}`:a;}
+function decAdd(a,b){a=cleanDec(a);b=cleanDec(b);const[ai,af='']=a.split('.'),[bi,bf='']=b.split('.');const sc=Math.max(af.length,bf.length);let sum=(BigInt(ai+af.padEnd(sc,'0'))+BigInt(bi+bf.padEnd(sc,'0'))).toString();let neg=sum.startsWith('-');if(neg)sum=sum.slice(1);if(!sc)return(neg?'-':'')+sum;sum=sum.padStart(sc+1,'0');let out=sum.slice(0,-sc)+'.'+sum.slice(-sc);out=out.replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1');return(neg?'-':'')+out;}
+function sumPay(rows){return (rows||[]).reduce((a,r)=>decAdd(a,r.pay||r.payout_amount||r.payout_rate||0),'0');}
+function pay3(v){if(window.AMSCore&&AMSCore.pay3)return AMSCore.pay3(v);let s=String(v??'').replace(/[$,\s]/g,'');const m=s.match(/-?\d+(?:\.\d+)?/);if(!m)return'0';const p=m[0].split('.');if(p.length<2)return p[0];const d=p[1].slice(0,3).replace(/0+$/,'');return d?p[0]+'.'+d:p[0];}function money(v){return '$ '+cleanDec(v);}
+function payFmt(v){return '$'+cleanDec(v);}
+/* LIVE API OVERRIDES (no dummy data) */
+function decAdd(a,b){a=cleanDec(a);b=cleanDec(b);const[ai,af='']=a.split('.'),[bi,bf='']=b.split('.');const sc=Math.max(af.length,bf.length);let sum=(BigInt(ai+af.padEnd(sc,'0'))+BigInt(bi+bf.padEnd(sc,'0'))).toString();let neg=sum.startsWith('-');if(neg)sum=sum.slice(1);if(!sc)return(neg?'-':'')+sum;sum=sum.padStart(sc+1,'0');let out=sum.slice(0,-sc)+'.'+sum.slice(-sc);out=out.replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1');return(neg?'-':'')+out;}
+function sumPay(rows){return (rows||[]).reduce((a,r)=>decAdd(a,r.pay||r.payout_amount||r.payout_rate||0),'0');}
+function money(v){return '$ '+cleanDec(v);}
+async function loadProfile(){try{const me=await API.get('/me');CLIENT=me.name||me.username||CLIENT;document.querySelectorAll('.nm').forEach(e=>e.textContent=CLIENT);document.querySelectorAll('.av').forEach(e=>e.textContent=(CLIENT[0]||'C').toUpperCase());}catch(e){}}
+async function loadDashboard(){
+  const d=await API.get('/dashboard').catch(e=>{window.AMSDashboardCore && AMSDashboardCore.error();throw e;});
+  const spark=(d.daily7||[]).map(x=>x.count||0);
+  /* GLOBAL dashboard top (2026-10-24, client scope): SMS counts from
+     /dashboard; money cards are the client's existing payout sums
+     (payout_today / payout_month) — labelled Payout, not ledger earnings
+     (clients have no payment_ledger earnings). Values unchanged. */
+  if(window.AMSDashboard && AMSDashboard.amsKpiCustom){
+    const _fmtN=v=>v==null||v===''?'—':Number(v).toLocaleString();
+    const _fmtM=v=>v==null||v===''?'—':'$'+pay3(v);
+    AMSDashboard.amsKpiCustom('amsKpis','amsDashMeta',[
+      {cls:'ams-panel-blue', label:'SMS TODAY', value:_fmtN(d.sms_today), sub:'Received today'},
+      {cls:'ams-panel-pink', label:'SMS THIS WEEK', value:_fmtN(d.sms_week), sub:'Received since Monday', info:'Monday-start UK reporting week'},
+      {cls:'ams-panel-green', label:'PAYOUT TODAY', value:_fmtM(d.payout_today), sub:'Earned today'},
+      {cls:'ams-panel-orange', label:'PAYOUT THIS MONTH', value:_fmtM(d.payout_month), sub:'Earned since the 1st', info:'UK calendar month to date'}
+    ],[_fmtN(d.numbers)+' Numbers']);
+    let _daily=null; try{ _daily=await API.get('/dashboard/daily?days=15'); }catch(e){ console.warn('dashboard/daily',e); }
+    const _rows=(_daily&&_daily.rows)||null;
+    AMSDashboard.amsVolume('amsVolume', _rows||d.daily7, _rows?_rows.map(r=>({date:r.date,amount:r.payout})):[], _rows?_daily.sms_total:d.sms_7d, _rows?_daily.payout_total:null, 'Payout');
+    AMSDashboard.amsRail('amsRail',[
+      {label:'SMS Yesterday', value:d.sms_yesterday, icon:'volume'},
+      {label:'Payout This Week', value:d.payout_week, money:true, icon:'money'},
+      {label:'My Numbers', value:d.numbers, icon:'numbers'}
+    ]);
+  }
+  void spark;
+  window.AMSDashboard.areaChart('amsSmsChart',{title:'SMS Last 7 Days',series:'SMS',color:'#6d5df6',rows:d.daily7,valueKey:'count',ariaLabel:'Received OTP per day for the last seven UK reporting days'});
+  window.AMSDashboardCore.refreshExtras('client');
+  if(window.amsRenderClientRecent) amsRenderClientRecent((d&&d.recent)||[]);
+}
+
+async function loadRanges(){
+  try{
+    const ranges=await API.get('/ranges');
+    rangeNames=ranges.map(r=>r.name);
+  }catch(e){rangeNames=[];testNumbers=[];}
+
+  if (window.renderSearchSelect && document.getElementById('numRangeContainer')) {
+    const items = rangeNames.map(r => ({ value: r, label: r }));
+    window.renderSearchSelect('numRangeContainer', {
+      id: 'numRange',
+      placeholder: 'Select Range',
+      items: items,
+      value: (document.getElementById('numRange')?.value) || '',
+      onChange: () => renderNumbers()
+    });
+  } else {
+    fillSel('numRange',rangeNames);
+  }
+
+  if (window.renderSearchSelect && document.getElementById('stRangeContainer')) {
+    const items = [{ value: '', label: 'All Ranges' }].concat(rangeNames.map(r => ({ value: r, label: r })));
+    window.renderSearchSelect('stRangeContainer', {
+      id: 'stRange',
+      placeholder: 'All Ranges',
+      items: items,
+      value: (document.getElementById('stRange')?.value) || '',
+      onChange: () => renderStats()
+    });
+  } else {
+    fillSel('stRange',rangeNames);
+  }
+
+  renderTestRangeSelect();
+  try{ let dl=document.getElementById('stNumDl'); if(!dl){ dl=document.createElement('datalist'); dl.id='stNumDl'; const inp=document.getElementById('stNumber'); if(inp&&inp.parentNode) inp.parentNode.appendChild(dl); }
+    const rj=await API.smsNumbers({from:(document.getElementById('stFrom')?.value)||'',to:(document.getElementById('stTo')?.value)||''});
+    dl.innerHTML=(rj.items||[]).map(x=>`<option value="${String(x.number).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}">${x.count!=null?x.count+' OTPs':''}</option>`).join(''); }catch(e){}
+  try{ const cs=document.getElementById('stCli'); if(cs){ const _f=(document.getElementById('stFrom')?.value)||'', _t=(document.getElementById('stTo')?.value)||''; const rj=await API.smsClis(_f,_t); const items=(rj.items&&rj.items.length)?rj.items:(rj.clis||[]).map(c=>({cli:c})); cs.innerHTML='<option value="">All CLIs</option>'+items.map(x=>`<option value="${String(x.cli).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${String(x.cli).replace(/&/g,'&amp;').replace(/</g,'&lt;')}${x.count!=null?' ('+x.count+')':''}</option>`).join(''); } }catch(e){}
+}
+async function loadStats(){ try{ const sms=await API.get('/sms'); stats=sms.map(r=>{const msg=r.message||'';return {range:r.range_name||'',number:r.number,cli:r.cli||'',msg,date:(r.received_at||'').slice(0,19),otp:r.otp_code||extractOTP(msg)}}); recentTests=sms.slice(0,50).map(r=>({date:(r.received_at||'').slice(0,19),range:r.range_name||'',num:r.number||'',cli:r.cli||''})); }catch(e){ stats=[]; recentTests=[]; } renderStats();loadDashboard(); }
+
+async function loadClientPageData(page){
+  try{
+    if(page==='dashboard') return loadDashboard();
+    if(page==='numbers'){ loadRanges(); return loadNumbers(); }
+    if(page==='stats'){ await loadRanges(); return renderStats(true); }
+    if(page==='test'){ await loadRanges(); await loadTestNumbers(); renderTestRangeSelect(); return renderTest(); }
+  }catch(e){console.warn('loadClientPageData failed',page,e);}
+}
+
+
+
+/* FAST SERVER-SIDE CLIENT NUMBERS */
+let cliNumSeq=0;function cliState(key){window.__cliFast=window.__cliFast||{};if(!window.__cliFast[key])window.__cliFast[key]={page:1,totalPages:1,signature:''};return window.__cliFast[key];}
+function cliShown(p,l,n,t){return t===0?0:Math.min(t,((p-1)*Number(l||25))+n)}
+async function renderNumbers(){
+  const body=document.getElementById('numBody');if(!body)return;
+  const rf=document.getElementById('numRange')?.value||'',len=document.getElementById('numLen')?.value||'25',q=(document.getElementById('numSearch')?.value||'').trim();
+  const state=cliState('numbers');const sig=JSON.stringify({rf,len,q,sort:nSort.k,dir:nSort.d});if(state.signature!==sig){state.page=1;state.signature=sig;}
+  const params=new URLSearchParams({paged:'1',page:String(state.page),limit:len,last_sms:'1'});if(rf)params.set('range',rf);if(q)params.set('search',q);if(nSort.k){params.set('sort',nSort.k);params.set('dir',nSort.d===-1?'desc':'asc');}
+  const seq=++cliNumSeq;let data={rows:[],total:0,page:1,limit:25,totalPages:1};try{data=await API.get('/numbers?'+params.toString())}catch(e){console.warn(e)}if(seq!==cliNumSeq)return;
+  state.page=data.page||1;state.totalPages=data.totalPages||1;
+  numData=(data.rows||[]).map(r=>({range:r.range_name||'',number:r.number,payterm:r.payterm||'Weekly',status:'Active',payout:r.payout,last_sms_at:r.last_sms_at||'',sd:r.sd_limit||0,sw:r.sw_limit||0}));
+  body.innerHTML=numData.map(r=>`<tr><td>${r.range}</td><td><b>${r.number}</b></td><td><span class="tag tag-gray">${r.payterm}</span></td><td><span class="tag tag-green">${r.status}</span></td><td data-label="Payout"><b>${cliPay(r.payout)}</b></td><td><span class="last-sms">${r.last_sms_at||'—'}</span></td><td class="muted">SD : ${r.sd} | SW : ${r.sw}</td></tr>`).join('')||`<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No allocated numbers found</td></tr>`;
+  const currentNumbers = (numData || []).map(r => String(r.number || '').trim()).filter(Boolean);
+  const countEl = document.getElementById('numPageCount');
+  if(countEl) countEl.textContent = currentNumbers.length.toLocaleString();
+  numInfo.innerHTML=`Showing ${cliShown(data.page,data.limit,numData.length,data.total)} of ${data.total||0} numbers`;
+  const pag=numInfo.closest('.table-foot')?.querySelector('.pagination');if(pag&&window.drawServerPagination)drawServerPagination(pag,state,renderNumbers);
+}
+async function copyCurrentPageNumbers(btn){
+  const list = (numData || []).map(r => String(r.number || '').trim()).filter(Boolean);
+  if (!list.length) {
+    alert('No numbers on current page to copy.');
+    return;
+  }
+  const text = list.join('\n');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    const target = btn || null;
+    if (target) {
+      const origHtml = target.innerHTML;
+      target.innerHTML = '<span style="font-size:12px;color:#047857;font-weight:600">Copied ✓</span>';
+      setTimeout(() => { target.innerHTML = origHtml; }, 1500);
+    }
+  } catch (err) {
+    alert('Failed to copy numbers: ' + err.message);
+  }
+}
+window.copyCurrentPageNumbers = copyCurrentPageNumbers;
+async function loadNumbers(){return renderNumbers();}
+
+/* SERVER-SIDE SMS STATS (performance) */
+let cliStatsPager={page:1,totalPages:1,signature:''};
+function cliStatsSig(o){try{return JSON.stringify(o)}catch(e){return String(Date.now())}}
+async function renderStats(fresh){if(!document.getElementById('statsBody'))return;
+  const uk=(window.API&&API.ukToday)?API.ukToday():todayStr();
+  const f=document.getElementById('stFrom'),t=document.getElementById('stTo');
+  if(f&&!f.value){f.value=uk;f.dataset.amsAuto='1';} else if(f&&f.dataset.amsAuto==='1'&&f.value!==uk){f.value=uk;}
+  if(t&&!t.value){t.value=uk;t.dataset.amsAuto='1';} else if(t&&t.dataset.amsAuto==='1'&&t.value!==uk){t.value=uk;}
+  if(!document.__amsAutoDateHook){ document.__amsAutoDateHook=1; document.addEventListener('change',e=>{ if(e.target&&e.target.matches&&e.target.matches('input[type=date]')) e.target.dataset.amsAuto='0'; }); }
+  const rf=stRange.value||'',len=stLen.value||'25',q=(stSearch.value||'').trim();
+  const numF=(document.getElementById('stNumber')?.value||'').trim(),cliF=(document.getElementById('stCliSearch')?.value||'').trim();
+  const from=f?.value||'',to=t?.value||'';
+  /* P20: contains-search (number_like/cli_like) — reference SEARCH NUMBER / SEARCH CLI */
+  const base=new URLSearchParams({from,to});
+  if(rf)base.set('range',rf); if(q)base.set('search',q);
+ 
+  if(numF)base.set('number_like',numF); if(cliF)base.set('cli_like',cliF);
+  const groups=[];['hour','day','month','range','number','cli','currency'].forEach(d=>{const el=document.getElementById('stGb_'+d);if(el&&el.checked)groups.push(d);});
+  const stHead=document.getElementById('stHead'),stFoot=document.getElementById('stFoot');
+  if(groups.length){
+    /* ---- GROUPED MODE: /api/sms/report (client scope backend-enforced) ---- */
+    const sig=cliStatsSig({mode:'group',g:groups.join(','),f:base.toString(),len});if(cliStatsPager.signature!==sig){cliStatsPager.page=1;cliStatsPager.signature=sig;}
+    const params=new URLSearchParams(base);params.set('group',groups.join(','));params.set('page',String(cliStatsPager.page));params.set('limit',len);
+    if(fresh)params.set('_amsr',String(Date.now()));   /* auto-refresh: bypass the short GET cache */
+    let data={rows:[],total:0,page:1,limit:25,totalPages:1,totals:{}};try{data=await API.get('/sms/report?'+params.toString())}catch(e){console.warn(e)}
+    cliStatsPager.page=data.page||1;cliStatsPager.totalPages=data.totalPages||1;
+    const dimL={hour:'Hour',day:'Day',month:'Month',range:'Range',number:'Number',cli:'CLI',currency:'Currency'};
+    stHead.innerHTML='<tr>'+groups.map(g=>`<th>${dimL[g]||g}</th>`).join('')+'<th>SMS</th></tr>';
+    const rows=data.rows||[];
+    const fmtDim=(d,v)=>{const raw=String(v==null?'':v);const esc=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');if(!raw)return '<span class="muted">—</span>';if(d==='number'||d==='cli'||d==='hour'||d==='day'||d==='month')return `<span class="mono">${esc}</span>`;if(d==='range')return `<span class="tag tag-blue">${esc}</span>`;if(d==='currency')return `<span class="tag tag-green">${esc}</span>`;return esc;};
+    statsBody.innerHTML=rows.map(r=>'<tr>'+groups.map(g=>`<td>${fmtDim(g,r.dims&&r.dims[g])}</td>`).join('')+`<td class="cell-money">${(r.sms||0).toLocaleString()}</td></tr>`).join('')||`<tr><td colspan="${groups.length+1}" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+    const tot=data.totals||{};
+    stFoot.innerHTML=`<tr><td colspan="${groups.length}"><b>Totals</b></td><td class="cell-money"><b>${(tot.sms||0).toLocaleString()}</b></td></tr>`;
+    statsInfo.textContent=`Showing ${data.total===0?0:Math.min(data.total,((data.page||1)-1)*Number(data.limit||25)+rows.length)} of ${data.total||0} groups (UK: ${from||'…'} → ${to||'…'})`;
+    const pag=statsInfo.closest('.table-foot')?.querySelector('.pagination');if(pag&&window.drawServerPagination)drawServerPagination(pag,cliStatsPager,renderStats);
+    return;
+  }
+  /* ---- DETAIL MODE: /api/sms/paged (OTP view — unchanged columns) ---- */
+  const sig=cliStatsSig({mode:'detail',f:base.toString(),len});if(cliStatsPager.signature!==sig){cliStatsPager.page=1;cliStatsPager.signature=sig;}
+  const params=new URLSearchParams(base);params.set('page',String(cliStatsPager.page));params.set('limit',len);params.set('sort','date');params.set('dir','desc');
+  if(fresh)params.set('_amsr',String(Date.now()));     /* auto-refresh: bypass the short GET cache */
+  let data={rows:[],total:0,page:1,limit:25,totalPages:1};try{data=await API.get('/sms/paged?'+params.toString())}catch(e){console.warn(e)}cliStatsPager.page=data.page||1;cliStatsPager.totalPages=data.totalPages||1;
+  const rows=(data.rows||[]).map(r=>{const msg=r.message||'';return {range:r.range_name||'',number:r.number||'',cli:r.cli||'',msg,date:(r.received_at||'').slice(0,19),otp:r.otp_code||extractOTP(msg)}});
+  stats=rows;stHead.innerHTML='<tr><th>Date</th><th>Range</th><th>Number</th><th>CLI</th><th>OTP Code</th><th>Copy</th><th>Message</th></tr>';
+  statsBody.innerHTML=rows.map(r=>`<tr><td class="muted">${r.date}</td><td>${r.range}</td><td class="mono">${r.number}</td><td class="mono">${r.cli}</td><td>${r.otp?`<span class="otp-code">${r.otp}</span>`:'<span class="otp-empty">—</span>'}</td><td>${r.otp?`<button type="button" class="ams-btn ams-blue" onclick="copyText('${r.otp}')" data-tip="Copy OTP" title="Copy OTP" aria-label="Copy OTP"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>`:'—'}</td><td class="msg-body">${r.msg}</td></tr>`).join('')||`<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+  stFoot.innerHTML='';
+  statsInfo.textContent=`Showing ${data.total===0?0:Math.min(data.total,((data.page||1)-1)*Number(data.limit||25)+rows.length)} of ${data.total||0} records (UK: ${from||'…'} → ${to||'…'})`;const pag=statsInfo.closest('.table-foot')?.querySelector('.pagination');if(pag&&window.drawServerPagination)drawServerPagination(pag,cliStatsPager,renderStats);}
+function stResetFilters(){ ['stNumber','stCliSearch'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';}); ['stRange'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';}); ['hour','day','month','range','number','cli','currency'].forEach(d=>{const e=document.getElementById('stGb_'+d); if(e) e.checked=false;}); ['stFrom','stTo'].forEach(id=>{const e=document.getElementById(id); if(e){e.value='';e.dataset.amsAuto='';}}); renderStats(); }
+async function loadStats(){ await renderStats(); renderNumbers(); }
+
+/* ============================================================================
+   P20 LATEST-FIRST AUTO REFRESH - Client SMS Detailed Report (+ newest-SMS card)
+   The client's newest-OTP surfaces are the SMS Detailed Report page (stats) and the
+   dashboard "Recent Activity" list. Both pick up a newly received OTP/SMS at the TOP
+   automatically, without the user touching a Range/filter. Backend ordering is already
+   correct (received_at DESC, id DESC - unchanged); these views simply never re-fetched.
+   A limit-1 probe detects a new top record, then the existing loader re-runs with a
+   cache-bypassing GET. Columns, filters, pagination and scoping are untouched.
+   ========================================================================== */
+const AMS_SMS_REFRESH_MS = 8000;
+let amsSmsTopSeenId = null, amsSmsTotalSeen = null;
+function amsClientSmsPageVisible(){
+  const vis=(id)=>{ const el=document.getElementById('page-'+id); return !!(el&&el.classList.contains('active')); };
+  if(vis('stats')) return 'stats';
+  if(vis('dashboard')) return 'dashboard';
+  return '';
+}
+async function amsSmsTopProbeId(){
+  /* the newest row of this client's scope + the scoped total: two cheap facts, no row data */
+  try{
+    const d=await API.get('/sms/paged?page=1&limit=1&sort=date&dir=desc&_amsr='+Date.now());
+    const r=d&&d.rows&&d.rows[0];
+    return { id:r?String(r.id):'', total:String(d&&d.total!=null?d.total:'') };
+  }catch(e){ return null; }
+}
+/* one shared renderer for the dashboard "Recent Activity" card (KPI cards / charts untouched) */
+function amsRenderClientRecent(list){
+  const recentCard=[...document.querySelectorAll('#page-dashboard .card')].find(c=>c.textContent.includes('Recent Activity'));
+  if(!recentCard) return;
+  const head=recentCard.querySelector('.card-head')?.outerHTML||'';
+  recentCard.innerHTML=head+((list||[]).map(r=>`<div class="li"><div class="l"><div class="ic si ro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div><div class="t1">New SMS — ${r.number||'—'}</div><div class="t2">${(r.received_at||'').slice(0,19)} · ${r.cli||'—'}</div></div></div></div>`).join('')||'<div class="muted" style="padding:18px">No recent activity yet</div>');
+}
+async function amsSmsAutoRefresh(){
+  if(document.hidden) return;
+  const page=amsClientSmsPageVisible();
+  if(!page) return;
+  const probe=await amsSmsTopProbeId();
+  if(!probe||!probe.id) return;
+  if(amsSmsTopSeenId===null){ amsSmsTopSeenId=probe.id; amsSmsTotalSeen=probe.total; return; } /* first look */
+  /* refresh when a NEW top record appeared, or when the scoped total changed (a new SMS whose
+     carrier timestamp is older still has to show up, in its own date position) */
+  const changed = (probe.id!==amsSmsTopSeenId) || (probe.total!==amsSmsTotalSeen);
+  amsSmsTopSeenId=probe.id; amsSmsTotalSeen=probe.total;
+  if(!changed) return;
+  if(page==='stats') return renderStats(true);              /* keeps the current page + filters */
+  try{ const d=await API.get('/dashboard?_amsr='+Date.now()); amsRenderClientRecent(d.recent); }catch(e){}
+}
+setInterval(amsSmsAutoRefresh, AMS_SMS_REFRESH_MS);
+setTimeout(amsSmsAutoRefresh, 1500);                          /* establish the baseline early */
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(amsSmsAutoRefresh, 200); });
+
+/* FAST PRIORITY INIT */
+loadProfile();loadDashboard();
+setTimeout(async()=>{try{await loadRanges();await Promise.allSettled([loadNumbers(),loadStats()]);}catch(e){console.warn('client critical preload failed',e)}},50);
+setTimeout(showClientWelcome,700);
+</script>
+
+</body>
+</html>

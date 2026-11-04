@@ -1,0 +1,25 @@
+{
+  "name": "global-sms-panel",
+  "version": "1.0.0",
+  "description": "GLOBAL SMS multi-level SMS/OTP panel for Admin, Manager, Agent and Client roles.",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^11.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "smpp": "^0.6.0-rc.4",
+    "xlsx": "^0.18.5"
+  }
+}

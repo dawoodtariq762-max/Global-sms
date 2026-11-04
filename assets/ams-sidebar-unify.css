@@ -1,0 +1,209 @@
+/* ============================================================================
+   ams-sidebar-unify.css
+   ----------------------------------------------------------------------------
+   The Admin, Manager and Agent panels were built with three different sidebar
+   implementations (.sidebar / .appbar / .rail) and three different class
+   vocabularies for their nav items. The shared design system (ams-ds.css)
+   styles `.nav-item` / `.sub-item` and the `:is(.sidebar,.rail,.appbar)`
+   background identically, but Manager used `.navtab`/`.dropitem` and Agent used
+   `.ritem`/`.rsubitem`, so those panels silently fell back to their own inline
+   CSS and drifted.
+
+   The panels have now been aliased onto the shared class names. This file
+   finishes the job by making the *geometry and behaviour* identical. It is
+   loaded after each panel's own styles so it resolves the !important fights
+   between them in one place.
+
+   Nothing here touches permissions, menus or business logic.
+   ========================================================================== */
+
+/* --- 1. Canonical geometry: fixed, full-height, 210px, Admin's easing ------- */
+:is(.sidebar, .rail, .appbar) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 210px !important;
+  min-width: 210px !important;
+  max-width: 210px !important;
+  flex-shrink: 0 !important;
+  z-index: 50 !important;
+  transform: translateX(0) !important;
+  transition: transform .32s cubic-bezier(.22, .8, .24, 1),
+              box-shadow .32s ease !important;
+  will-change: transform;
+}
+
+/* --- 2. Agent rail: no collapsed state, no hover-expansion -----------------
+   The rail previously rendered at 76px and expanded to 238px on hover, which
+   meant it kept resizing while the pointer crossed it and never matched the
+   Admin sidebar's fixed width. */
+.rail { align-items: stretch !important; }
+.rail:hover { width: 210px !important; }
+.rail .brand-text,
+.rail .ritem .lbl,
+.rail .rsubitem .lbl,
+.rail .ritem .chev { opacity: 1 !important; display: block !important; }
+/* (Removed: `.rail .rsub { max-height: none !important; }`. It pinned every Agent
+   sub-menu permanently open, so the SMS Numbers / CDR Stats parents toggled
+   their `.open` class but nothing visibly moved and the chevron never turned.
+   Sub-menus now follow `.open` exactly like Admin's .submenu; the open/close
+   motion is in ams-motion.css.) */
+
+/* --- 3. Content offset ----------------------------------------------------
+   Each panel already offsets its own wrapper by 210px (.main for Admin and
+   Agent, .content for Manager). With the sidebar taken out of flow by rule 1,
+   that single offset now lands correctly. Previously the Agent rail was
+   `position: relative`, so it occupied 210px of flow AND .main added another
+   210px margin — pushing content to 420px and leaving a dead gutter. */
+.main { margin-left: 210px !important; }
+.appbar ~ .content,
+.appbar + .content { margin-left: 210px !important; }
+
+/* --- 4. Mobile: identical off-canvas behaviour on all three panels --------- */
+@media (max-width: 900px) {
+  :is(.sidebar, .rail, .appbar) { transform: translateX(-100%) !important; }
+  :is(.sidebar, .rail, .appbar).show,
+  html.ams-ui-sb-open :is(.sidebar, .rail, .appbar) { transform: translateX(0) !important; }
+  .main,
+  .appbar ~ .content { margin-left: 0 !important; }
+}
+
+/* --- 5. Dashboard card rows: one consistent rhythm ------------------------
+   Admin spaces card rows with a 14px gap and a 16px bottom margin. Agent and
+   Manager additionally used `.grid2` at 18px/20px, which broke the rhythm and
+   produced the visibly uneven OTP card spacing.
+   NOTE on specificity: ams-layout.css sets `.grid2 { gap: 18px !important }`
+   via `body:is(.ams-light,.ams-dark) :is(.stats-grid,.dash-metrics,.grid2,...)`.
+   `.stats-grid` escapes that rule at (0,4,2) from ams-ds.css, but `.grid2`
+   does not — hence the 14px vs 18px mismatch. The selector below deliberately
+   matches ams-ds.css's own specificity so the Admin value (14px) wins. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .grid2 {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+  gap: 14px !important;
+  margin-bottom: 16px !important;
+}
+@media (max-width: 1000px) {
+  html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .grid2 { grid-template-columns: 1fr !important; }
+}
+
+/* --- 6. Shared entrance animation for every card row ----------------------
+   ams-ds.css animates `.stats-grid` and `.dash-metrics` children. Agent and
+   Manager render their OTP cards into `.ams-ui-cards` / `.ams-ui-wcards` and use
+   `.grid2` for a further row, so those rows had no animation — the "missing
+   lighting" in the Manager panel. Extend the same motion to all of them. */
+@keyframes ams-ui-rise { from { opacity: 0; transform: translateY(10px); } }
+.page.active :is(.stats-grid, .dash-metrics, .ams-ui-cards, .ams-ui-wcards, .grid2) > * {
+  animation: ams-ui-rise .42s cubic-bezier(.22, .8, .24, 1) backwards;
+}
+.page.active :is(.stats-grid, .dash-metrics, .ams-ui-cards, .ams-ui-wcards, .grid2) > :nth-child(2) { animation-delay: .04s; }
+.page.active :is(.stats-grid, .dash-metrics, .ams-ui-cards, .ams-ui-wcards, .grid2) > :nth-child(3) { animation-delay: .08s; }
+.page.active :is(.stats-grid, .dash-metrics, .ams-ui-cards, .ams-ui-wcards, .grid2) > :nth-child(4) { animation-delay: .12s; }
+
+/* --- 7. Top toolbar: Admin's 60px bar is the reference --------------------
+   Admin and Agent both render a <header class="topbar">. Agent's user badge
+   (.who) rendered 47px tall — taller than the 38px of every other top-bar
+   control — so the bar grew past its 60px min-height to 64.25px and dropped
+   the page heading 4px lower than Admin's. Cap the badge to 38px so the bar
+   settles at Admin's 60px.
+
+   Manager's top bar is instead a <header class="mgr-topbar"> at 56px, which is
+   why its heading sat 4px higher. Make all three 60px. */
+/* Manager's top bar is a <header class="mgr-topbar"> at 56px; Admin's .topbar
+   and Agent's .topbar are both 60px. That 4px is why Manager's page heading
+   sat 4px higher. Make all three 60px. */
+.mgr-topbar,
+body .mgr-topbar { height: 60px !important; min-height: 60px !important; }
+.topbar :is(.who, .who .av) { box-sizing: border-box !important; }
+.topbar .who {
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  align-items: center !important;
+}
+.topbar .who .av { width: 28px !important; height: 28px !important; flex: none !important; }
+
+/* NOTE: sections 8-10 use the same scope prefix as ams-ds.css on purpose. The
+   panels carry their own !important sidebar rules, and only matching that
+   specificity (this file loads later) lets Admin's values win. */
+
+/* --- 8. Brand block: Admin's compact logo + name row -----------------------
+   Admin: 73px row = 16px padding, 40x40 logo (11px radius), 12px gap, 13px/600
+   label, hairline underneath. Manager rendered a 159px centred card and Agent a
+   92px one. Markup is untouched (logo stays `img[data-brand-logo]`, so branding
+   overrides still work); only the layout changes. */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .appbar-top {
+  padding: 0 !important;
+  gap: 0 !important;
+  flex: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, .07) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .appbar .brand {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  min-height: 0 !important;
+  padding: 16px 18px !important;
+  gap: 12px !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .appbar .brand .logo {
+  width: 40px !important; height: 40px !important; flex: none !important; margin: 0 !important;
+  border-radius: 11px !important; overflow: hidden !important; background: #fff !important; /* same white tile as Admin's .sb-logo */
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .appbar .brand .logo img { width: 40px !important; height: 40px !important; object-fit: contain !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .appbar .brand small { font-size: 13px !important; font-weight: 600 !important; color: #c5d0e6 !important; text-align: left !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail { padding: 0 !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail > .logo {
+  position: absolute !important; left: 18px; top: 16px; z-index: 1;
+  width: 40px !important; height: 40px !important; margin: 0 !important;
+  border-radius: 11px !important; overflow: hidden !important; background: #fff !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail > .logo img { width: 40px !important; height: 40px !important; object-fit: contain !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail .brand-text {
+  box-sizing: border-box; flex: none !important;
+  display: flex !important; align-items: center;
+  height: 73px; margin: 0 !important; padding: 0 12px 0 70px !important;
+  text-align: left !important;
+  border-bottom: 1px solid rgba(255, 255, 255, .07) !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail .brand-text small { display: block !important; font-size: 13px !important; font-weight: 600 !important; }
+
+/* --- 9. Nav rhythm: Admin's 38px items on a 40px pitch ---------------------- */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .navtabs { gap: 0 !important; padding: 10px 0 24px !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail-nav { padding: 10px 0 24px !important; }
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .navtab,
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail .ritem {
+  box-sizing: border-box;
+  min-height: 38px !important; height: auto !important;
+  padding: 9px 12px !important; margin: 0 0 2px !important;
+  border-radius: 10px !important;
+}
+
+/* --- 10. Sub-menu group chrome: Admin's indented rail ----------------------- */
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .appbar .dropmenu,
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail .rsub {
+  margin: 0 0 0 20px !important;
+  padding: 0 0 0 6px !important;
+  border: 0 !important;
+  border-left: 1px solid rgba(255, 255, 255, .1) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .dropitem,
+html body.ams-panel.ams-ui:is(.ams-light, .ams-dark) .rail .rsubitem {
+  box-sizing: border-box;
+  min-height: 36px !important; height: auto !important;
+  margin: 2px 0 !important; padding: 9px 12px !important;
+  border-radius: 10px !important;
+}
+
+/* Reduced-motion users keep the layout but not the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .page.active :is(.stats-grid, .dash-metrics, .ams-ui-cards, .ams-ui-wcards, .grid2) > * { animation: none !important; }
+  :is(.sidebar, .rail, .appbar) { transition: none !important; }
+}

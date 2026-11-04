@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="en" class="ams-light">
+<head><script src="/assets/ams-storage.js?v=gsms-20261104"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/assets/ams-favicon.png?v=gsms-20261104"  data-brand-favicon />
+<title>GLOBAL SMS — Agent Panel</title>
+<style id="route-auth-hide">html{visibility:hidden;}
+.rail{width:76px!important;}
+.rail:hover{width:238px!important;}
+.main{margin-left:76px!important;}
+@media(max-width:900px){.main{margin-left:0!important;}
+.rail{transform:translateX(-100%);}
+.rail.show{transform:translateX(0);}}
+.page-head{border-bottom:1px solid #ddd!important;padding-bottom:14px!important;}
+.page > .toolbar,.page > .table-wrap,.page > .card,.page > .grid2{position:relative!important;}
+.page > .toolbar:not(:first-child)::before,.page > .table-wrap:not(:first-child)::before,.page > .card:not(:first-child)::before,.page > .grid2:not(:first-child)::before{content:"";position:absolute;left:0;right:0;top:-10px;height:1px;opacity:.95;}
+.table-wrap + .table-wrap{margin-top:18px!important;}
+.toolbar + .table-wrap,.card + .table-wrap,.stats-grid + .toolbar,.stats-grid + .grid2{margin-top:18px!important;}
+.hamburger{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:0;border-radius:10px;font-size:22px;font-weight:900;cursor:pointer;}
+@media(max-width:900px){.hamburger{display:flex!important;}
+.rail.show{transform:translateX(0)!important;width:238px!important;align-items:stretch!important;}
+.rail.show .brand-text,.rail.show .ritem .lbl,.rail.show .rsubitem .lbl,.rail.show .ritem .chev{opacity:1!important;display:block!important;}
+.rail.show .rsub{max-height:500px!important;}}</style>
+<script>
+(function(){
+  var expected='agent';
+  try{
+    var token=sessionStorage.getItem('ams_token')||localStorage.getItem('ams_token');
+    var role=sessionStorage.getItem('ams_role')||localStorage.getItem('ams_role');
+    if(!token || role!==expected){ location.replace('/panel-login'); return; }
+    fetch('/api/me',{headers:{Authorization:'Bearer '+token}})
+      .then(function(r){ if(!r.ok) throw new Error('auth'); return r.json(); })
+      .then(function(u){ if(!u || u.role!==expected) throw new Error('role'); document.documentElement.style.visibility='visible'; })
+      .catch(function(){ sessionStorage.clear(); ['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k)); location.replace('/panel-login'); });
+  }catch(e){ sessionStorage.clear(); ['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k)); location.replace('/panel-login'); }
+})();
+</script>
+<style>*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:.1px;}
+a{text-decoration:none;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{border-radius:6px;}
+.layout{display:flex;min-height:100vh;}
+.rail{width:76px;flex-shrink:0;border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:50;display:flex;flex-direction:column;align-items:center;padding:14px 0;transition:width .22s ease;overflow:hidden;}
+.rail:hover{width:238px;align-items:stretch;}
+.rail .logo{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;flex-shrink:0;}
+.rail:hover .logo{margin:0 14px 8px;}
+.rail .logo svg{width:24px;height:24px;stroke:#fff;}
+.brand-text{display:none;white-space:nowrap;padding:0 16px 14px;border-bottom:1px solid var(--border);margin-bottom:10px;}
+.rail:hover .brand-text{display:block;}
+.brand-text h1{font-size:15px;font-weight:700;}
+.brand-text small{font-size:11px;}
+.rail-nav{flex:1;width:100%;overflow-y:auto;overflow-x:hidden;padding:4px 0;}
+.rail-nav::-webkit-scrollbar{width:0;}
+.ritem{display:flex;align-items:center;gap:14px;height:46px;margin:3px 12px;padding:0 14px;border-radius:12px;cursor:pointer;transition:.15s;white-space:nowrap;position:relative;}
+.ritem svg{width:20px;height:20px;stroke:currentColor;flex-shrink:0;}
+.ritem .lbl{font-size:13.5px;font-weight:500;opacity:0;transition:opacity .15s;}
+.rail:hover .ritem .lbl{opacity:1;}
+.ritem .chev{margin-left:auto;width:14px;height:14px;opacity:0;transition:.2s;}
+.rail:hover .ritem .chev{opacity:.7;}
+.ritem.open .chev{transform:rotate(90deg);}
+.rsub{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.rsub.open{max-height:200px;}
+.rail:not(:hover) .rsub{max-height:0;}
+.rsubitem{display:flex;align-items:center;gap:12px;height:38px;margin:2px 12px 2px 26px;padding:0 12px;border-radius:9px;cursor:pointer;font-size:12.5px;white-space:nowrap;transition:.15s;}
+.rsubitem .d{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.rsubitem .lbl{opacity:0;}
+.rail:hover .rsubitem .lbl{opacity:1;}
+.main{flex:1;margin-left:76px;display:flex;flex-direction:column;min-width:0;}
+.topbar{height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 24px;position:sticky;top:0;z-index:40;}
+.tb-title{font-size:15px;font-weight:600;}
+.clock{margin-left:auto;font-size:12.5px;padding:7px 13px;border-radius:9px;border:1px solid var(--border);}
+.tb-btn{width:38px;height:38px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:.15s;}
+.tb-btn svg{width:19px;height:19px;stroke:currentColor;}
+.tb-btn .dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;border:2px solid var(--bg2);}
+.who{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 6px;border:1px solid var(--border);border-radius:24px;}
+.who .av{width:31px;height:31px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.who .nm{font-size:13px;font-weight:600;}
+.who .rl{font-size:10.5px;}
+.content{padding:24px;flex:1;}
+.page-head{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.page-head h2{font-size:23px;font-weight:600;}
+.breadcrumb{font-size:12.5px;margin-top:4px;}
+.breadcrumb b{font-weight:500;}
+.head-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.page{display:none;}
+.page.active{display:block;animation:fade .3s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}
+to{opacity:1;transform:translateY(0);}}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;}
+.stat-card{border:1px solid var(--border);border-radius:16px;padding:19px;display:flex;align-items:center;gap:15px;transition:.2s;position:relative;overflow:hidden;}
+.stat-card:hover{transform:translateY(-3px);}
+.stat-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;}
+.si{width:46px;height:46px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.si svg{width:22px;height:22px;}
+.si.bl svg{stroke:#93c5fd;}
+.si.in svg{stroke:#a9c2ff;}
+.si.sk svg{stroke:#7dd3fc;}
+.si.am svg{stroke:#fbbf24;}
+.si.gr svg{stroke:#86efac;}
+.si.rd svg{stroke:#fda4af;}
+.stat-info h3{font-size:24px;font-weight:700;line-height:1;}
+.stat-info p{font-size:12.5px;margin-top:6px;}
+.stat-info .trend{font-size:11.5px;margin-top:5px;}
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:20px;}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr;}}
+.card{border:1px solid var(--border);border-radius:16px;padding:20px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-head h3{font-size:15px;font-weight:600;}
+.card-head .sub{font-size:12px;}
+.chip{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);}
+.chart{display:flex;align-items:flex-end;gap:12px;height:190px;padding-top:10px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;}
+.bar-track{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;}
+.bar{width:58%;max-width:32px;border-radius:7px 7px 0 0;position:relative;cursor:pointer;transition:.4s;}
+.bar .val{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:10px;}
+.bar-label{font-size:11px;}
+.li{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.li:last-child{border-bottom:none;}
+.li .l{display:flex;align-items:center;gap:11px;}
+.li .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.li .ic svg{width:18px;height:18px;}
+.li .t1{font-size:13px;}
+.li .t2{font-size:11.5px;margin-top:2px;}
+.li .v{font-size:16px;font-weight:700;}
+.toolbar{border:1px solid var(--border);border-radius:14px;padding:15px 17px;margin-bottom:16px;}
+.filter-row{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-bottom:13px;}
+.filter-row:last-child{margin-bottom:0;}
+select,input[type=text],input[type=number],input[type=email],input[type=password],input[type=date],textarea{border:1px solid var(--border2);border-radius:9px;padding:10px 12px;font-size:13px;outline:none;transition:.15s;width:100%;font-family:inherit;}
+.filter-row select,.filter-row input{width:auto;}
+.sel-lg{min-width:210px;}
+.btn{border:none;border-radius:9px;padding:10px 17px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap;}
+.btn:hover{transform:translateY(-1px);}
+.btn-ghost{border:1px solid var(--border2);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.table-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.tc-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.tc-left label{font-size:13px;}
+.exp-btns{display:flex;gap:6px;}
+.exp-btns .btn{padding:7px 12px;font-size:12px;}
+.tc-right{display:flex;align-items:center;gap:8px;}
+.tc-right label{font-size:13px;}
+.bulk-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 2px;}
+.bulk-bar .info{font-size:12.5px;margin-right:auto;}
+.table-wrap{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:16px;}
+.tscroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+thead th{text-align:left;padding:13px 16px;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--border2);user-select:none;}
+th.sortable{cursor:pointer;}
+thead th .sort{opacity:.4;margin-left:5px;}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+.cell-sub{font-size:11.5px;}
+.cell-money{font-weight:600;}
+.mono{font-family:"Courier New",monospace;letter-spacing:.5px;}
+.msg-body{white-space:normal;max-width:340px;min-width:240px;line-height:1.55;font-size:13px;}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:11.5px;font-weight:600;}
+.tag-mgr{border:1px solid #ddd;}
+.tag-agt{border:1px solid #ddd;}
+.tag-cli{border:1px solid #ddd;}
+.icon-btn{width:30px;height:30px;border-radius:7px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-right:4px;transition:.15s;}
+.icon-btn svg{width:15px;height:15px;stroke:#fff;}
+.table-foot{display:flex;align-items:center;justify-content:space-between;padding:13px 17px;flex-wrap:wrap;gap:10px;}
+.table-foot .info{font-size:12.5px;}
+.pagination{display:flex;gap:5px;}
+.pagination button{border:1px solid var(--border2);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12.5px;}
+.allocate-num{width:80px !important;padding:7px 9px !important;}
+.readonly-note{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 11px;border-radius:8px;border:1px solid #ddd;}
+.masknote{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 11px;border-radius:8px;border:1px solid #ddd;}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;animation:fade .2s ease;}
+.modal{border:1px solid var(--border2);border-radius:16px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:17px 21px;border-bottom:1px solid var(--border);}
+.modal-head h3{font-size:16px;font-weight:600;}
+.modal-close{border:none;background:transparent;cursor:pointer;font-size:26px;line-height:1;min-width:40px;min-height:40px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;}
+.modal-body{padding:19px 21px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12.5px;margin-bottom:6px;font-weight:500;}
+.form-group .hint{font-size:11px;margin-top:4px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-foot{padding:15px 21px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.switch{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.switch input{width:auto;}
+.dash-metrics{grid-template-columns:repeat(4,minmax(210px,1fr))!important;gap:20px!important;margin-bottom:20px!important;}
+@media(max-width:1100px){.dash-metrics{grid-template-columns:repeat(2,minmax(210px,1fr))!important;}}
+@media(max-width:620px){.dash-metrics{grid-template-columns:1fr!important;}}
+.stat-card.dash-metric{border:0!important;border-radius:18px!important;min-height:92px!important;padding:16px 18px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;overflow:hidden!important;position:relative!important;transform:none!important;}
+.stat-card.dash-metric::before{content:""!important;display:block!important;position:absolute!important;width:140px!important;height:140px!important;right:-58px!important;top:-62px!important;border-radius:50%!important;}
+.stat-card.dash-metric::after{content:"";position:absolute;width:72px;height:72px;right:34px;bottom:-34px;border-radius:50%;}
+.stat-card.dash-metric .stat-info{position:relative;z-index:1;}
+.stat-card.dash-metric .stat-info p{text-transform:uppercase!important;font-size:10.5px!important;font-weight:800!important;letter-spacing:.42px!important;margin:0 0 9px!important;}
+.stat-card.dash-metric .stat-info h3{font-size:22px!important;font-weight:850!important;margin:0!important;letter-spacing:.2px;}
+.stat-card.dash-metric .stat-info span{font-size:11px!important;display:block!important;margin-top:2px!important;}
+.dash-go{width:24px;height:24px;border-radius:50%;border:1px solid #ddd;display:grid;place-items:center;font-size:12px;font-weight:900;position:relative;z-index:1;}
+.dash-note-card{padding:18px!important;border-radius:18px!important;}
+.dash-note-card .card-head{margin-bottom:12px!important;}
+.bar{border-radius:9px 9px 0 0!important;}
+.tag-mgr{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-agt{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-cli,.tag-client{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-blue{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-green{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-amber{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-red{border:1px solid #ddd!important;font-weight:800!important;}
+.tag-gray{border:1px solid #ddd!important;font-weight:800!important;}
+body{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;font-size:14px!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+table{font-size:13.5px!important;line-height:1.6!important;border-collapse:separate!important;border-spacing:0 3px!important;}
+thead th{font-weight:600!important;letter-spacing:.25px!important;}
+table td{font-weight:500!important;}
+.page-head h2{font-weight:600!important;}
+.card-head h3{font-weight:600!important;}
+.tag,.tag-mgr,.tag-agt,.tag-cli,.tag-client,.tag-blue,.tag-green,.tag-amber,.tag-red,.tag-gray{border:1px solid #ddd!important;border-radius:8px!important;padding:5px 10px!important;font-weight:600!important;font-size:12px!important;line-height:1.15!important;letter-spacing:0!important;display:inline-flex;align-items:center;gap:4px;}
+.cell-money{font-weight:700!important;}
+.payout-rate,.rate-cell{font-weight:700!important;}
+.msg-body{line-height:1.6!important;}
+.mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace!important;font-weight:600!important;}
+.filter-row label{font-weight:600;font-size:13px;}
+body{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;}
+.sidebar,.rail{border-right:1px solid #ddd!important;}
+.topbar,.tb1,.navshell{border-bottom:1px solid #ddd!important;}
+.sidebar::before,.rail::before,.topbar::before,.tb1::before,.navshell::before{display:none!important;}
+.sb-brand,.rail-brand{border-bottom:1px solid #ddd!important;}
+.sb-section,.sb-sec{font-weight:700!important;letter-spacing:.08em!important;}
+.nav-item svg,.tab svg,.ritem svg,.navtab svg,.sub-item svg,.rsubitem svg{stroke:currentColor!important;}
+.nav-item.active svg,.tab.active svg,.ritem.active svg{stroke:#FFFFFF!important;}
+.sub-item.active,.rsubitem.active{font-weight:700!important;}
+.page-head h2,.card-head h3{font-weight:700!important;}
+table{border-collapse:separate!important;border-spacing:0 3px!important;}
+thead th{font-weight:700!important;border-top:1px solid #ddd!important;border-bottom:1px solid #ddd!important;}
+tbody tr td{border-bottom:1px solid #ddd!important;}
+.dash-metric{border-radius:16px!important;}
+.btn{border-radius:10px!important;min-height:38px!important;font-weight:700!important;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.1!important;}
+.btn-ghost{border:1px solid #ddd!important;}
+.btn:hover{transform:translateY(-1px);}
+.avatar,.who .av{border:2px solid #ddd!important;}
+.tag,.tag-mgr,.tag-agt,.tag-cli,.tag-client,.tag-blue,.tag-green,.tag-amber,.tag-red,.tag-gray{border:1px solid #ddd!important;border-radius:8px!important;font-weight:600!important;}
+.cell-money{font-weight:700!important;}
+.payout-rate,.rate-cell{font-weight:700!important;}
+body{font-family:Inter,Roboto,"Segoe UI",Arial,sans-serif!important;letter-spacing:0!important;font-size:14px!important;}
+.sidebar{width:260px!important;}
+.main{margin-left:260px!important;}
+.content{padding:26px 22px!important;}
+.nav-item,.sub-item,.tab,.ritem,.rsubitem,.navtab{font-size:13.25px!important;letter-spacing:0!important;line-height:1.35!important;gap:12px!important;}
+.nav-item span,.sub-item span,.tab span,.ritem .lbl,.rsubitem .lbl,.navtab .lbl{white-space:normal!important;word-break:normal!important;}
+.sb-brand h1,.sb-brand small{letter-spacing:0!important;}
+.sb-section,.sb-sec{letter-spacing:.07em!important;font-size:10.5px!important;}
+.topbar,.tb1{height:56px!important;padding-left:22px!important;padding-right:20px!important;}
+.tb-date,.clock{font-size:12.5px!important;letter-spacing:0!important;}
+.page-head{margin-bottom:20px!important;}
+.page-head h2{font-size:23px!important;letter-spacing:-.02em!important;line-height:1.2!important;}
+.breadcrumb{font-size:12.5px!important;letter-spacing:0!important;}
+.dash-metrics{gap:20px!important;}
+.stat-card.dash-metric{min-height:96px!important;padding:17px 18px!important;border-radius:16px!important;}
+.stat-card.dash-metric .stat-info p{font-size:11.5px!important;letter-spacing:.18px!important;margin-bottom:8px!important;}
+.stat-card.dash-metric .stat-info h3{font-size:24px!important;line-height:1!important;}
+.stat-card.dash-metric .stat-info span{font-size:11.5px!important;}
+.card{border-radius:16px!important;}
+.card-head h3{font-size:15px!important;letter-spacing:0!important;}
+.card-head .sub{font-size:12.5px!important;letter-spacing:0!important;}
+.chart{height:205px!important;}
+.bar .val{font-size:11px!important;}
+.bar-label{font-size:11.5px!important;}
+table{font-family:Inter,Roboto,"Segoe UI",Arial,sans-serif!important;font-size:13.5px!important;}
+thead th{font-size:11.5px!important;letter-spacing:.25px!important;}
+.table-controls label,.tc-right label,.tc-left label{font-size:12.5px!important;}
+.btn{min-height:38px!important;padding:9px 15px!important;font-size:12.5px!important;}
+.btn-sm{min-height:32px!important;padding:6px 11px!important;}
+@media(max-width:900px){.sidebar{width:260px!important;}
+.main{margin-left:0!important;}
+.content{padding:20px 14px!important;}}
+.sb-logo svg,.brand .logo svg,.rail .logo svg,.sb-brand .logo svg,.brand-logo .logo svg{stroke:#fff!important;}
+.sb-brand h1,.brand h1,.brand-text h1,.brand-logo h1{font-weight:700!important;letter-spacing:-.01em!important;}
+.ams-sms-logo-img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;border-radius:inherit!important;}
+.sb-logo,.brand .logo,.rail .logo,.sb-brand .logo,.brand-logo .logo{padding:0!important;overflow:hidden!important;border:1px solid #ddd!important;}
+.brand-logo .logo{width:92px!important;height:92px!important;border-radius:22px!important;margin-bottom:16px!important;}
+.sb-logo{width:44px!important;height:44px!important;border-radius:13px!important;}
+.brand .logo,.sb-brand .logo{width:46px!important;height:46px!important;border-radius:13px!important;}
+.rail .logo{width:50px!important;height:50px!important;border-radius:14px!important;}
+.brand-panel .brand-logo{align-items:flex-start!important;}
+.brand-panel .brand-logo h1{font-size:24px!important;}
+.sidebar,.rail{border-right:1px solid #ddd!important;}
+.sb-brand,.rail-brand,.brand-text{border-bottom:1px solid #ddd!important;}
+.nav-item svg,.sub-item svg,.ritem svg,.rsubitem svg{stroke:currentColor!important;}
+.nav-item.active svg,.ritem.active svg,.tab.active svg{stroke:#0F172A!important;}
+.appbar{border-bottom:1px solid #ddd!important;}
+.sb-logo,.brand .logo,.rail .logo,.sb-brand .logo{border:1px solid #ddd!important;}
+.topbar,.tb1{border-bottom:1px solid #ddd!important;}
+.rail{width:76px!important;}
+.rail:hover{width:238px!important;}
+.main{margin-left:76px!important;}
+@media(max-width:900px){.main{margin-left:0!important;}
+.rail{transform:translateX(-100%);}
+.rail.show{transform:translateX(0);}}
+.page-head{border-bottom:1px solid #ddd!important;padding-bottom:14px!important;}
+.page > .toolbar,.page > .table-wrap,.page > .card,.page > .grid2{position:relative!important;}
+.page > .toolbar:not(:first-child)::before,.page > .table-wrap:not(:first-child)::before,.page > .card:not(:first-child)::before,.page > .grid2:not(:first-child)::before{content:"";position:absolute;left:0;right:0;top:-10px;height:1px;opacity:.95;}
+.table-wrap + .table-wrap{margin-top:18px!important;}
+.toolbar + .table-wrap,.card + .table-wrap,.stats-grid + .toolbar,.stats-grid + .grid2{margin-top:18px!important;}
+@media(min-width:901px){.rail{width:260px!important;align-items:stretch!important;}
+.rail:hover{width:260px!important;}
+.rail .logo{margin:0 14px 8px!important;}
+.brand-text{display:block!important;}
+.ritem .lbl,.rsubitem .lbl,.ritem .chev{opacity:1!important;display:block!important;}
+.rail:not(:hover) .rsub.open,.rsub.open{max-height:500px!important;}
+.main{margin-left:260px!important;}}
+@media(max-width:900px){.rail{width:260px!important;align-items:stretch!important;transform:translateX(-105%)!important;}
+.rail.show{transform:translateX(0)!important;width:260px!important;}
+.rail.show .brand-text,.rail.show .ritem .lbl,.rail.show .rsubitem .lbl,.rail.show .ritem .chev{opacity:1!important;display:block!important;}
+.main{margin-left:0!important;}
+.content{padding:20px 14px!important;}}</style>
+
+
+
+<link rel="stylesheet" href="/assets/ams.css?v=gsms-20261104"/><script src="/assets/ams.js?v=gsms-20261104" defer></script><script src="/assets/credit-notes.js?v=gsms-20261104" defer></script>
+
+<link rel="stylesheet" href="/assets/ams-light.css?v=gsms-20261104"/>
+<!-- FINAL POLISH 2C: shared theme-neutral geometry. Loaded LAST so Light and Dark
+     share exactly one layout (sizes, spacing, flex/grid, font metrics) while each
+     theme keeps painting its own colours. Generated by scripts/split-theme-geometry.py. -->
+<link rel="stylesheet" href="/assets/ams-layout.css?v=gsms-20261104"/>
+<!-- FINAL POLISH 2A/2B/2C/2D/2E: shared panel chrome (hamburger + sidebar,
+     sun/moon theme toggle, filter alignment contract, heading contrast,
+     Terms and Conditions dialog, dark dropdown paint). Loaded last. -->
+<link rel="stylesheet" href="/assets/ams-chrome.css?v=gsms-20261104"/>
+<link rel="stylesheet" href="/assets/ams-ds.css?v=gsms-20261104"/>
+  <link rel="stylesheet" href="/assets/ams-sidebar-unify.css?v=gsms-20261104"/>
+<script src="/assets/ams-ds.js?v=gsms-20261104" defer></script>
+<script src="/assets/dashboard-ui.js?v=gsms-20261104"></script>
+
+<script src="/assets/number-copy.js?v=gsms-20261104"></script>
+<link rel="stylesheet" href="/assets/ams-motion.css?v=gsms-20261104"/><script src="/assets/ams-motion.js?v=gsms-20261104" defer></script>
+<link rel="stylesheet" href="/branding/runtime.css"/><script src="/branding/runtime.js" defer></script><link rel="stylesheet" href="/assets/ams-panel.css?v=gsms-20261104"/><link rel="stylesheet" href="/assets/ams-unify.css?v=gsms-20261104"/><script src="/assets/ams-cli-search.js?v=gsms-20261104" defer></script></head>
+<body class="ams-light ams-panel ams-ui">
+<div class="layout">
+  <!-- ===== ICON RAIL ===== -->
+  <aside class="rail" id="rail">
+    <div class="logo"><img class="ams-sms-logo-img" data-brand-logo src="/assets/ams-logo-square.png?v=gsms-20261104" alt="GLOBAL SMS" /></div>
+    <div class="brand-text"><h1 data-brand="name">GLOBAL SMS</h1><small>Agent Panel</small></div>
+    <nav class="rail-nav sb-nav">
+      <div class="ritem active nav-item" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span class="lbl">Dashboard</span></div>
+      <div class="ritem nav-item" data-page="extapi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg><span class="lbl">REST API</span></div>
+
+      <div class="ritem nav-item" id="pSms" onclick="toggleSub('sSms','pSms')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">SMS Numbers</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="rsub submenu" id="sSms">
+        <div class="rsubitem sub-item" data-page="rateCard"><span class="d"></span><span class="lbl">SMS Rate Card</span></div>
+        <div class="rsubitem sub-item" data-page="numbers"><span class="d"></span><span class="lbl">SMS Numbers</span></div>
+        <div class="rsubitem sub-item" data-page="bulkAlloc"><span class="d"></span><span class="lbl">Range Allocation</span></div>
+        <div class="rsubitem sub-item" data-page="cliRunning"><span class="d"></span><span class="lbl">CLI Search</span></div>
+      </div>
+
+
+      <div class="rsec">Communication</div>
+      <div class="ritem nav-item" data-page="clients"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg><span class="lbl">Client Management</span></div>
+
+      <div class="ritem nav-item" id="pCdr" onclick="toggleSub('sCdr','pCdr')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg><span class="lbl">SMS CDR Stats</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="rsub submenu" id="sCdr">
+        <div class="rsubitem sub-item" data-page="smsDetail"><span class="d"></span><span class="lbl">Detailed Report</span></div>
+        <div class="rsubitem sub-item" data-page="clientStats"><span class="d"></span><span class="lbl">Client Stats</span></div>
+        <div class="rsubitem sub-item" data-page="rangeStats"><span class="d"></span><span class="lbl">Range Stats</span></div>
+        <div class="rsubitem sub-item" data-page="numberStats"><span class="d"></span><span class="lbl">Number Stats</span></div>
+      </div>
+      <div class="ritem nav-item" data-page="payment"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="lbl">Payment</span><span class="ams-nav-lock" id="payNavLock" style="margin-left:auto;font-size:12px;opacity:0.85"></span></div>
+    <div class="ritem nav-item" data-page="creditNotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 12h8M8 16h6"/></svg><span class="lbl">Credit Notes</span></div>
+      <a class="ritem nav-item" href="/chat" target="_blank" rel="noopener" title="Chat (opens in a new tab)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="lbl">Chat</span></a>
+</nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" type="button" onclick="toggleRail()" aria-label="Menu">☰</button>
+      <span class="tb-title" id="pageTitle">Dashboard</span>
+      <span class="clock" id="clock">Fri, 2026-07-03 05:33:57</span>
+      <button class="tb-btn" title="Fullscreen" onclick="toggleFull()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      <div class="who"><div class="av">A</div><div><div class="nm">Agent</div><div class="rl">Agent</div></div></div>
+      <button class="tb-btn" title="Logout" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </header>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <section class="page" id="page-creditNotes"></section>
+      <!-- DASHBOARD -->
+<section class="page active" id="page-dashboard">
+      <div class="page-head"><div><h2>Dashboard</h2><div class="breadcrumb"><b>Home</b> » Dashboard</div></div></div>
+      <!-- GLOBAL-style dashboard: meta pill, 4 KPI cards, Volume chart + right rail (real /dashboard + /earnings-summary data) -->
+      <div class="ams-panel-dash-meta-row"><span class="ams-panel-meta" id="amsDashMeta" style="display:none"></span></div>
+      <div id="amsKpis"></div>
+      <div class="ams-panel-middle"><div id="amsVolume"></div><aside id="amsRail"></aside></div>
+      <div class="ams-metric-rankings"></div>
+      <!-- Preserved existing sections (same data/endpoints as before) -->
+      <div class="ams-ui-charts">
+        <div id="amsSmsChart"></div>
+        <div id="amsEarnChart"></div>
+      </div>
+      <div id="amsEarnings"></div>
+      <div id="amsScope"></div>
+    </section>
+
+      <!-- RATE CARD -->
+      <section class="page" id="page-rateCard">
+        <div class="page-head"><div><h2>SMS Rate Card</h2><div class="breadcrumb"><b>SMS Numbers</b> › Rate Card</div></div>
+          <div class="head-actions"><span class="readonly-note">View only</span><button type="button" class="btn btn-purple btn-sm" onclick="openSelfAlloc()">Self Allocate</button></div></div>
+        <div class="table-wrap" style="padding:15px 17px;margin-top:0"><div class="table-controls">
+          <div class="tc-left"><label>Show Records:</label><select id="rcLen" onchange="renderRateCard()"><option>10</option><option selected>25</option><option value="All">All</option></select>
+          <div class="exp-btns"><button type="button" class="ams-btn ams-blue"  data-tip="Copy" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button type="button" class="ams-btn ams-blue"  data-tip="Download CSV" title="Download CSV" aria-label="Download CSV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="ams-btn ams-green"  data-tip="Download Excel" title="Download Excel" aria-label="Download Excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></div></div>
+          <div class="tc-right"><label>Search:</label><input type="text" id="rcSearch" oninput="renderRateCard()" placeholder="Search..."/></div></div></div>
+        <div class="table-wrap"><div class="tscroll"><table>
+          <thead><tr><th>Range</th><th>Currency</th><th>1/1</th><th>7/1</th><th>7/7</th><th>30/45</th><th>Action</th></tr></thead><tbody id="rcBody"></tbody></table></div>
+          <div class="table-foot"><div class="info" id="rcInfo"></div></div></div>
+
+        <!-- FINAL POLISH 5B: the duplicate "Self Allocation" section below the rate
+             listing is removed. Self-allocation itself is untouched: the Self Allocate
+             button in the page header and the per-range Self Allocate action in the
+             rate-card rows both still open the same modal, use the same
+             /agent/self-allocate endpoints and keep every limit, permission and
+             validation rule. When no range is available the rate card simply shows the
+             existing "No ranges available" style empty state — no second section. -->
+      </section>
+
+      
+      <!-- SELF ALLOCATE -->
+      </section>
+
+
+      <!-- GLOBAL-style CLI Search (ranges running a CLI, last 24h; separate from Test Panel masking) -->
+      <section class="page" id="page-cliRunning">
+        <div class="page-head"><div><h2>CLI Search</h2><div class="breadcrumb"><b>SMS Numbers</b> › CLI Search</div></div></div>
+        
+    <!-- GLOBAL-style CLI Search — ranges running this CLI in the last 24 hours (separate from CLI Analytics below and from Test Panel masking) -->
+    <p class="muted" style="margin:2px 0 14px">See which ranges a sender has been running on in the last 24 hours. Type the sender in full, exactly as it appears. Capital letters do not matter.</p>
+    <div class="toolbar"><div class="ams-panel-cli-fields">
+      <div class="ams-panel-field"><label for="amsCliSender">Sender (CLI)</label><input type="text" id="amsCliSender" placeholder="The full sender, e.g. facebook" autocomplete="off" onkeydown="if(event.key==='Enter')searchAmsCli()"/></div>
+      <div class="ams-panel-field"><label for="amsCliMessage">Message Text</label><input type="text" id="amsCliMessage" placeholder="Any words from the message" autocomplete="off" onkeydown="if(event.key==='Enter')searchAmsCli()"/></div>
+      <button type="button" onclick="searchAmsCli()">Search</button>
+    </div></div>
+    <div class="table-wrap" style="padding:16px 18px">
+      <div class="ams-panel-cli-head"><h3>Ranges Running This CLI</h3><div><label>Show</label> <select id="amsCliPerPage" onchange="renderAmsCliRanges()"><option>10</option><option selected>25</option><option>50</option><option>100</option><option>500</option><option>1000</option></select> <label>per page</label></div></div>
+      <div class="tscroll"><table><thead><tr><th>Range</th><th>Last Seen</th></tr></thead><tbody id="amsCliBody"><tr><td colspan="2" class="muted" style="text-align:center;padding:26px">No data available in table.</td></tr></tbody></table></div>
+      <div class="ams-panel-cli-pager"><div id="amsCliInfo">Showing 0 to 0 of 0 entries</div><div class="ams-panel-pages"><button type="button" id="amsCliBtnFirst" onclick="amsCliPage('first')" disabled>First</button><button type="button" id="amsCliBtnPrev" onclick="amsCliPage('prev')" disabled>Previous</button><button type="button" class="active" id="amsCliPageCur">1</button><button type="button" id="amsCliBtnNext" onclick="amsCliPage('next')" disabled>Next</button><button type="button" id="amsCliBtnLast" onclick="amsCliPage('last')" disabled>Last</button></div></div>
+    </div>
+
+      </section>
+
+      <!-- SMS NUMBERS -->
+      <section class="page" id="page-numbers">
+        <div class="page-head"><div><h2>SMS Numbers <span class="ams-num-page-badge" style="font-size:14px;font-weight:600;color:var(--text,#0f172a);background:var(--u-soft,#eef2f7);padding:3px 9px;border-radius:6px;margin-left:10px;vertical-align:middle;display:inline-flex;align-items:center;gap:6px">Numbers: <span id="numPageCount">0</span> </span></h2><div class="breadcrumb"><b>SMS Numbers</b> › My Numbers</div></div>
+          <div class="head-actions">
+            <button type="button" class="ams-btn ams-green"  onclick="openAllocAll()" data-tip="Allocate Selected" title="Allocate Selected" aria-label="Allocate Selected"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <button type="button" class="ams-btn danger" data-tip="Unallocate Selected" aria-label="Unallocate Selected" onclick="unallocSel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/></svg></button>
+            <button type="button" class="ams-btn ams-blue"  onclick="openSmart()" data-tip="Smart Divide" title="Smart Divide" aria-label="Smart Divide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="filter-row">
+            <div id="numRangeContainer" style="display:inline-block;min-width:180px"><select class="sel-lg" id="numRange"><option value="">Select Range</option></select></div>
+            <div id="numClientContainer" style="display:inline-block;min-width:180px"><select class="sel-lg" id="numClient"><option value="">Select Client</option></select></div>
+            <button type="button" class="ams-btn ams-blue"  onclick="renderNumbers()" data-tip="Filters" title="Filters" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
+            <button type="button" class="ams-btn"  onclick="resetNum()" data-tip="Reset" title="Reset" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+            <div class="ams-numbers-count-badge" style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:var(--text,#0f172a);background:var(--u-soft,#eef2f7);padding:6px 12px;border-radius:8px;border:1px solid var(--border,#e2e8f0)">
+              <span>Numbers: <span id="numBadgeCount">0</span></span>
+              
+            </div>
+          </div>
+          <div class="table-controls">
+            <div class="tc-left"><label>Show Records:</label><select id="numLen" onchange="renderNumbers()"><option>10</option><option selected>25</option><option>50</option><option>100</option><option>500</option><option>1000</option><option>5000</option><option value="All">All</option></select>
+            <div class="exp-btns"><button type="button" class="ams-btn ams-blue" onclick="copyCurrentPageNumbers(this)" data-tip="Copy numbers" title="Copy numbers" aria-label="Copy numbers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button type="button" class="ams-btn ams-blue"  data-tip="Download CSV" title="Download CSV" aria-label="Download CSV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="ams-btn ams-green"  data-tip="Download Excel" title="Download Excel" aria-label="Download Excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></div></div>
+            <div class="tc-right"><label>Search:</label><input type="text" id="numSearch" oninput="renderNumbers()" placeholder="Search..."/></div></div>
+          <div class="bulk-bar"><span class="info" id="selInfo">0 selected</span></div>
+        </div>
+        <div class="table-wrap"><div class="tscroll"><table>
+          <thead><tr><th><input type="checkbox" onclick="toggleAll(this)"/></th>
+            <th class="sortable" onclick="sortNum('range')">Range <span class="sort">⇅</span></th>
+            <th class="sortable" onclick="sortNum('number')">Number <span class="sort" id="nSortHint">⇅</span></th>
+            <th class="sortable" onclick="sortNum('rate')">Rate <span class="sort">⇅</span></th>
+            <th class="sortable" onclick="cycleClientFilter()">Client <span class="sort" id="cSortHint">⇅</span></th>
+            <th>Limits</th></tr></thead>
+          <tbody id="numBody"></tbody></table></div>
+          <div class="table-foot"><div class="info" id="numInfo"></div><div class="pagination"><button>‹</button><button class="active">1</button><button>2</button><button>›</button></div></div></div>
+      </section>
+
+      <!-- BULK ALLOC -->
+      <!-- SMS TEST PANEL (Agent) — same structure/masking as the existing Client/Manager Test Panel -->
+      </section>
+
+      <section class="page" id="page-bulkAlloc">
+        <div class="page-head"><div><h2>SMS Range Allocation</h2><div class="breadcrumb"><b>SMS Numbers</b> › Range Allocation</div></div></div>
+        <div class="toolbar">
+          <div class="filter-row" style="align-items:center;gap:10px">
+            <div id="baRangeDropdownContainer"></div>
+            <div id="baClientDropdownContainer"></div>
+            <select class="sel-lg" id="baPayterm" onchange="renderBulk()"><option value="daily">Daily (1/1)</option><option value="weekly_7_1">Weekly (7/1)</option><option value="weekly_7_7">Weekly (7/7)</option><option value="monthly_30x45">Monthly (30/45)</option></select>
+            <input type="number" style="width:130px" placeholder="Qty" id="baQty"/>
+            <button class="btn btn-blue" onclick="doBulk()">Allocate to Client</button>
+          </div>
+        </div>
+        <div class="table-wrap"><div class="tscroll"><table>
+          <thead><tr><th>Range Name</th><th>Available</th><th>Allocated</th><th>Rate</th><th>Allocate (to Client)</th><th>Unallocate</th></tr></thead>
+          <tbody id="baBody"></tbody></table></div>
+          <div class="table-foot"><div class="info" id="baInfo"></div></div></div>
+      </section>
+
+
+      <!-- CLIENTS -->
+      <section class="page" id="page-clients"></section>
+<section class="page" id="page-extapi"></section>
+      <!-- CDR pages -->
+      <section class="page" id="page-smsDetail"></section>
+      <section class="page" id="page-clientStats"></section>
+      <section class="page" id="page-rangeStats"></section>
+      <section class="page" id="page-numberStats"></section>
+
+      <!-- PAYMENT SECTION -->
+      <section class="page" id="page-payment">
+        <!-- IN-PAGE PAYMENT SECURITY GATE -->
+        <div id="paymentLockView" style="padding:18px 0">
+          <div class="card" style="max-width:430px;margin:26px auto;padding:26px 24px;text-align:center">
+            <h2 style="font-size:18px;margin:0 0 6px;font-weight:700">Payment Security</h2>
+            <p style="color:var(--muted);font-size:12.5px;margin:0 0 18px">Enter your Security PIN to view balances, Binance UID and payment requests.</p>
+            <div style="max-width:300px;margin:0 auto">
+              <input type="password" id="paymentPinInput" placeholder="Security PIN" maxlength="32" autocomplete="off" style="width:100%;text-align:center;font-size:16px;letter-spacing:4px;padding:11px 12px" onkeydown="if(event.key==='Enter')unlockSectionWithPin('payment')">
+              <div id="paymentPinErr" style="color:#b42318;font-size:12.5px;margin-top:8px;min-height:18px;display:none"></div>
+              <button class="btn btn-blue" id="btnUnlockPayment" style="width:100%;margin-top:12px" onclick="unlockSectionWithPin('payment')">Unlock</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAYMENT CONTENT VIEW -->
+        <div id="paymentContentView" style="display:none">
+        <div class="page-head"><div><h2>Payment</h2><div class="breadcrumb"><b>Payments</b> &rsaquo; Wallet &amp; Requests</div></div><div class="head-actions"><button type="button" class="ams-btn" onclick="relockChatPayment()">Lock Payment</button></div></div>
+        <div class="stats-grid">
+          <div class="stat-card dash-metric d-blue"><div class="stat-info"><p>Daily Balance</p><h3 id="agtDailyBal">$ 0</h3><span id="agtDailyMin">Minimum $ 0</span></div><div class="dash-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div></div>
+          <div class="stat-card dash-metric d-green"><div class="stat-info"><p>Weekly Balance</p><h3 id="agtWeeklyBal">$ 0</h3><span id="agtWeeklyMin">Minimum $ 0</span></div><div class="dash-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div></div>
+          <div class="stat-card dash-metric d-orange"><div class="stat-info"><p>Monthly Balance</p><h3 id="agtMonthlyBal">$ 0</h3><span id="agtMonthlyMin">Minimum $ 0</span></div><div class="dash-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M7 14h3M14 14h3M7 18h3M14 18h3"/></svg></div></div>
+        </div>
+        <div class="grid2">
+          <div class="card"><div class="card-head"><div><h3>Binance UID</h3><div class="sub">Payouts are sent to the Binance UID saved here.</div></div><button class="btn btn-blue btn-sm" onclick="openWalletHelp()">Help</button></div><div class="form-group"><label>Binance UID</label><input id="agtWallet" placeholder="Enter your Binance UID" inputmode="numeric" autocomplete="off"></div><div class="hint" id="agtWalletHint" style="color:#c83732">Check the UID before saving — payouts go to the saved UID and it is locked once saved.</div><button class="btn btn-blue" id="btnSaveAgtWallet" style="margin-top:12px" onclick="saveAgentWallet()">Save Binance UID</button></div>
+          <div class="card"><div class="card-head"><div><h3>Request Payment</h3><div class="sub">Only eligible balances can be requested.</div></div></div><div id="agtRequestButtons" style="display:grid;gap:10px"></div><div id="agtPayNotifications" class="hint" style="margin-top:12px"></div></div>
+        </div>
+        <div class="table-wrap" style="padding:15px 17px;margin-top:16px"><div class="table-controls"><div class="tc-left"><label>Payment History</label></div><div class="tc-right"><button type="button" class="ams-btn ams-blue"  onclick="loadAgentPayment()" data-tip="Refresh" title="Refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div></div></div>
+        <div class="table-wrap"><div class="tscroll"><table><thead><tr><th>ID</th><th>Type</th><th>Amount</th><th>Binance UID</th><th>Status</th><th>Requested</th><th>TXID</th><th>Proof</th></tr></thead><tbody id="agtPayBody"></tbody></table></div><div class="table-foot"><div class="info" id="agtPayInfo"></div></div></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ SELF ALLOCATE MODAL ============ -->
+<div class="modal-overlay" id="selfAllocModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head">
+      <h3>Self Allocate Numbers</h3>
+      <button class="modal-close" onclick="closeModal('selfAllocModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="saAlertBox" style="display:none;padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:13px;line-height:1.45"></div>
+
+      <div class="form-group">
+        <label>Selected Range <span class="req">*</span></label>
+        <select id="saModalRange" onchange="saOnRangeChange()" style="width:100%"></select>
+      </div>
+
+      <div class="form-group">
+        <label>Billing Period <span class="req">*</span></label>
+        <div style="display:flex;gap:18px;align-items:center;padding:6px 0" id="saPeriodGroup">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600">
+            <input type="radio" name="saPeriod" id="saRadioWeekly" value="weekly" checked onchange="saOnPeriodChange()"/> Weekly
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600">
+            <input type="radio" name="saPeriod" id="saRadioMonthly" value="monthly" onchange="saOnPeriodChange()"/> Monthly
+          </label>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Authorized Rate <span class="muted" style="font-weight:400">(Rate Management)</span></label>
+          <input type="text" id="saModalRate" readonly style="background:#f1f5f9;font-weight:700;color:#047857;cursor:default"/>
+        </div>
+        <div class="form-group">
+          <label>Quantity to Allocate <span class="req">*</span></label>
+          <input type="number" id="saModalQty" min="1" max="1000" value="10" placeholder="10"/>
+        </div>
+      </div>
+
+      <div class="hint" id="saModalQuotaHint" style="margin-top:2px;font-size:12px;color:var(--text-2,#334155)"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('selfAllocModal')">Cancel</button>
+      <button class="btn btn-purple" id="btnConfirmSelfAlloc" onclick="confirmSelfAlloc()">Allocate Numbers</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALLOCATE ALL MODAL -->
+<div class="modal-overlay" id="allocAllModal"><div class="modal">
+  <div class="modal-head"><h3>Allocate Selected Numbers</h3><button class="modal-close" onclick="closeModal('allocAllModal')">×</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Select Client <span class="req">*</span></label><div id="aaTargetDropdownWrap"></div></div>
+    <div class="form-group"><label>Payterm</label><select id="aaPayterm"><option value="daily">Daily (1/1)</option><option value="weekly_7_1">Weekly (7/1)</option><option value="weekly_7_7">Weekly (7/7)</option><option value="monthly_30x45">Monthly (30/45)</option></select></div>
+    <div class="form-group"><label>Payout ($)</label><input type="number" id="aaPayout" step="0.001" value="0" placeholder="0"/></div>
+    <div class="hint" id="aaCount"></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('allocAllModal')">Cancel</button><button class="btn btn-blue" onclick="confirmAllocAll()">Allocate</button></div>
+</div></div>
+
+<!-- SMART DIVIDE MODAL -->
+<div class="modal-overlay" id="smartModal"><div class="modal" style="max-width:560px">
+  <div class="modal-head"><h3>Smart Bulk Allocation (Auto-Divide)</h3><button class="modal-close" onclick="closeModal('smartModal')">×</button></div>
+  <div class="modal-body">
+    <div class="hint" style="margin-bottom:12px">Select multiple ranges and clients, then enter per-range quantity. Unallocated numbers will be split evenly across selected clients.</div>
+    <div class="form-group"><label>Select Ranges <span class="req">*</span></label><div id="smRanges" style="max-height:130px;overflow-y:auto;background:var(--row);border:1px solid var(--border2);border-radius:9px;padding:10px"></div></div>
+    <div class="form-group"><label>Select Clients <span class="req">*</span></label><div id="smClients" style="max-height:130px;overflow-y:auto;background:var(--row);border:1px solid var(--border2);border-radius:9px;padding:10px"></div></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Numbers per Range <span class="req">*</span></label><input type="number" id="smQty" placeholder="e.g. 20"/></div>
+      <div class="form-group"><label>Payterm</label><select id="smPayterm"><option value="daily">Daily (1/1)</option><option value="weekly_7_1">Weekly (7/1)</option><option value="weekly_7_7">Weekly (7/7)</option><option value="monthly_30x45">Monthly (30/45)</option></select></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('smartModal')">Cancel</button><button class="btn btn-blue" onclick="runSmartDivide()">Distribute</button></div>
+</div></div>
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="clientModal"><div class="modal">
+  <div class="modal-head"><h3 id="clientModalTitle">Add Client</h3><button class="modal-close" onclick="closeModal('clientModal')">×</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Username <span class="req">*</span></label><input type="text" id="cU" placeholder="Enter username"/></div>
+    <div class="form-group"><label>Password <span class="req">*</span></label><input type="password" id="cP" placeholder="Enter password"/></div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="cN" placeholder="Optional"/></div>
+    <div class="form-grid"><div class="form-group"><label>Email</label><input type="email" id="cE" placeholder="Optional"/></div><div class="form-group"><label>Contact</label><input type="text" id="cC" placeholder="Optional"/></div></div>
+    <div class="form-group"><label>Skype</label><input type="text" id="cS" placeholder="Optional"/></div>
+    <div class="form-group"><label class="switch"><input type="checkbox" id="cA" checked/> Account Active</label></div>
+    <div class="hint">Only username and password are required for a client. Other fields are optional.</div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-blue" onclick="saveClient()">Save</button></div>
+</div></div>
+
+
+<div class="modal-overlay" id="walletHelpModal"><div class="modal" style="max-width:720px"><div class="modal-head"><h3>How to find your Binance UID</h3><button class="modal-close" onclick="closeModal('walletHelpModal')">×</button></div><div class="modal-body"><div class="hint" style="margin-bottom:12px"><b>Warning:</b> Payments are sent to the Binance UID you save here. Please double-check your UID before saving — entering an incorrect UID can result in funds being sent to the wrong account. You are responsible for the accuracy of your Binance UID.</div><div class="card"><b>Step 1 — Open the Binance app</b><div class="hint">Log in to the Binance app on your phone.</div></div><div class="card"><b>Step 2 — Go to your Profile</b><div class="hint">Tap the profile icon (top left on the home screen).</div></div><div class="card"><b>Step 3 — Find your UID</b><div class="hint">Your Binance UID is shown on the profile page, right under your name (a number of 8–12 digits).</div></div><div class="card"><b>Step 4 — Copy and paste it here</b><div class="hint">Copy the full number and paste it into the Binance UID field, then save.</div></div><div class="card"><b>Using the Binance website instead</b><div class="hint">Log in at binance.com → hover over your profile icon (top right) → your Binance UID is displayed in the dropdown menu under your email. Copy that number and paste it here.</div></div></div></div></div>
+
+<!-- P21: Chat & Payment Security Lock Modal -->
+<div class="modal-overlay" id="chatLockModal" style="z-index:99999">
+  <div class="modal" style="max-width:440px;text-align:center">
+    <div class="modal-head" style="justify-content:center;position:relative">
+      <h3 id="chatLockModalTitle" style="display:flex;align-items:center;gap:8px;font-size:16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#30ABED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span id="chatLockModalTitleText">Security Verification</span>
+      </h3>
+      <button class="modal-close" style="position:absolute;right:18px" onclick="cancelChatLock()">×</button>
+    </div>
+    <div class="modal-body" style="padding:24px 22px">
+      <div style="width:56px;height:56px;border-radius:28px;background:rgba(48,171,237,.14);border:1px solid rgba(48,171,237,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#30ABED">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <p id="chatLockDesc" style="color:var(--text-2,#334155);font-size:13.5px;margin:0 0 18px;line-height:1.5">
+        Enter your <b>Account Security PIN</b> to unlock this section.
+      </p>
+      <div class="form-group" style="text-align:left">
+        <label style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Account Security PIN</label>
+        <div style="position:relative;margin-top:6px">
+          <input type="password" id="chatLockInput" placeholder="Enter 6-digit PIN" maxlength="32" autocomplete="off" style="font-size:18px;letter-spacing:4px;text-align:center;padding:12px 14px;width:100%" onkeydown="if(event.key==='Enter')submitChatLock()">
+        </div>
+      </div>
+      <div id="chatLockErr" style="color:#b42318;font-size:12.5px;margin-top:10px;min-height:18px;display:none"></div>
+    </div>
+    <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" type="button" onclick="cancelChatLock()">Cancel</button>
+      <button class="btn btn-blue" id="btnChatLockSubmit" type="button" onclick="submitChatLock()">Verify &amp; Unlock</button>
+    </div>
+  </div>
+</div>
+
+<script src="/api.js?v=gsms-20261104"></script>
+<script>
+if(window.API){ API.guard('agent'); }
+/* P21: Security Lock for Chat and Payment */
+function isChatPaymentUnlocked(){
+  const token = sessionStorage.getItem('ams_chat_unlock_token') || localStorage.getItem('ams_chat_unlock_token');
+  return !!token;
+}
+
+function updateNavLockIndicators(){
+  const isUnlocked = isChatPaymentUnlocked();
+  const payLockEl = document.getElementById('payNavLock');
+  if(payLockEl) payLockEl.style.display = isUnlocked ? 'none' : 'inline-block';
+}
+
+async function checkChatSecurityEnabled(){
+  try {
+    const res = await API.get('/chat/auth/lock-status');
+    if(res && res.unlocked && res.unlock_token){
+      sessionStorage.setItem('ams_chat_unlock_token', res.unlock_token);
+      localStorage.setItem('ams_chat_unlock_token', res.unlock_token);
+    }
+    updateNavLockIndicators();
+    return true;
+  } catch (e) {
+    updateNavLockIndicators();
+    return true;
+  }
+}
+
+async function unlockSectionWithPin(section){
+  const inp = document.getElementById('paymentPinInput');
+  const err = document.getElementById('paymentPinErr');
+  const btn = document.getElementById('btnUnlockPayment');
+  const pin = (inp ? inp.value : '').trim();
+
+  if(!pin){
+    if(err){
+      err.textContent = 'Please enter your Security PIN';
+      err.style.display = 'block';
+    }
+    if(inp) inp.focus();
+    return;
+  }
+
+  if(btn){
+    btn.disabled = true;
+    btn.textContent = 'Verifying...';
+  }
+  if(err) err.style.display = 'none';
+
+  try {
+    const token = sessionStorage.getItem('ams_token') || localStorage.getItem('ams_token');
+    const res = await fetch('/api/chat/auth/verify-lock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ password: pin })
+    });
+    const data = await res.json().catch(() => ({}));
+    if(res.ok && data.ok){
+      if(data.unlock_token){
+        sessionStorage.setItem('ams_chat_unlock_token', data.unlock_token);
+        localStorage.setItem('ams_chat_unlock_token', data.unlock_token);
+      }
+      updateNavLockIndicators();
+      if(inp) inp.value = '';
+      if(err){ err.style.display = 'none'; err.textContent = ''; }
+      revealUnlockedSection(section);
+    } else {
+      if(err){
+        err.textContent = data.error || 'Access denied. Incorrect Security PIN';
+        err.style.display = 'block';
+      }
+      if(inp){ inp.select(); inp.focus(); }
+    }
+  } catch(e){
+    if(err){
+      err.textContent = 'Verification failed: ' + e.message;
+      err.style.display = 'block';
+    }
+  } finally {
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+    }
+  }
+}
+
+function revealUnlockedSection(section){
+  updateNavLockIndicators();
+  const paymentLockView = document.getElementById('paymentLockView');
+  const paymentContentView = document.getElementById('paymentContentView');
+
+  if(section === 'payment'){
+    if(paymentLockView) paymentLockView.style.display = 'none';
+    if(paymentContentView) paymentContentView.style.display = 'block';
+    loadAgentPayment();
+  }
+}
+
+function relockChatPayment(){
+  sessionStorage.removeItem('ams_chat_unlock_token');
+  localStorage.removeItem('ams_chat_unlock_token');
+  sessionStorage.removeItem('ams_agent_sec_unlocked');
+  localStorage.removeItem('ams_agent_sec_unlocked');
+  updateNavLockIndicators();
+
+  const paymentLockView = document.getElementById('paymentLockView');
+  const paymentContentView = document.getElementById('paymentContentView');
+  if(paymentLockView) paymentLockView.style.display = 'block';
+  if(paymentContentView) paymentContentView.style.display = 'none';
+
+
+  const cur = document.querySelector('.page.active');
+  const id = cur ? cur.id.replace('page-', '') : '';
+  if(id === 'payment'){
+    const dashNav = document.querySelector('.ritem[data-page="dashboard"]');
+    showPage('dashboard', dashNav);
+  }
+  alert('Payment has been locked.');
+}
+
+// Initial check on load
+checkChatSecurityEnabled().catch(()=>{});
+
+window.showPageByName = function(id){
+  const el = document.querySelector(`.ritem[data-page="${id}"], .rsubitem[data-page="${id}"]`);
+  showPage(id, el);
+};
+
+/* NAV */
+async function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);
+  if(pg)pg.classList.add('active');
+  document.querySelectorAll('.ritem').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.rsubitem').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('pageTitle').textContent=(el?el.querySelector('.lbl').textContent:'Dashboard');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  if(id === 'payment'){
+    const isUnlocked = isChatPaymentUnlocked();
+    const lockView = document.getElementById('paymentLockView');
+    const contentView = document.getElementById('paymentContentView');
+    if(!isUnlocked){
+      if(lockView) lockView.style.display = 'block';
+      if(contentView) contentView.style.display = 'none';
+      const pinInp = document.getElementById('paymentPinInput');
+      if(pinInp){ pinInp.value = ''; setTimeout(() => pinInp.focus(), 100); }
+      const err = document.getElementById('paymentPinErr');
+      if(err){ err.style.display = 'none'; err.textContent = ''; }
+      return; // Do NOT load payment info or UID
+    } else {
+      if(lockView) lockView.style.display = 'none';
+      if(contentView) contentView.style.display = 'block';
+      loadAgentPayment();
+      return;
+    }
+  }
+
+  if(typeof loadAgentPageData==='function') loadAgentPageData(id);
+}
+
+/* FINAL POLISH 5E: shared navigation hook used by assets/credit-notes.js so a locked
+   ledger read can point the agent at the existing Payment section (Security PIN)
+   without leaving the panel. */
+window.amsGotoPaymentPage=function(){
+  const item=document.querySelector('.ritem[data-page="payment"]');
+  if(item){ item.click(); return; }
+  if(typeof showPage==='function') showPage('payment',item||undefined);
+};
+document.querySelectorAll('.ritem[data-page]').forEach(n=>n.addEventListener('click',()=>showPage(n.dataset.page,n)));
+document.querySelectorAll('.rsubitem').forEach(s=>s.addEventListener('click',()=>{showPage(s.dataset.page,s);const p=s.closest('.rsub').previousElementSibling;if(p)p.classList.add('active');}));
+function toggleSub(subId,pId){document.getElementById(subId).classList.toggle('open');document.getElementById(pId).classList.toggle('open');}
+function toggleRail(){document.getElementById('rail')?.classList.toggle('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function toggleFull(){if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}else{document.exitFullscreen&&document.exitFullscreen();}}
+function logout(){ if(confirm('Do you want to logout?')){ if(window.API&&API.logout){API.logout();}else{try{sessionStorage.clear();['ams_token','ams_role','ams_user','ams_name'].forEach(k=>localStorage.removeItem(k));}catch(e){} window.location.href='/panel-login';} } }
+function tick(){const d=new Date();const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const p=n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent=days[d.getDay()]+', '+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
+/* P14: UK report-day roll watcher */
+if(window.API&&API.onUkDayChange){ API.onUkDayChange(()=>{ try{ const p=document.querySelector('.page.active'); if(!p) return; const id=(p.id||'').replace('page-','');
+  if(id==='smsDetail'&&document.getElementById('sdBody')) renderSmsDetail();
+  if(id==='clientStats'&&document.getElementById('csBody')) renderClientStats();
+  ['range','number'].forEach(k=>{ if(id===k+'Stats'&&document.getElementById(k+'Body')) renderDrill(k); });
+}catch(e){} }); }
+setInterval(tick,1000);tick();
+function drawWeek(data){const el=document.getElementById('wk');if(!el)return;const max=Math.max(1,...(data||[]).map(d=>d.v||0));el.innerHTML=(data||[]).map(d=>`<div class="bar-col"><div class="bar-track"><div class="bar" style="height:${((d.v||0)/max*100)}%"><span class="val">${d.v||0}</span></div></div><div class="bar-label">${d.l}</div></div>`).join('')||'<div class="muted" style="padding:20px">No chart data</div>';}
+
+/* ===== LIVE DATA ONLY (no dummy data) ===== */
+let AGT=sessionStorage.getItem('ams_name')||sessionStorage.getItem('ams_user')||'Agent', MGR='';
+let myClients=[];
+let clientsData=[];
+let rangeNames=[];
+let rateCard=[];
+let baData=[];
+let numData=[];
+let cdr=[];
+let smsRecords=[];
+let testNumbers=[];
+let recentTests=[];
+function unique(arr){return [...new Set((arr||[]).filter(Boolean))];}
+function refreshClients(){myClients=unique((clientsData||[]).map(c=>c.username).concat((smsRecords||[]).map(r=>r.client_name)));}
+function smsToCdr(r){return {client:r.client_name||'—',range:r.range_name||'—',number:r.number||'',sms:1,pay:cleanDec(r.payout_amount||r.payout_rate||0),payout_rate:cleanDec(r.payout_rate||0),cli:r.cli||'',msg:r.message||'',date:(r.received_at||'').slice(0,19)};}
+
+/* CLI masking */
+/* fill selects */
+function fillSel(id,arr,keep=true){const s=document.getElementById(id);if(!s)return;const f=keep?s.children[0].outerHTML:'';s.innerHTML=f+arr.map(x=>`<option>${x}</option>`).join('');}
+/* ===== SMS TEST PANEL (Agent) =================================================
+   Reuses the SAME Test Panel endpoints as the Client/Manager/Admin panels:
+     /api/test-numbers     -> active test numbers (Range | Test Number)
+     /api/test-panel/sms   -> test-panel SMS rows (date | range | number | CLI | SMS)
+   Masking follows the existing Test Panel rule for agents (admin.html models the
+   same rule: "admin=full, agent=masked"): CLI is masked and the SMS body is never
+   shown in this panel. Read-only — it calls no write endpoint, so no number, range,
+   client or other user's data can be changed from here. */
+function maskCLI(cli){ cli=String(cli||''); if(!cli) return ''; if(cli.length<=2) return cli; return cli.slice(0,2)+'x'.repeat(cli.length-2); }
+/* Range options = the agent's own ranges (/api/ranges — unchanged, ownership-scoped)
+   plus the ranges of the active test numbers this panel is already showing. */
+let testPanelRangeList=[];
+async function loadTestPanelRangeList(){
+  try{ const d=await API.get('/test-numbers?ranges_only=1'); testPanelRangeList=(d&&d.ranges)||[]; }catch(e){ testPanelRangeList=[]; }
+}
+function testPanelRangeNames(){
+  const names=[...new Set([...(rangeNames||[]),...(testPanelRangeList||[])].filter(Boolean))];
+  return names.sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}));
+}
+function renderTestRangeSelect(){
+  const list=testPanelRangeNames();
+  const cur=(document.getElementById('testRange')?.value)||'';
+  const value=list.includes(cur)?cur:'';
+  if (window.renderSearchSelect && document.getElementById('testRangeContainer')) {
+    window.renderSearchSelect('testRangeContainer', {
+      id: 'testRange', placeholder: 'Select Range', searchPlaceholder: 'Search range...',
+      items: list.map(r => ({ value: r, label: r })),
+      value: value,
+      onChange: () => renderTest()
+    });
+  } else {
+    fillSel('testRange', list);
+  }
+}
+/* Test Panel pagination (agent): the two tables page independently through the real
+   paged endpoints (25/page) instead of loading the whole test pool into the browser. */
+const TEST_PAGE_SIZE=25;
+let tnState={page:1,limit:TEST_PAGE_SIZE,total:0,totalPages:1,shown:0};
+let trState={page:1,limit:TEST_PAGE_SIZE,total:0,totalPages:1,shown:0};
+function testPagerButtons(st){
+  if(!st.totalPages||st.totalPages<=1) return '';
+  const cur=st.page,last=st.totalPages,list=[1];
+  for(let i=cur-1;i<=cur+1;i++) if(i>1&&i<last) list.push(i);
+  if(last>1) list.push(last);
+  const uniq=[...new Set(list)].sort((a,b)=>a-b);
+  let html='<button type="button" data-tp="prev"'+(cur<=1?' disabled':'')+'>‹</button>';
+  uniq.forEach((p,i)=>{ if(i>0&&p-uniq[i-1]>1) html+='<button type="button" disabled>…</button>';
+    html+=`<button type="button" data-tp="${p}" class="${p===cur?'active':''}">${p}</button>`; });
+  html+='<button type="button" data-tp="next"'+(cur>=last?' disabled':'')+'>›</button>';
+  return html;
+}
+function paintTestPager(infoId,pagerId,st,label,fn){
+  const info=document.getElementById(infoId),pg=document.getElementById(pagerId);
+  if(info) info.textContent=`Showing ${(st.page-1)*st.limit+(st.shown||0)} of ${st.total} ${label}`;
+  if(pg){ pg.innerHTML=testPagerButtons(st); pg.querySelectorAll('button[data-tp]').forEach(btn=>{ btn.onclick=()=>{ const v=btn.dataset.tp;
+    if(v==='prev') st.page=Math.max(1,st.page-1); else if(v==='next') st.page=Math.min(st.totalPages,st.page+1); else st.page=parseInt(v,10)||1;
+    fn(); }; }); }
+}
+function paintTestNumbers(){
+  const tnRows=testNumbers||[];
+  document.getElementById('tnBody').innerHTML=tnRows.map(r=>`<tr><td>${r.range||''}</td><td class="mono">${r.num||''}</td></tr>`).join('')||`<tr><td colspan="2" class="muted" style="text-align:center;padding:22px">No test numbers found</td></tr>`;
+  tnState.shown=tnRows.length; paintTestPager('tnInfo','tnPager',tnState,'test numbers',()=>tnGoPage(tnState.page));
+}
+async function tnGoPage(n){ tnState.page=Math.max(1,Math.min(n||1,tnState.totalPages||1)); await loadTestNumbers(); paintTestNumbers(); }
+function trGoPage(n){ trState.page=Math.max(1,Math.min(n||1,trState.totalPages||1)); renderTest(true); }
+async function loadTestNumbers(page){
+  if(page) tnState.page=page;
+  const rf=(document.getElementById('testRange')?.value)||'';
+  const params=new URLSearchParams({paged:'1',page:String(tnState.page),limit:String(tnState.limit)});
+  if(rf) params.set('range',rf);
+  let data={rows:[],total:0,page:1,totalPages:1};
+  try{ data=await API.get('/test-numbers?'+params.toString()); }catch(e){}
+  if(Array.isArray(data)) data={rows:data,total:data.length,page:1,totalPages:1};
+  tnState.page=Number(data.page||1); tnState.total=Number(data.total||0); tnState.totalPages=Number(data.totalPages||1);
+  testNumbers=(data.rows||[]).map(t=>({range:t.range_name,num:t.number,payout:t.payout||'Ask'}));
+  if(!testPanelRangeList.length) await loadTestPanelRangeList();
+  renderTestRangeSelect();}
+async function loadTestRanges(){ try{ const scoped=await API.get('/ranges'); rangeNames=(scoped||[]).map(r=>r.name); }catch(e){ rangeNames=rangeNames||[]; } }
+let testFilterSig='';
+async function renderTest(keepPages){
+  const rf=(document.getElementById('testRange')?.value)||'', cf=(document.getElementById('testCli')?.value||'').trim().toLowerCase();
+  const sig=JSON.stringify({rf,cf});
+  if(!keepPages && sig!==testFilterSig){ testFilterSig=sig; tnState.page=1; trState.page=1; }
+  /* Numbers section */
+  if(!keepPages) await loadTestNumbers();
+  paintTestNumbers();
+  /* SMS section — its own page/limit, filters applied server-side */
+  const params=new URLSearchParams({paged:'1',page:String(trState.page),limit:String(trState.limit)});
+  if(rf) params.set('range',rf);
+  const cliServer=cf.replace(/x+$/,'');
+  if(cliServer) params.set('cli',cliServer);
+  let data={rows:[],total:0,page:1,totalPages:1};
+  try{ data=await API.get('/test-panel/sms?'+params.toString()); }catch(e){}
+  if(Array.isArray(data)) data={rows:data,total:data.length,page:1,totalPages:1};
+  trState.page=Number(data.page||1); trState.total=Number(data.total||0); trState.totalPages=Number(data.totalPages||1);
+  const rows=(data.rows||[]).map(r=>({date:(r.received_at||'').slice(0,19),range:r.range_name||'',num:r.number||'',cli:r.cli||''}));
+  document.getElementById('trBody').innerHTML=rows.map(r=>`<tr><td class="muted">${r.date}</td><td>${r.range}</td><td class="mono">${r.num}</td><td class="mono">${maskCLI(r.cli)}</td><td class="mono">xxxxxxxxxxxx</td></tr>`).join('')||`<tr><td colspan="5" class="muted" style="text-align:center;padding:22px">No test panel SMS found</td></tr>`;
+  trState.shown=rows.length; paintTestPager('trInfo','trPager',trState,'test SMS',()=>trGoPage(trState.page));
+}
+
+function refreshAgentNumbersFilters() {
+  const rList = (rangeNames || []).slice();
+  rList.sort((a,b)=>a.localeCompare(b));
+
+  if (window.renderSearchSelect && document.getElementById('numRangeContainer')) {
+    const items = rList.map(r => ({ value: r, label: r }));
+    window.renderSearchSelect('numRangeContainer', {
+      id: 'numRange',
+      placeholder: 'Select Range',
+      searchPlaceholder: 'Search range...',
+      style: 'min-width:180px',
+      items: items,
+      value: rangeF || '',
+      onChange: (v) => { rangeF = v; renderNumbers(); }
+    });
+  } else {
+    fillSel('numRange', rList);
+  }
+
+  const cList = (myClients || []).slice();
+  cList.sort((a,b)=>a.localeCompare(b));
+
+  if (window.renderSearchSelect && document.getElementById('numClientContainer')) {
+    const items = cList.map(c => ({ value: c, label: c }));
+    window.renderSearchSelect('numClientContainer', {
+      id: 'numClient',
+      placeholder: 'Select Client',
+      searchPlaceholder: 'Search client...',
+      style: 'min-width:180px',
+      items: items,
+      value: clientF || '',
+      onChange: (v) => { clientF = v; renderNumbers(); }
+    });
+  } else {
+    fillSel('numClient', cList);
+  }
+}
+function refreshClientSelects(){
+  refreshAgentNumbersFilters();
+  fillSel('bulkClient',myClients);
+  fillSel('baClient',myClients);
+}
+refreshAgentNumbersFilters();refreshClientSelects();
+
+/* RATE CARD (API) */
+function fr(v){return v==='NA'||!v?'<span class="muted">NA</span>':'<span class="cell-money">$ '+v+'</span>';}
+async function loadRateCard(){ try{ rateCard=(await API.get('/ranges')).map(r=>({range:r.name,cur:r.currency,r1:r.rate_1_1,r2:r.rate_7_1,r3:r.rate_7_7,r4:r.rate_30_45,payment_type:r.payment_type})); }catch(e){ rateCard=[]; } renderRateCard(); }
+function renderRateCard(){
+  /* FINAL POLISH 5B: guard + one concise empty state (the duplicate Self Allocation
+     section that used to repeat this information is gone). */
+  const body=document.getElementById('rcBody'); if(!body) return;
+  const len=document.getElementById('rcLen')?.value||'25',q=(document.getElementById('rcSearch')?.value||'').toLowerCase();
+  let rows=(rateCard||[]).filter(r=>r.range.toLowerCase().includes(q));const pag=API.paginateRows('agtRateCard',rows,len,'rcInfo',renderRateCard);const t=pag.total;rows=pag.rows;
+  body.innerHTML=rows.map(r=>`<tr><td><b>${r.range}</b></td><td><span class="tag tag-green">${r.cur}</span></td><td>${fr(r.r1)}</td><td>${fr(r.r2)}</td><td>${fr(r.r3)}</td><td>${fr(r.r4)}</td><td><button type="button" class="btn btn-purple btn-sm" onclick="openSelfAlloc('${String(r.range).replace(/'/g, "\\'")}')" style="padding:4px 10px;font-size:12px;font-weight:600">Self Allocate</button></td></tr>`).join('')
+    ||'<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No ranges available for self-allocation yet.</td></tr>';
+  const info=document.getElementById('rcInfo'); if(info) info.textContent=`Showing ${rows.length} of ${t} ranges`;}
+
+/* SMS NUMBERS */
+let nSort={k:null,d:1},cliF=0,rangeF='',clientF='';
+function sortNum(k){if(nSort.k===k)nSort.d*=-1;else{nSort.k=k;nSort.d=1;}if(k==='number')document.getElementById('nSortHint').textContent=nSort.d===1?'▲':'▼';renderNumbers();}
+function cycleClientFilter(){cliF=(cliF+1)%3;document.getElementById('cSortHint').textContent=cliF===0?'⇅':(cliF===1?'Unallocated ▾':'Allocated ▾');renderNumbers();}
+function resetNum(){
+  rangeF='';
+  clientF='';
+  if (window.setSearchDropdownValue) {
+    window.setSearchDropdownValue('numRange', '', 'Select Range');
+    window.setSearchDropdownValue('numClient', '', 'Select Client');
+  }
+  const nr=document.getElementById('numRange'); if(nr) nr.value='';
+  const nc=document.getElementById('numClient'); if(nc) nc.value='';
+  const ns=document.getElementById('numSearch'); if(ns) ns.value='';
+  cliF=0;
+  const csh=document.getElementById('cSortHint'); if(csh) csh.textContent='⇅';
+  renderNumbers();
+}
+async function loadNumbers(){ refreshAgentNumbersFilters(); return renderNumbers(); }
+function renderNumbers(){rangeF=document.getElementById('numRange')?.value||'';clientF=document.getElementById('numClient')?.value||'';
+  const len=document.getElementById('numLen').value,q=(document.getElementById('numSearch').value||'').toLowerCase();
+  let rows=(numData||[]).filter(r=>(r.number.includes(q)||r.client.toLowerCase().includes(q)||r.range.toLowerCase().includes(q)));
+  if(rangeF)rows=rows.filter(r=>r.range===rangeF);if(clientF)rows=rows.filter(r=>r.client===clientF);
+  if(cliF===1)rows=rows.filter(r=>!r.client);else if(cliF===2)rows=rows.filter(r=>!!r.client);
+  if(nSort.k)rows.sort((a,b)=>((a[nSort.k]||'')+'').localeCompare((b[nSort.k]||'')+'',undefined,{numeric:true})*nSort.d);
+  const pag=API.paginateRows('agtNumbers',rows,len,'numInfo',renderNumbers);const t=pag.total;rows=pag.rows;
+  document.getElementById('numBody').innerHTML=rows.map(r=>`<tr><td data-label="Selected"><input type="checkbox" class="rc" data-id="${r.id}" onchange="updSel()"/></td>
+    <td data-label="Range">${r.range}</td><td data-label="Number" class="ams-num"><b>${r.number}</b></td><td data-label="My Rate" class="cell-money">${r.rate}</td>
+    <td data-label="Client">${r.client?`<span class="tag tag-cli">${r.client}</span>`:'<span class="tag tag-gray">—</span>'}</td>
+    <td data-label="Limits" class="muted">SD : ${r.sd} | SW : ${r.sw}</td></tr>`).join('')||`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No numbers found</td></tr>`;
+  document.getElementById('numInfo').textContent=`Showing ${rows.length} of ${t} numbers`;updSel();}
+function toggleAll(cb){document.querySelectorAll('.rc').forEach(c=>c.checked=cb.checked);updSel();}
+function updSel(){document.getElementById('selInfo').textContent=document.querySelectorAll('.rc:checked').length+' selected';}
+function selIds(){return[...document.querySelectorAll('.rc:checked')].map(c=>parseInt(c.dataset.id));}
+async function unallocSel(){const ids=selIds();if(!ids.length){alert('Select numbers.');return;}try{await API.post('/numbers/unallocate',{ids});alert(`✅ ${ids.length} numbers unallocated.`);loadNumbers();}catch(e){alert('❌ '+e.message);}}
+/* Allocate All modal (to Client) */
+async function openAllocAll(){const ids=selIds();if(!ids.length){alert('Please select numbers first (checkbox).');return;}
+  if(!clientsData.length)clientsData=await API.get('/users/client');
+  const items = (clientsData||[]).map(c=>({ value: String(c.id), label: `Client: ${c.username}`, search: `Client ${c.username} ${c.name||''}` }));
+  items.sort((a,b)=>a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
+
+  if(window.renderSearchSelect){
+    window.renderSearchSelect('aaTargetDropdownWrap', {
+      id: 'aaClient',
+      name: 'aaClient',
+      placeholder: 'Please select client',
+      searchPlaceholder: 'Search client...',
+      style: 'width:100%',
+      items: items,
+      value: '',
+      onChange: function(val){}
+    });
+  } else {
+    const sel = document.getElementById('aaTargetDropdownWrap');
+    sel.innerHTML = `<select id="aaClient" style="width:100%"><option value="">Please select client</option>${items.map(it=>`<option value="${it.value}">${it.label}</option>`).join('')}</select>`;
+  }
+
+  document.getElementById('aaPayterm').value='weekly_7_1';document.getElementById('aaPayout').value='0';
+  document.getElementById('aaCount').innerHTML=`<b>${ids.length}</b> numbers selected — they will be allocated to the Client.`;
+  document.getElementById('allocAllModal').classList.add('show');}
+async function confirmAllocAll(){const ids=selIds();const c=document.getElementById('aaClient').value,pt=document.getElementById('aaPayterm').value,po=document.getElementById('aaPayout').value;if(!c){alert('Select a client.');return;}
+  const body={ids,target_id:+c,payterm:pt,payout:po,rate:po};
+  try{
+    /* Numbers already allocated to somebody else are never taken away silently:
+       the server reports them as `blocked`; the user is asked here and only an
+       explicit confirmation resends them with force=true. */
+    let res=await API.post('/numbers/allocate',body);
+    const blocked=(res&&res.blocked_ids)||[];
+    if(blocked.length){
+      if(confirm(`⚠ ${blocked.length} of the ${ids.length} selected numbers are already allocated to another user/client.\n\nReassign those ${blocked.length} numbers to the selected client? This moves them away from their current owner.\n\nOK = reassign · Cancel = leave them allocated as they are.`)){
+        res=await API.post('/numbers/allocate',Object.assign({},body,{ids:blocked,force:true}));
+      }
+    }
+    closeModal('allocAllModal');
+    const done=(res&&res.allocated!=null)?res.allocated:ids.length, left=(res&&res.blocked)?res.blocked:0;
+    alert(`✅ ${done} numbers allocated.`+(left?`\n⏭ ${left} numbers were left unchanged (already allocated).`:''));loadNumbers();
+  }catch(e){alert('❌ '+e.message);}}
+/* Smart Divide (to Clients) */
+async function openSmart(){const ranges=await API.get('/ranges');if(!clientsData.length)clientsData=await API.get('/users/client');
+  document.getElementById('smRanges').innerHTML=ranges.map(r=>`<label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;cursor:pointer"><input type="checkbox" class="smR" value="${r.id}" style="width:auto"/> ${r.name}</label>`).join('');
+  document.getElementById('smClients').innerHTML=clientsData.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;cursor:pointer"><input type="checkbox" class="smC" value="${c.id}" style="width:auto"/> ${c.username}</label>`).join('');
+  document.getElementById('smQty').value='';document.getElementById('smartModal').classList.add('show');}
+async function runSmartDivide(){const range_ids=[...document.querySelectorAll('.smR:checked')].map(c=>+c.value);const target_ids=[...document.querySelectorAll('.smC:checked')].map(c=>+c.value);const qty=parseInt(document.getElementById('smQty').value);
+  if(!range_ids.length){alert('Select range.');return;}if(!target_ids.length){alert('Select a client.');return;}if(!qty||qty<=0){alert('Enter quantity.');return;}
+  try{const r=await API.post('/numbers/smart-divide',{range_ids,target_ids,qty});closeModal('smartModal');alert(r.message || `✅ Smart divide complete!\nTotal: ${r.total}`);loadNumbers();}catch(e){alert('❌ '+e.message);}}
+
+/* BULK ALLOC */
+function cycleRate(r,cycle){
+  if(!r) return '0';
+  function clean(v){ if(v===null||v===undefined) return null; const s=String(v).trim(); if(s===''||/^(na|n\/a|null|undefined)$/i.test(s)) return null; const n=parseFloat(s); return (isFinite(n)&&n>0)?s:null; }
+  cycle=cycle||document.getElementById('baPayterm')?.value||'weekly_7_1';
+  let val=null;
+  if(cycle==='daily') val=clean(r.r1)||clean(r.rate_1_1);
+  else if(cycle==='weekly_7_7') val=clean(r.r3)||clean(r.rate_7_7);
+  else if(cycle==='monthly_30x45') val=clean(r.r4)||clean(r.rate_30_45);
+  else val=clean(r.r2)||clean(r.rate_7_1);
+  return val||clean(r.r2)||clean(r.rate_7_1)||clean(r.r3)||clean(r.rate_7_7)||clean(r.r4)||clean(r.rate_30_45)||clean(r.r1)||clean(r.rate_1_1)||clean(r.rate)||'0';
+}
+function renderBulk(){document.getElementById('baBody').innerHTML=baData.map((r,i)=>`<tr>
+  <td><b>${r.range}</b></td><td><span class="tag tag-green">${r.avail}</span> <span class="muted">/ ${r.total}</span></td>
+  <td><span class="tag tag-amber">${r.alloc}</span></td><td class="cell-money">${cycleRate(r)}</td>
+  <td><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><select id="bc${i}" style="width:auto;padding:7px 9px">${myClients.map(c=>`<option>${c}</option>`).join('')}</select><input type="number" class="allocate-num" placeholder="Qty" id="bq${i}"/><button type="button" class="ams-btn ams-green"  onclick="baRow(${i})" data-tip="Allocate" title="Allocate" aria-label="Allocate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></button></div></td>
+  <td><div style="display:flex;gap:6px;align-items:center"><input type="number" class="allocate-num" placeholder="Qty" id="bu${i}"/><button type="button" class="ams-btn ams-amber"  onclick="baUn(${i})" data-tip="Unallocate" title="Unallocate" aria-label="Unallocate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg></button></div></td></tr>`).join('');
+  document.getElementById('baInfo').textContent=`${baData.length} ranges`;}
+function baRow(i){const q=parseInt(document.getElementById('bq'+i).value),c=document.getElementById('bc'+i).value;if(!q||q<=0){alert('Enter a valid quantity.');return;}if(q>baData[i].avail){alert('Available: '+baData[i].avail);return;}baData[i].avail-=q;baData[i].alloc+=q;alert(`✅ ${q} numbers of "${baData[i].range}" allocated to ${c}.`);renderBulk();}
+function baUn(i){const q=parseInt(document.getElementById('bu'+i).value);if(!q||q<=0){alert('Enter a valid quantity.');return;}if(q>baData[i].alloc){alert('Allocated: '+baData[i].alloc);return;}baData[i].alloc-=q;baData[i].avail+=q;alert(`✅ ${q} numbers unallocated.`);renderBulk();}
+function doBulk(){const r=document.getElementById('baRange').value,c=document.getElementById('baClient').value,q=parseInt(document.getElementById('baQty').value);if(!r||!c||!q){alert('Range, Select client and quantity.');return;}const idx=baData.findIndex(x=>x.range===r);if(q>baData[idx].avail){alert('Available: '+baData[idx].avail);return;}baData[idx].avail-=q;baData[idx].alloc+=q;alert(`✅ ${q} numbers of "${r}" allocated to ${c}.`);document.getElementById('baQty').value='';renderBulk();}
+
+/* CLIENT MANAGEMENT */
+function buildClients(){document.getElementById('page-clients').innerHTML=`
+  <div class="page-head"><div><h2>Client Management</h2><div class="breadcrumb"><b>Users</b> › My Clients</div></div>
+    <div class="head-actions"><button class="btn btn-blue" onclick="openClient(-1)">+ Add Client</button></div></div>
+  <div class="table-wrap" style="padding:15px 17px;margin-top:0"><div class="table-controls">
+    <div class="tc-left"><label>Show Records:</label><select id="clLen" onchange="renderClients()"><option>10</option><option selected>25</option><option value="All">All</option></select>
+    <div class="exp-btns"><button type="button" class="ams-btn ams-blue"  data-tip="Copy" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button type="button" class="ams-btn ams-blue"  data-tip="Download CSV" title="Download CSV" aria-label="Download CSV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="ams-btn ams-green"  data-tip="Download Excel" title="Download Excel" aria-label="Download Excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></div></div>
+    <div class="tc-right"><label>Search:</label><input type="text" id="clSearch" oninput="renderClients()" placeholder="Search..."/></div></div></div>
+  <div class="table-wrap"><div class="tscroll"><table>
+    <thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Contact</th><th>Numbers</th><th>Active</th><th>Action</th></tr></thead>
+    <tbody id="clBody"></tbody></table></div><div class="table-foot"><div class="info" id="clInfo"></div></div></div>`;
+  loadClients();}
+/* FINAL POLISH 5D: this file declared loadClients() twice; the second declaration
+   (further down) silently replaced this one, so myClients was only ever refreshed
+   through refreshClients(). There is now a single definition below. */
+function findClient(id){return (clientsData||[]).find(x=>x.id===id);}
+function renderClients(){
+  /* FINAL POLISH 5D: the boot preload calls this before the Client Management page
+     exists; reading #clLen unguarded threw and aborted the rest of the preload, so
+     the list only appeared after a manual browser reload. */
+  if(!document.getElementById('clBody')) return;
+  const len=document.getElementById('clLen')?.value||'25',q=(document.getElementById('clSearch')?.value||'').toLowerCase();
+  let rows=(clientsData||[]).filter(r=>r.username.toLowerCase().includes(q)||(r.name||'').toLowerCase().includes(q));
+  const pag=API.paginateRows('agtClients',rows,len,'clInfo',renderClients);const t=pag.total;rows=pag.rows;
+  document.getElementById('clBody').innerHTML=rows.map(r=>{const nums=(numData||[]).filter(n=>n.client===r.username).length;
+    return `<tr><td><span class="tag tag-cli">${r.username}</span></td><td>${r.name||'<span class="muted">—</span>'}</td><td>${r.email||'<span class="muted">—</span>'}</td><td>${r.contact||'<span class="muted">—</span>'}</td><td><span class="tag tag-blue">${nums}</span></td>
+    <td>${r.active?'<span class="check-ok">✔</span>':'<span class="tag tag-red">Disabled</span>'}</td>
+    <td style="white-space:nowrap"><button class="icon-btn ib-blue" onclick="viewClient(${r.id})"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button class="icon-btn ib-amber" onclick="openClient(${r.id})"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+      <button class="icon-btn ib-red" onclick="delClient(${r.id})"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>`;}).join('')||`<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No clients found</td></tr>`;
+  document.getElementById('clInfo').textContent=`Showing ${rows.length} of ${t} clients`;}
+let clId=-1;
+function openClient(id){clId=id;document.getElementById('clientModalTitle').textContent=id<0?'Add Client':'Edit Client';
+  const r=id<0?{username:'',name:'',email:'',contact:'',skype:'',active:1}:findClient(id)||{};cU.value=r.username||'';cP.value='';cN.value=r.name||'';cE.value=r.email||'';cC.value=r.contact||'';cS.value=r.skype||'';cA.checked=!!r.active;cU.disabled=id>=0;document.getElementById('clientModal').classList.add('show');}
+async function saveClient(){if(!cU.value.trim()){alert('Username is required.');return;}if(clId<0&&!cP.value){alert('Password is required.');return;}
+  const body={username:cU.value.trim(),password:cP.value,role:'client',name:cN.value.trim(),email:cE.value.trim(),contact:cC.value.trim(),skype:cS.value.trim(),active:cA.checked};
+  try{ if(clId<0) await API.post('/users',body); else await API.put('/users/'+clId,body); closeModal('clientModal'); loadClients(); refreshClientSelects(); }catch(e){ alert('❌ '+e.message); }}
+async function delClient(id){if(confirm('This client delete?')){try{await API.del('/users/'+id);loadClients();refreshClientSelects();}catch(e){alert('❌ '+e.message);}}}
+function viewClient(id){const r=findClient(id)||{};const nums=(numData||[]).filter(n=>n.client===r.username).length;alert(`👤 Client\n\nUsername: ${r.username}\nName: ${r.name||'—'}\nEmail: ${r.email||'—'}\nContact: ${r.contact||'—'}\nNumbers: ${nums}\nActive: ${r.active?'Yes':'No'}`);}
+
+/* CDR helpers */
+function eb(){return`<div class="exp-btns"><button type="button" class="ams-btn ams-blue"  data-tip="Copy" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button type="button" class="ams-btn ams-blue"  data-tip="Download CSV" title="Download CSV" aria-label="Download CSV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="ams-btn ams-green"  data-tip="Download Excel" title="Download Excel" aria-label="Download Excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></div>`;}
+function tIcon(c,s){return`<div class="si ${c}">${s}</div>`;}
+
+/* SMS REPORT (client column) */
+function setDefaultDates(fromId,toId){const uk=todayStr();const f=document.getElementById(fromId),t=document.getElementById(toId);
+  if(f){ if(!f.value){f.value=uk;f.dataset.amsAuto='1';} else if(f.dataset.amsAuto==='1'&&f.value!==uk){f.value=uk;} }
+  if(t){ if(!t.value){t.value=uk;t.dataset.amsAuto='1';} else if(t.dataset.amsAuto==='1'&&t.value!==uk){t.value=uk;} }
+  if(!document.__amsAutoDateHook){ document.__amsAutoDateHook=1; document.addEventListener('change',e=>{ if(e.target&&e.target.matches&&e.target.matches('input[type=date]')) e.target.dataset.amsAuto='0'; }); }
+}
+
+/* ===== CDR: DETAILED (advanced filters) ===== */
+function buildSmsDetail(){
+  document.getElementById('page-smsDetail').innerHTML=`
+  <style>.ams-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 6px 2px 0;}
+.ams-chip .x{cursor:pointer;font-weight:800;}
+.ams-gb-lab{font-weight:600;align-self:center;margin-right:2px;}
+tfoot.ams-tot td{position:sticky;bottom:0;border-top:2px solid #ddd;font-weight:700;}</style>
+  <div class="page-head"><div><h2>SMS Detailed Report</h2><div class="breadcrumb"><b>CDR Stats</b> › Detailed</div></div></div>
+  <div class="toolbar">
+    <div class="filter-row"><label><input type="checkbox" id="sdUseDate" checked style="width:auto" onchange="renderSmsDetail()"> Date</label><input type="date" id="sdDateFrom" title="From date" onchange="renderSmsDetail()" /> <span class="muted" style="align-self:center">to</span> <input type="date" id="sdDateTo" title="To date" onchange="renderSmsDetail()" />
+    
+    <label>Number</label><input type="text" id="sdNumSearch" placeholder="Search number…" style="min-width:150px" oninput="clearTimeout(window.__sdNT);window.__sdNT=setTimeout(renderSmsDetail,450)"/>
+    <label>CLI</label><input type="text" id="sdCliSearch" placeholder="Search CLI…" style="min-width:120px" oninput="clearTimeout(window.__sdCT);window.__sdCT=setTimeout(renderSmsDetail,450)"/>
+    <button class="btn btn-blue" onclick="renderSmsDetail()">Apply Filter</button><button type="button" class="ams-btn"  onclick="sdReset()" data-tip="Reset" title="Reset" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button></div>
+    <!-- P20 CDR REBUILD: filters + Group by (reference design). Provider/Manager
+         admin-only hain (backend bhi enforce karta hai — silently ignored). -->
+    <div class="filter-row" style="margin-top:6px">
+      <label style="min-width:34px">Filters</label>
+      <div id="sdSelRangeContainer" style="display:inline-block;min-width:150px"></div>
+      <div id="sdSelClientContainer" style="display:inline-block;min-width:150px"></div>
+    </div>
+    <div class="filter-row" style="margin-top:6px;flex-wrap:wrap">
+      <span class="ams-gb-lab">Group by</span>
+      <label style="width:auto"><input type="checkbox" id="sdGb_hour" style="width:auto" onchange="renderSmsDetail()"> Hour</label><label style="width:auto"><input type="checkbox" id="sdGb_day" style="width:auto" onchange="renderSmsDetail()"> Day</label><label style="width:auto"><input type="checkbox" id="sdGb_month" style="width:auto" onchange="renderSmsDetail()"> Month</label><label style="width:auto"><input type="checkbox" id="sdGb_range" style="width:auto" onchange="renderSmsDetail()"> Range</label><label style="width:auto"><input type="checkbox" id="sdGb_number" style="width:auto" onchange="renderSmsDetail()"> Number</label><label style="width:auto"><input type="checkbox" id="sdGb_cli" style="width:auto" onchange="renderSmsDetail()"> CLI</label><label style="width:auto"><input type="checkbox" id="sdGb_client" style="width:auto" onchange="renderSmsDetail()"> Client</label><label style="width:auto"><input type="checkbox" id="sdGb_currency" style="width:auto" onchange="renderSmsDetail()"> Currency</label>
+    </div>
+    <div id="sdChips" style="display:flex;flex-wrap:wrap;align-items:center"></div>
+  </div>
+  <div class="table-wrap" style="padding:15px 17px;margin-top:0"><div class="table-controls">
+    <div class="tc-left"><label>Show Records:</label><select id="sdLen" onchange="renderSmsDetail()"><option>10</option><option selected>25</option><option>50</option><option>100</option><option>500</option><option>1000</option><option>10000</option><option value="All">All</option></select>${eb()}</div>
+    <div class="tc-right"><label>Search:</label><input type="text" id="sdSearch" oninput="clearTimeout(window.__sdST);window.__sdST=setTimeout(renderSmsDetail,450)" placeholder="Search..."/></div></div></div>
+  <div class="table-wrap"><div class="tscroll"><table><thead id="sdHead"></thead><tbody id="sdBody"></tbody><tfoot id="sdFoot" class="ams-tot"></tfoot></table></div>
+    <div class="table-foot"><div class="info" id="sdInfo"></div><div class="info" id="sdPayoutInfo"></div><div class="pagination"></div></div></div>`;var _f3=document.getElementById('sdDateFrom'),_t3=document.getElementById('sdDateTo');if(_f3)_f3.value='';if(_t3)_t3.value='';renderSmsDetail();fillSdFilterSelects();}
+/* ---- P20 report state/helpers (agent) ---- */
+function sdDims(){ return {hour:'Hour',day:'Day',month:'Month',range:'Range',number:'Number',cli:'CLI',client:'Client',currency:'Currency'}; }
+function sdSelAll(){ return {cli:'',number:'',range:'',client:''}; }
+function sdSelPick(dim,val){
+  const sel=(window.__sdSel=window.__sdSel||sdSelAll());
+  sel[dim]=String(val||'');
+  renderSmsDetail();
+}
+function sdUnpick(dim){
+  const sel=(window.__sdSel=window.__sdSel||sdSelAll());
+  sel[dim]='';
+  const map={cli:'sdCliSearch',number:'sdNumSearch',range:'sdSelRange',client:'sdSelClient'};
+  const el=map[dim]?document.getElementById(map[dim]):null; if(el) el.value='';
+  renderSmsDetail();
+}
+function sdChipsHtml(){
+  const sel=window.__sdSel||{};
+  const lbl={cli:'CLI contains',number:'Number contains',range:'Range',client:'Client'};
+  const out=[];
+  for(const k of ['cli','number','range','client']){
+    if(sel[k]){ const v=String(sel[k]).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      out.push(`<span class="ams-chip">${lbl[k]}: <b>${v}</b> <span class="x" onclick="sdUnpick('${k}')" title="Remove filter">&#10005;</span></span>`); } }
+  return out.join('');
+}
+function sdSyncFilterSelects(){
+  const sel=window.__sdSel=window.__sdSel||sdSelAll();
+  const map={range:'sdSelRange',client:'sdSelClient'};
+  for(const k of Object.keys(map)){ const el=document.getElementById(map[k]); if(el){ const want=String(sel[k]||''); if(el.value!==want) el.value=want; } }
+}
+function sdGbActive(){ const out=[]; for(const d of Object.keys(sdDims())){ const el=document.getElementById('sdGb_'+d); if(el&&el.checked) out.push(d); } return out; }
+function sdReset(){
+  window.__sdSort={k:'',d:''}; window.__sdSel=sdSelAll();
+  amsResetSortHeads('sdSort_');
+  for(const d of Object.keys(sdDims())){ const el=document.getElementById('sdGb_'+d); if(el) el.checked=false; }
+  sdUseDate.checked=true;
+  var _f2=document.getElementById('sdDateFrom'),_t2=document.getElementById('sdDateTo');
+  if(_f2){_f2.value='';_f2.dataset.amsAuto='';} if(_t2){_t2.value='';_t2.dataset.amsAuto='';}
+  const nsd=document.getElementById('sdSearch'); if(nsd) nsd.value='';
+  const _nsr=document.getElementById('sdNumSearch'),_csr=document.getElementById('sdCliSearch');
+  if(_nsr)_nsr.value=''; if(_csr)_csr.value='';
+}
+/* P20: group-by column formatting */
+function sdFmtDim(d,v){
+  const raw=String(v==null?'':v);
+  const esc=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  if(!raw) return '<span class="muted">—</span>';
+  if(d==='number'||d==='cli') return `<span class="mono">${esc}</span>`;
+  if(d==='range') return `<span class="tag tag-blue">${esc}</span>`;
+  if(d==='agent') return `<span class="tag tag-agt">${esc}</span>`;
+  if(d==='client') return `<span class="tag tag-cli">${esc}</span>`;
+  if(d==='currency') return `<span class="tag tag-green">${esc}</span>`;
+  if(d==='hour'||d==='day'||d==='month') return `<span class="mono">${esc}</span>`;
+  return esc;
+}
+/* P20: grouped-mode sort (SMS / My Payout — server-side) */
+function amsSdGroupSort(k){
+  const st=(window.__sdGs=window.__sdGs||{k:'',d:''});
+  st.d = (st.k===k && st.d==='asc') ? 'desc' : 'asc';
+  st.k = k;
+  renderSmsDetail();
+}
+async function fillSdFilterSelects(){
+  const escOpt=(v)=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  try{
+    const rsel=document.getElementById('sdSelRange');
+    if(rsel&&rsel.options.length<=1){
+      const ranges=await API.get('/ranges');
+      rsel.innerHTML='<option value="">All Ranges</option>'+((ranges||[]).map(r=>`<option value="${escOpt(r.name)}">${escOpt(r.name)}</option>`).join(''));
+    }
+    const cll=document.getElementById('sdSelClient');
+    if(cll&&cll.options.length<=1){
+      if(!clientsData.length){try{clientsData=await API.get('/users/client');}catch(e){}}
+      refreshClients();
+      cll.innerHTML='<option value="">All Clients</option>'+unique(myClients||[]).map(n=>`<option value="${escOpt(n)}">${escOpt(n)}</option>`).join('');
+    }
+    sdSyncFilterSelects();
+  }catch(e){console.warn(e)}
+}
+
+function groupRows(rows,key,label){const map={};rows.forEach(r=>{const k=r[key]||'—';if(!map[k])map[k]={name:k,sms:0,pay:'0'};map[k].sms++;map[k].pay=decAdd(map[k].pay,r.payout_amount||r.payout_rate||0);});const arr=Object.values(map);return {head:`<tr><th>${label}</th><th>Total OTPs</th><th>Total Payout</th></tr>`,rows:arr.map(x=>`<tr><td><span class="tag tag-cli">${x.name}</span></td><td class="cell-money">${x.sms}</td><td class="cell-money">${money(x.pay)}</td></tr>`)};}
+function inSmsDateRange(receivedAt){
+  var d = ukDateOf(receivedAt || '');
+  if (!d) return false;
+  var fromEl = document.getElementById('sdDateFrom');
+  var toEl   = document.getElementById('sdDateTo');
+  var from = fromEl && fromEl.value ? fromEl.value : '';
+  var to   = toEl   && toEl.value   ? toEl.value   : '';
+  if (!from && !to) return d === todayStr();
+  if (from && to && from > to) { var t = from; from = to; to = t; }
+  if (from && d < from) return false;
+  if (to   && d > to)   return false;
+  return true;
+}
+async function renderSmsDetail_legacy_dead_P19(){/* P19: DEAD legacy copy — kabhi call na karein. Live = async renderSmsDetail neeche. */return;
+  const _sdF=(document.getElementById('sdDateFrom')?.value)||'',_sdT=(document.getElementById('sdDateTo')?.value)||'';
+  let dateFrom=_sdF,dateTo=_sdT;
+  if(!dateFrom&&!dateTo){ dateFrom=todayStr(); dateTo=todayStr(); }
+  else if(dateFrom&&!dateTo){ dateTo='2099-12-31'; }
+  else if(!dateFrom&&dateTo){ dateFrom='1970-01-01'; }
+  if(dateFrom>dateTo){ const _s=dateFrom; dateFrom=dateTo; dateTo=_s; }
+  const dateVal=dateFrom,rangeVal=sdRange?.value||'',userVal=sdUser?.value||'',cliVal=sdCli?.value||'',search=(sdSearch?.value||'').trim(),len=sdLen?.value||'25';
+  const by=sdUseNumber?.checked?'number':(sdUseRange?.checked?'range':(sdUseUser?.checked?'client':''));
+  if(by){
+    const params=new URLSearchParams({from:dateFrom,to:dateTo}); if(rangeVal)params.set('range',rangeVal); if(userVal)params.set('client',userVal); if(search)params.set('search',search);
+    if(cliVal)params.set('cli',cliVal);
+    let data={rows:[]}; try{data=await API.get('/stats-summary/'+by+'?'+params.toString())}catch(e){}
+    sdHead.innerHTML=`<tr><th>${by}</th><th>Total OTPs</th><th>Total Payout</th></tr>`;
+    sdBody.innerHTML=(data.rows||[]).map(x=>`<tr><td><span class="tag tag-blue">${x.key||'—'}</span></td><td class="cell-money">${x.sms||0}</td><td class="cell-money">${money(x.payment||'0')}</td></tr>`).join('')||`<tr><td colspan="3" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+    sdInfo.textContent=`Showing ${(data.rows||[]).length} summary rows`; sdPayoutInfo.textContent=`Filtered total payout: ${money(data.totalPayment||'0')}`; return;
+  }
+  const state=agtPager('agtSmsDetailServer');const sig=agtSig({dateVal,rangeVal,userVal,cliVal,search,len});if(state.signature!==sig){state.page=1;state.signature=sig;}
+  const params=new URLSearchParams({page:String(state.page),limit:len,from:dateFrom,to:dateTo,sort:'date',dir:'desc'});
+  /* auto-refresh passes fresh=1 -> cache-bypassing GET so a just-received OTP is really fetched
+     (unknown query key: the endpoint ignores it, it only makes the short read caches miss) */
+  if(fresh)params.set('_amsr',String(Date.now()));
+  if(rangeVal)params.set('range',rangeVal); if(userVal)params.set('client',userVal); if(search)params.set('search',search);
+  if(cliVal)params.set('cli',cliVal);
+  let data={rows:[],total:0,page:1,limit:25,totalPages:1,totalPayment:'0'}; try{data=await API.get('/sms/paged?'+params.toString())}catch(e){}
+  state.page=data.page||1; state.totalPages=data.totalPages||1;
+  sdHead.innerHTML='<tr><th>Date</th><th>Client</th><th>Range</th><th>Number</th><th>CLI</th><th>Payout Rate</th><th>Message</th></tr>';
+  const rows=data.rows||[];
+  sdBody.innerHTML=rows.map(r=>`<tr><td class="muted">${(r.received_at||'').slice(0,19)}</td><td><b>${r.range_name||'—'}</b></td><td class="mono">${r.number||''}</td><td class="mono">${r.cli||''}</td><td class="msg-body">${r.message||''}</td><td><span class="tag tag-cli">${r.client_name||'—'}</span></td><td>${r.range_currency?'<span class="tag tag-green">'+r.range_currency+'</span>':'—'}</td><td class="cell-money">${cleanDec(r.payout_rate||r.payout_amount||0)}</td><td class="cell-money">${r.number_payout!=null&&r.number_payout!==''?cleanDec(r.number_payout):'—'}</td></tr>`).join('')||`<tr><td colspan="9" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+  sdInfo.textContent=`Showing ${shownSrv(data.page,data.limit,rows.length,data.total)} of ${data.total||0} rows`;
+  sdPayoutInfo.textContent=`Filtered total payout: ${money(data.totalPayment||'0')}`;
+  const p=sdInfo?.closest('.table-foot')?.querySelector('.pagination'); if(p&&window.drawServerPagination)drawServerPagination(p,state,renderSmsDetail);
+}
+
+/* CLIENT STATS */
+function buildClientStats(){document.getElementById('page-clientStats').innerHTML=`
+  <div class="page-head"><div><h2>Client Stats</h2><div class="breadcrumb"><b>CDR Stats</b> › Client Stats</div></div></div>
+  <div class="toolbar"><div class="filter-row">
+    <label>From</label><input type="date" id="csFrom" onchange="renderClientStats()"/><label>To</label><input type="date" id="csTo" onchange="renderClientStats()"/>
+    <button type="button" class="ams-btn ams-blue"  onclick="renderClientStats()" data-tip="Apply filters" title="Apply" aria-label="Apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
+    <button type="button" class="ams-btn"  onclick="csReset()" data-tip="Reset" title="Reset" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+  </div></div>
+  <div class="table-wrap" style="padding:15px 17px;margin-top:0"><div class="table-controls">
+    <div class="tc-left"><label>Show Records:</label><select id="csLen" onchange="renderClientStats()"><option>10</option><option selected>25</option><option value="All">All</option></select>${eb()}</div>
+    <div class="tc-right"><label>Search:</label><input type="text" id="csSearch" oninput="renderClientStats()" placeholder="Search..."/></div></div></div>
+  <div class="table-wrap"><div class="tscroll"><table>
+    <thead><tr><th>Client</th><th>Numbers</th><th>Total SMS</th><th>Payment ($)</th></tr></thead><tbody id="csBody"></tbody></table></div>
+    <div class="table-foot"><div class="info" id="csInfo"></div></div></div>`;
+  const totSms=cdr.reduce((s,r)=>s+r.sms,0),totPay=sumPay(cdr);
+  renderClientStats();}
+function renderClientStats(){const len=document.getElementById('csLen').value,q=(document.getElementById('csSearch').value||'').toLowerCase();
+  let list=myClients.map(c=>{const recs=cdr.filter(r=>r.client===c);return {name:c,recs,sms:recs.reduce((s,r)=>s+r.sms,0),pay:sumPay(recs),nums:numData.filter(n=>n.client===c).length};}).filter(x=>x.sms>0).filter(x=>x.name.toLowerCase().includes(q));const pag=API.paginateRows('agtClientStats',list,len,'csInfo',renderClientStats);const t=pag.total;list=pag.rows;
+  document.getElementById('csBody').innerHTML=list.map(x=>`<tr><td><span class="tag tag-cli">${x.name}</span></td><td><span class="tag tag-blue">${x.nums}</span></td><td class="cell-money">${x.sms.toLocaleString()}</td><td class="cell-money" style="color:#047857">$ ${cleanDec(x.pay)}</td></tr>`).join('')||`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No clients with OTPs found</td></tr>`;
+  document.getElementById('csInfo').textContent=`Showing ${list.length} of ${t} clients`;}
+
+function csReset(){['csSearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['csFrom','csTo'].forEach(id=>{const e=document.getElementById(id);if(e){e.value='';e.dataset.amsAuto='';}});renderClientStats();}
+/* RANGE / NUMBER STATS (drill by client) */
+function buildDrill(kind){const title=kind==='range'?'Range Stats':'Number Stats';
+  document.getElementById('page-'+kind+'Stats').innerHTML=`
+  <div class="page-head"><div><h2>${title}</h2><div class="breadcrumb"><b>CDR Stats</b> › ${title}</div></div></div>
+  <div class="toolbar"><div class="filter-row">
+    <label>From</label><input type="date" id="${kind}From" onchange="renderDrill('${kind}')"/><label>To</label><input type="date" id="${kind}To" onchange="renderDrill('${kind}')"/>
+    <select id="${kind}FCli" onchange="renderDrill('${kind}')"><option value="">Filter Client</option>${myClients.map(c=>`<option>${c}</option>`).join('')}</select>
+    <button type="button" class="ams-btn ams-blue"  onclick="renderDrill('${kind}')" data-tip="Filters" title="Filters" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
+    <button type="button" class="ams-btn"  onclick="document.getElementById('${kind}FCli').value='';document.getElementById('${kind}Search').value='';renderDrill('${kind}')" data-tip="Reset" title="Reset" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button></div></div>
+  <div class="table-wrap" style="padding:15px 17px;margin-top:0"><div class="table-controls">
+    <div class="tc-left"><label>Show Records:</label><select id="${kind}Len" onchange="renderDrill('${kind}')"><option>10</option><option selected>25</option><option value="All">All</option></select>${eb()}</div>
+    <div class="tc-right"><label>Search:</label><input type="text" id="${kind}Search" oninput="renderDrill('${kind}')" placeholder="Search..."/></div></div></div>
+  <div class="table-wrap"><div class="tscroll"><table>
+    <thead><tr><th>${kind==='range'?'Range':'Number'}</th><th>Client</th><th>Total SMS</th><th>Payment ($)</th></tr></thead><tbody id="${kind}Body"></tbody></table></div>
+    <div class="table-foot"><div class="info" id="${kind}Info"></div></div></div>`;
+  const key=kind==='range'?'range':'number';const uniq=new Set(cdr.map(r=>r[key])).size;const totSms=cdr.reduce((s,r)=>s+r.sms,0),totPay=sumPay(cdr);
+  renderDrill(kind);}
+function renderDrill(kind){const len=document.getElementById(kind+'Len').value,q=(document.getElementById(kind+'Search').value||'').toLowerCase(),c=document.getElementById(kind+'FCli').value;
+  const key=kind==='range'?'range':'number';let recs=cdr.filter(r=>(!c||r.client===c));
+  const map={};recs.forEach(r=>{const gk=r[key]+'|'+r.client;if(!map[gk])map[gk]={val:r[key],client:r.client,sms:0,pay:'0'};map[gk].sms+=r.sms;map[gk].pay=decAdd(map[gk].pay,r.pay);});
+  let rows=Object.values(map).filter(x=>[x.val,x.client].join(' ').toLowerCase().includes(q));const pag=API.paginateRows('agtDrill'+kind,rows,len,kind+'Info',()=>renderDrill(kind));const t=pag.total;rows=pag.rows;
+  document.getElementById(kind+'Body').innerHTML=rows.map(x=>`<tr><td><b>${kind==='number'?'<span class="mono">'+x.val+'</span>':x.val}</b></td><td><span class="tag tag-cli">${x.client}</span></td><td class="cell-money">${x.sms.toLocaleString()}</td><td class="cell-money" style="color:#047857">$ ${cleanDec(x.pay)}</td></tr>`).join('')||`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+  document.getElementById(kind+'Info').textContent=`Showing ${rows.length} of ${t} rows`;}
+
+/* TEST PANEL (masked CLI + masked SMS body; range filter only on test numbers) */
+/* PAYMENT */
+/* NEWS (API) */
+
+
+function cleanDec(v){let s=String(v??'').replace(/[$,\s]/g,'');const m=s.match(/-?\d+(?:\.\d+)?/);if(!m)return '0';s=m[0];if(!s.includes('.'))return String(BigInt(s));let[a,b]=s.split('.');b=(b||'').replace(/0+$/,'');a=String(BigInt(a||'0'));return b?`${a}.${b}`:a;}
+function decAdd(a,b){a=cleanDec(a);b=cleanDec(b);const[ai,af='']=a.split('.'),[bi,bf='']=b.split('.');const sc=Math.max(af.length,bf.length);let sum=(BigInt(ai+af.padEnd(sc,'0'))+BigInt(bi+bf.padEnd(sc,'0'))).toString();let neg=sum.startsWith('-');if(neg)sum=sum.slice(1);if(!sc)return(neg?'-':'')+sum;sum=sum.padStart(sc+1,'0');let out=sum.slice(0,-sc)+'.'+sum.slice(-sc);out=out.replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1');return(neg?'-':'')+out;}
+function sumPay(rows){return (rows||[]).reduce((a,r)=>decAdd(a,r.pay||r.payout_amount||r.payout_rate||0),'0');}
+function pay3(v){if(window.AMSCore&&AMSCore.pay3)return AMSCore.pay3(v);let s=String(v??'').replace(/[$,\s]/g,'');const m=s.match(/-?\d+(?:\.\d+)?/);if(!m)return'0';const p=m[0].split('.');if(p.length<2)return p[0];const d=p[1].slice(0,3).replace(/0+$/,'');return d?p[0]+'.'+d:p[0];}function money(v){return '$ '+cleanDec(v);}
+function payFmt(v){return '$'+cleanDec(v);}
+/* LIVE API OVERRIDES (no dummy data) */
+function decAdd(a,b){a=cleanDec(a);b=cleanDec(b);const[ai,af='']=a.split('.'),[bi,bf='']=b.split('.');const sc=Math.max(af.length,bf.length);let sum=(BigInt(ai+af.padEnd(sc,'0'))+BigInt(bi+bf.padEnd(sc,'0'))).toString();let neg=sum.startsWith('-');if(neg)sum=sum.slice(1);if(!sc)return(neg?'-':'')+sum;sum=sum.padStart(sc+1,'0');let out=sum.slice(0,-sc)+'.'+sum.slice(-sc);out=out.replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1');return(neg?'-':'')+out;}
+function sumPay(rows){return (rows||[]).reduce((a,r)=>decAdd(a,r.pay||r.payout_amount||r.payout_rate||0),'0');}
+function money(v){return '$ '+cleanDec(v);}
+
+function todayStr(){return (window.API&&API.ukToday)?API.ukToday():new Date().toISOString().slice(0,10);}function ukDateOf(v){return (window.API&&API.ukDate)?API.ukDate(v):String(v||'').slice(0,10);}
+function uniqueVals(arr){return [...new Set((arr||[]).filter(Boolean))];}
+async function loadProfile(){try{const me=await API.get('/me');AGT=me.name||me.username||AGT;document.querySelectorAll('.nm').forEach(e=>e.textContent=AGT);document.querySelectorAll('.av').forEach(e=>e.textContent=(AGT[0]||'A').toUpperCase());}catch(e){}}
+async function loadDashboard(){
+  const d=await API.get('/dashboard').catch(e=>{window.AMSDashboardCore && AMSDashboardCore.error();throw e;});
+  const spark=(d.daily7||[]).map(x=>x.count||0);
+  /* GLOBAL dashboard top: KPI cards = SMS Today / SMS This Week (/dashboard,
+     sms_daily_stats) + Earnings Today / Earnings This Month (/earnings-summary,
+     payment_ledger — the earnings source approved 2026-10-24). The earning
+     fetch is failure-tolerant: KPI money cells render '—', never a fake 0. */
+  let _es=null; try{ _es=await API.get('/earnings-summary'); }catch(e){ console.warn('earnings-summary(cards)',e); }
+  if(window.AMSDashboard && AMSDashboard.amsKpis){
+    AMSDashboard.amsKpis('amsKpis','amsDashMeta',d,_es,[((d.clients||0).toLocaleString())+' Clients',((d.numbers||0).toLocaleString())+' Numbers']);
+let _daily=null; try{ _daily=await API.get('/dashboard/daily?days=15'); }catch(e){ console.warn('dashboard/daily',e); }
+    const _rows=(_daily&&_daily.rows)||null;
+    AMSDashboard.amsVolume('amsVolume', _rows||d.daily7, _rows||((_es&&_es.daily7)||[]), _rows?_daily.sms_total:d.sms_7d, _rows?_daily.earning_total:(_es&&_es.earning_7d));
+    AMSDashboard.amsRail('amsRail',[
+      {label:'SMS Yesterday', value:d.sms_yesterday, icon:'volume'},
+      {label:'Earnings This Week', value:_es&&_es.earning_week, money:true, icon:'money'},
+      {label:'My Clients', value:d.clients, icon:'clients'},
+      {label:'My Numbers', value:d.numbers, icon:'numbers'}
+    ]);
+  }
+  window.AMSDashboard.areaChart('amsSmsChart',{title:'SMS Last 7 Days',series:'SMS',color:'#6d5df6',rows:d.daily7,valueKey:'count',ariaLabel:'Received SMS per day for the last seven UK reporting days'});
+  window.AMSDashboard.statGroup('amsScope','Account',[
+    {label:'Number of Clients', value:d.clients||0, icon:'clients'},
+    {label:'My Numbers', value:d.numbers||0, icon:'numbers'}
+  ]);
+  window.AMSDashboardCore.refreshExtras('agent');
+  loadEarningCards('agent');
+}
+/* Earning cards + graph: the agent's own payment_ledger totals (existing endpoint). */
+async function loadEarningCards(role){
+  try{
+    const es=await API.get('/earnings-summary');
+    /* FINAL POLISH 5A: the Agent dashboard group is now labelled "Payout" (it is the
+       agent's own payout from the payment ledger). Only the displayed heading text
+       changed — the data, the endpoint, the graph and every calculation are the same. */
+    window.AMSDashboard.statGroup('amsEarnings','Payout',[
+      {label:'Earning Today', value:es.earning_daily, money:true, icon:'money'},
+      {label:'Earning This Week', value:es.earning_week, money:true, icon:'money'},
+      {label:'Earning This Month', value:es.earning_month, money:true, icon:'money'},
+      {label:'Real Earning', value:es.earning_all, money:true, icon:'money'}
+    ]);
+    window.AMSDashboard.areaChart('amsEarnChart',{title:'Earning Last 7 Days',series:'Earning',color:'#f59e0b',rows:es.daily7,valueKey:'amount',money:true,ariaLabel:'Recorded earning per day for the last seven UK reporting days'});
+  }catch(e){
+    console.warn(e);
+    const g=document.getElementById('amsEarnings');if(g)g.innerHTML='';
+    const c=document.getElementById('amsEarnChart');if(c)c.innerHTML='<div class="ams-ui-chart-card"><p class="ams-ui-chart-empty">Earning could not be loaded.</p></div>';
+  }
+}
+
+function pxPickRate(r){
+  /* BUGFIX: the old lookup was  r.r4 || r.r2 || 'NA'.
+     Ranges store unset cycles as the STRING "NA", which is truthy in JS, so
+     r.r4 ("NA") always won and the Rate column showed N/A even though a
+     weekly/daily rate was configured. Mirror the backend: pick the rate for
+     the range's own payment cycle first, then fall back to any positive rate. */
+  if(!r) return 'NA';
+  var ok=function(v){ if(v===null||v===undefined) return false;
+    var s=String(v).trim(); if(s===''||/^(na|n\/a|null|undefined)$/i.test(s)) return false;
+    var n=parseFloat(s); return isFinite(n) && n>0; };
+  var t=String(r.payment_type||r.payterm||'').toLowerCase();
+  var order;
+  if(t.indexOf('30')>=0||t.indexOf('month')>=0)      order=[r.r4,r.r2,r.r3,r.r1];
+  else if(t.indexOf('7_7')>=0||t==='weekly_7_7')     order=[r.r3,r.r2,r.r4,r.r1];
+  else if(t.indexOf('1_1')>=0||t.indexOf('dail')>=0) order=[r.r1,r.r2,r.r3,r.r4];
+  else                                               order=[r.r2,r.r3,r.r1,r.r4];
+  for(var i=0;i<order.length;i++) if(ok(order[i])) return String(order[i]).trim();
+  return 'NA';
+}
+function rebuildBa(){baData=(rateCard||[]).map(r=>{const nums=(numData||[]).filter(n=>n.range===r.range);const alloc=nums.filter(n=>n.client).length;return{id:r.id,range:r.range,total:nums.length,alloc,avail:nums.length-alloc,rate:pxPickRate(r)};});}
+async function loadRateCard(){
+  /* P19k #8: Rate Card ab SAB configured ranges dikhata hai (inventory scope NAHI — naya
+     /api/rate-card, public fields only). Selectors (numRange) scoped /api/ranges se hi
+     bharte hain (P19f inventory visibility untouched). */
+  try{ rateCard=(await API.get('/rate-card')).map(r=>({range:r.name,cur:r.currency,r1:r.rate_1_1,r2:r.rate_7_1,r3:r.rate_7_7,r4:r.rate_30_45,payment_type:r.payment_type})); }catch(e){ rateCard=[]; }
+  renderRateCard();
+  try{ const scoped=await API.get('/ranges'); rangeNames=(scoped||[]).map(r=>r.name); }catch(e){ rangeNames=[]; }
+  refreshAgentNumbersFilters();
+}
+async function loadNumbers(){ refreshAgentNumbersFilters(); return renderNumbers(); }
+/* FINAL POLISH 5D: the only loadClients() definition, and it goes through the shared
+   agtEnsureClients() loader — buildClients() calls this too, so one page open issues
+   one request instead of two. refreshClients()/refreshClientSelects() run inside the
+   shared loader; the render stays here. */
+async function loadClients(){ try{ await agtEnsureClients(); }catch(e){ clientsData=clientsData||[]; } renderClients(); }
+async function loadSms(fresh){ try{ smsRecords=await API.get(fresh?('/sms?_amsr='+Date.now()):'/sms'); }catch(e){ smsRecords=[]; } cdr=(smsRecords||[]).map(smsToCdr); recentTests=(smsRecords||[]).slice(0,50).map(r=>({date:(r.received_at||'').slice(0,19),range:r.range_name||'—',num:r.number||'',cli:r.cli||'',msg:r.message||''})); refreshClients(); const byCli={};smsRecords.forEach(r=>{const c=r.client_name||'—';byCli[c]=(byCli[c]||0)+1;});const b=document.getElementById('clSumBody');if(b)b.innerHTML=Object.keys(byCli).map(c=>`<tr><td><span class="tag tag-cli">${c}</span></td><td class="cell-money">${byCli[c]}</td><td class="cell-money" style="color:#047857">$ ${sumPay((smsRecords||[]).filter(r=>r.client_name===c))}</td></tr>`).join('')||`<tr><td colspan="3" class="muted" style="text-align:center;padding:16px">No records found</td></tr>`; if(document.getElementById('srBody'))renderSmsReport();if(document.getElementById('sdBody'))renderSmsDetail();if(document.getElementById('csBody'))renderClientStats();['range','number'].forEach(k=>{if(document.getElementById(k+'Body')){renderDrill(k);}});}
+function baRow(i){const q=parseInt(document.getElementById('bq'+i).value),c=document.getElementById('bc'+i).value;if(!q||!c){alert('Select client and quantity.');return;}const row=baData[i],cl=(clientsData||[]).find(x=>x.username===c);if(!row||!cl)return;API.post('/numbers/smart-divide',{range_ids:[row.id],target_ids:[cl.id],qty:q,payterm:(document.getElementById('baPayterm')?.value||'weekly_7_1')}).then(res=>{alert(`✅ ${res.total||0} numbers allocated.`);loadNumberSummaryForBulk();renderNumbers();}).catch(e=>alert('❌ '+e.message));}
+function baUn(i){const q=parseInt(document.getElementById('bu'+i).value),row=baData[i];if(!q||!row){alert('Enter quantity.');return;}const ids=(numData||[]).filter(n=>n.range===row.range&&n.client).slice(0,q).map(n=>n.id);if(!ids.length){alert('Allocated numbers were not found.');return;}API.post('/numbers/unallocate',{ids}).then(()=>{alert(`✅ ${ids.length} numbers unallocated.`);loadNumbers();}).catch(e=>alert('❌ '+e.message));}
+function doBulk(){const r=document.getElementById('baRange').value,c=document.getElementById('baClient').value,q=parseInt(document.getElementById('baQty').value);if(!r||!c||!q){alert('Range, Select client and quantity.');return;}const row=(baData||[]).find(x=>x.range===r)|| (rateCard||[]).find(x=>x.range===r),cl=(clientsData||[]).find(x=>x.username===c);if(!row||!cl)return;API.post('/numbers/smart-divide',{range_ids:[row.id],target_ids:[cl.id],qty:q,payterm:(document.getElementById('baPayterm')?.value||'weekly_7_1')}).then(res=>{alert(`✅ ${res.total||0} numbers allocated.`);document.getElementById('baQty').value='';loadNumberSummaryForBulk();renderNumbers();}).catch(e=>alert('❌ '+e.message));}
+
+/* PAYMENT V2 */
+function openWalletHelp(){document.getElementById('walletHelpModal').classList.add('show')}
+function payBal(b,type){return (b||[]).find(x=>x.payment_type===type)||{available_balance:'0',minimum:'0',can_request:false,label:type}}
+async function loadAgentPayment(){
+  if(!isChatPaymentUnlocked()){
+    const lockView = document.getElementById('paymentLockView');
+    const contentView = document.getElementById('paymentContentView');
+    if(lockView) lockView.style.display = 'block';
+    if(contentView) contentView.style.display = 'none';
+    return;
+  }
+  const data=await API.get('/payment-v2/agent/summary');
+  const uid = data.wallet?.binance_uid || '';
+  if(document.getElementById('agtWallet')) {
+    agtWallet.value = uid;
+    const btn = document.getElementById('btnSaveAgtWallet');
+    const hint = document.getElementById('agtWalletHint');
+    if (uid) {
+      agtWallet.disabled = true;
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Locked — contact Admin to change';
+        btn.className = 'btn btn-ghost';
+      }
+      if (hint) {
+        hint.style.color = 'var(--muted)';
+        hint.textContent = 'Your Binance UID is locked for security. Contact Admin Support to update it.';
+      }
+    } else {
+      agtWallet.disabled = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Save Binance UID';
+        btn.className = 'btn btn-blue';
+      }
+    }
+  }
+  const d=payBal(data.balances,'daily'), w=payBal(data.balances,'weekly'), m=payBal(data.balances,'monthly_30x45');
+  /* P17: card = TOTAL earned (available + not-yet-eligible) — ledger source of truth, dashboard-consistent.
+     Sub-line: minimum + abhi-available + kab eligible. Request gating (eligible-only) UNCHANGED. */
+  const _tot=(x)=>{ const a=parseFloat(x.available_balance)||0, e=parseFloat(x.earned_amount)||0; return money(pay3(Math.round((a+e)*1000000)/1000000)); };
+  const _sub=(x)=>{ const e=parseFloat(x.earned_amount)||0; return 'Minimum '+money(x.minimum)+' · available '+money(x.available_balance)+(e>0?' · earned '+money(x.earned_amount)+(x.next_eligible_at?' · eligible '+String(x.next_eligible_at).slice(0,10):''):''); };
+  agtDailyBal.textContent=_tot(d);agtDailyMin.textContent=_sub(d);
+  agtWeeklyBal.textContent=_tot(w);agtWeeklyMin.textContent=_sub(w);
+  agtMonthlyBal.textContent=_tot(m);agtMonthlyMin.textContent=_sub(m);
+  agtRequestButtons.innerHTML=[d,w,m].map(x=>{const can=!!x.can_request;const amt=money(x.available_balance); /* the payment-v2 summary exposes the requestable amount as available_balance */return `<button class="btn ${can?'btn-green':'btn-ghost'}" style="width:100%;text-align:left" ${can?'':'disabled'} title="${can?'':'Available '+money(x.available_balance)+' · minimum '+money(x.minimum)+' required'}" onclick="requestPayment('${x.payment_type}')">Request ${x.label} payment · ${amt}</button>`;}).join('');
+  const rows=await API.get('/payment-v2/agent/requests');
+  agtPayBody.innerHTML=rows.map(r=>{const _st=String(r.status||'').toLowerCase(),_cls=_st==='paid'?'tag-green':(_st==='rejected'?'tag-red':(_st==='requested'||_st==='pending'?'tag-amber':'tag-gray'));return `<tr><td>#${r.id}</td><td>${r.payment_type}</td><td class="cell-money">${money(pay3(r.amount))}</td><td class="mono">${r.binance_uid||(r.wallet_address?r.wallet_address+' <span class="tag tag-gray" style="font-size:10px">legacy wallet</span>':'—')}</td><td><span class="tag ${_cls}">${r.status}</span></td><td>${(r.requested_at||'').slice(0,19)}</td><td>${r.txid||'—'}</td><td>${r.screenshot_url?`<a href="${r.screenshot_url}" target="_blank">View</a>`:'—'}</td></tr>`;}).join('')||`<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">No payment history</td></tr>`;agtPayInfo.textContent=`${rows.length} request(s)`;
+  const notes=await API.get('/payment-v2/agent/notifications').catch(()=>[]);agtPayNotifications.innerHTML=(notes||[]).slice(0,3).map(n=>`<div>• ${(n.created_at||'').slice(0,19)} — ${n.message}</div>`).join('')||'No payment notifications';
+}
+async function saveAgentWallet(){try{await API.put('/payment-v2/agent/wallet',{binance_uid:agtWallet.value.trim()});alert('✅ Binance UID saved');loadAgentPayment();}catch(e){alert('❌ '+e.message)}}
+async function requestPayment(type){if(!confirm('Submit '+type+' payment request?'))return;try{await API.post('/payment-v2/agent/request',{payment_type:type});alert('✅ Payment request submitted');loadAgentPayment();}catch(e){alert('❌ '+e.message)}}
+
+
+/* =========================================================================
+ * FINAL POLISH 5D — CLIENT MANAGEMENT FIRST-OPEN LOADING (root-cause fix)
+ * One in-flight request per resource (no duplicate calls), stale results are
+ * discarded when the Agent switches page quickly (no race), and the table shows
+ * a real loading row and an understandable error row. No forced page reload.
+ * ========================================================================= */
+let agtLoadSeq=0;
+const agtInflight={};
+function agtOnce(key, fn){
+  if(!agtInflight[key]) agtInflight[key]=Promise.resolve().then(fn).finally(()=>{ delete agtInflight[key]; });
+  return agtInflight[key];
+}
+function agtEnsureClients(){ return agtOnce('clients', async()=>{
+  try{ clientsData=await API.get('/users/client'); }catch(e){ clientsData=clientsData||[]; throw e; }
+  refreshClients(); refreshClientSelects();
+}); }
+function agtEnsureSms(){ return agtOnce('sms', async()=>{
+  try{ smsRecords=await API.get('/sms'); }catch(e){ smsRecords=smsRecords||[]; throw e; }
+  cdr=(smsRecords||[]).map(smsToCdr); refreshClients();
+}); }
+/* The "Numbers" column counts this agent's allocated numbers per client. That list
+   is normally filled by the Numbers page, so on a first open of Client Management it
+   is fetched here (data only — the Numbers page DOM is not touched). */
+function agtEnsureNumberRows(){ return agtOnce('numbers', async()=>{
+  try{
+    const d=await API.get('/numbers?paged=1&page=1&limit=1000');
+    numData=(d.rows||[]).map(r=>({id:r.id,range_id:r.range_id,range:r.range_name||'',number:r.number,rate:r.effective_rate||r.rate||'',client:r.client_name||'',client_id:r.client_id,sd:r.sd_limit||0,sw:r.sw_limit||0}));
+  }catch(e){ /* the column simply stays 0 — never block the client list on it */ }
+}); }
+function agtTableLoading(bodyId, cols, text){
+  const b=document.getElementById(bodyId);
+  if(b) b.innerHTML='<tr><td colspan="'+cols+'" class="muted" style="text-align:center;padding:24px">'+(text||'Loading…')+'</td></tr>';
+}
+function agtTableError(bodyId, cols, msg){
+  const b=document.getElementById(bodyId);
+  if(b) b.innerHTML='<tr><td colspan="'+cols+'" class="muted" style="text-align:center;padding:24px">Could not load this list: '+(msg||'request failed')+'. Use Refresh or open the page again.</td></tr>';
+}
+async function agtLoadClientsPage(){
+  if(!document.getElementById('clBody')) buildClients();
+  const token=++agtLoadSeq;
+  agtTableLoading('clBody',7,'Loading clients…');
+  try{
+    const res=await Promise.allSettled([agtEnsureClients(), agtEnsureSms(), agtEnsureNumberRows()]);
+    if(token!==agtLoadSeq) return;                 /* a newer page won — drop this render */
+    const failed=res.find(r=>r.status==='rejected');
+    if(failed && !(clientsData||[]).length){ agtTableError('clBody',7,failed.reason&&failed.reason.message); return; }
+    renderClients();
+  }catch(e){
+    if(token!==agtLoadSeq) return;
+    agtTableError('clBody',7,e&&e.message);
+  }
+}
+async function loadAgentPageData(page){
+  try{
+    if(page==='dashboard') return loadDashboard();
+    if(page==='rateCard'){ await loadRateCard(); return loadSelfAllocRanges(); }
+    if(page==='numbers'){ loadNumbers(); return Promise.allSettled([loadRateCard(), loadClients()]).then(refreshAgentNumbersFilters); }
+    if(page==='bulkAlloc'){ await Promise.allSettled([loadClients(), loadNumberSummaryForBulk()]); return; }
+    if(page==='clients') return agtLoadClientsPage();
+    /* FINAL POLISH 5E: Credit Notes is rendered by the shared read-only component,
+       which reloads the live ledger each time this page becomes visible. Declaring
+       the branch keeps the intent explicit and gives the component a way to send the
+       agent to the Payment section (for Security PIN verification) without a page
+       reload when the ledger read is locked. */
+    if(page==='creditNotes') return;
+    if(page==='smsDetail'){ if(!document.getElementById('sdBody')) buildSmsDetail(); fillSdFilterSelects(); return loadSms(true); }
+    if(page==='clientStats'){ if(!document.getElementById('csBody')) buildClientStats(); return loadSms(); }
+    if(['rangeStats','numberStats'].includes(page)){ const k=page.replace('Stats',''); if(!document.getElementById(k+'Body')) buildDrill(k); return loadSms(); }
+    if(page==='payment'){
+      if(!isChatPaymentUnlocked()){
+        const lockView = document.getElementById('paymentLockView');
+        const contentView = document.getElementById('paymentContentView');
+        if(lockView) lockView.style.display = 'block';
+        if(contentView) contentView.style.display = 'none';
+        return;
+      }
+      return loadAgentPayment();
+    }
+  }catch(e){console.warn('loadAgentPageData failed',page,e);}
+}
+
+
+
+/* ===== SERVER-SIDE SMS/CDR REPORTS (performance) ===== */
+function agtPager(key){window.__agtPager=window.__agtPager||{};if(!window.__agtPager[key])window.__agtPager[key]={page:1,totalPages:1,signature:''};return window.__agtPager[key];}
+function agtSig(o){try{return JSON.stringify(o)}catch(e){return String(Date.now())}}
+/* P17: 3-state server-side sorting + dataset-scoped CLI list helpers */
+function amsSortCycle(st,col,first){ if(st.k!==col){st.k=col;st.d=first;} else if(st.d===first){ st.d=(first==='asc'?'desc':'asc'); } else { st.k=''; st.d=''; } }
+function amsArr(st,k){ return st.k===k ? (st.d==='asc'?'\u2191':'\u2193') : '\u21C5'; }
+function amsResetSortHeads(pfx){ ['range','number','cli','payout'].forEach(x=>{const el=document.getElementById(pfx+x); if(el) el.textContent='\u21C5';}); }
+function amsOptList(items){ return '<option value="">All CLIs</option>' + (items||[]).map(x => (typeof x === 'string' ? { cli: x } : x)).map(x => `<option value="${String(x.cli).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${String(x.cli).replace(/&/g,'&amp;').replace(/</g,'&lt;')}${x.count != null ? ' (' + x.count + ')' : ''}</option>`).join(''); }
+function amsSdSort(col){ const st=(window.__sdSort=window.__sdSort||{k:'',d:''}); amsSortCycle(st,col,col==='payout'?'desc':'asc'); ['range','number','cli','payout'].forEach(x=>{const el=document.getElementById('sdSort_'+x); if(el) el.textContent=amsArr(st,x);}); if(document.getElementById('sdBody')) renderSmsDetail(); }
+function amsSdSumSort(col){ const st=(window.__sdSumSort=window.__sdSumSort||{k:'',d:''}); amsSortCycle(st,col,'desc'); ['sms','payment'].forEach(x=>{const el=document.getElementById('sdSum_'+x); if(el) el.textContent=amsArr(st,x);}); if(document.getElementById('sdBody')) renderSmsDetail(); }
+function sdListArgs(){ const g=(id)=>{const e=document.getElementById(id);return (e&&e.value)?String(e.value).trim():'';}; const o={from:g('sdDateFrom'),to:g('sdDateTo'),range:g('sdRange'),client:g('sdUser'),search:g('sdSearch')}; Object.keys(o).forEach(k=>{if(!o[k])delete o[k];}); return o; }
+function shownSrv(p,l,n,t){return t===0?0:Math.min(t,((p-1)*Number(l||25))+n)}
+async function renderSmsDetail(fresh){if(!document.getElementById('sdBody'))return;
+  const chips=document.getElementById('sdChips'); if(chips) chips.innerHTML=sdChipsHtml();
+  const _sdF=(document.getElementById('sdDateFrom')?.value)||'',_sdT=(document.getElementById('sdDateTo')?.value)||'';let dateFrom=_sdF,dateTo=_sdT;if(!dateFrom&&!dateTo){dateFrom=todayStr();dateTo=todayStr();}else if(dateFrom&&!dateTo){dateTo='2099-12-31';}else if(!dateFrom&&dateTo){dateFrom='1970-01-01';}if(dateFrom>dateTo){const _s=dateFrom;dateFrom=dateTo;dateTo=_s;}
+  const search=(sdSearch?.value||'').trim(),len=sdLen?.value||'25';
+  /* P20 FIX: text searches ko pick-state me sync (warna typed value kabhi query me nahi jata) */
+  const sel=window.__sdSel=window.__sdSel||sdSelAll();
+  const _nsI=document.getElementById('sdNumSearch'), _csI=document.getElementById('sdCliSearch');
+  if(_nsI) sel.number=_nsI.value.trim(); if(_csI) sel.cli=_csI.value.trim();
+  sdSyncFilterSelects();
+  /* P20: text searches => contains params; dropdown picks => exact */
+  const base=new URLSearchParams({from:dateFrom,to:dateTo});
+  if(search)base.set('search',search);
+  if(sel.number)base.set('number_like',sel.number);
+  if(sel.cli)base.set('cli_like',sel.cli);
+  for(const k of ['range','client']) if(sel[k]) base.set(k,sel[k]);
+  const groups=sdGbActive();
+  const state=agtPager('agtSmsDetailServer');
+  if(groups.length){
+    /* ---- GROUPED MODE: /api/sms/report (role-scoped dims backend se) ---- */
+    const _gs=(window.__sdGs=window.__sdGs||{k:'',d:''});
+    const sig=agtSig({mode:'group',g:groups.join(','),f:base.toString(),len,sk:_gs.k,sd:_gs.d});if(state.signature!==sig){state.page=1;state.signature=sig;}
+    const params=new URLSearchParams(base);
+    params.set('group',groups.join(',')); params.set('page',String(state.page||1)); params.set('limit',len);
+    if(_gs.k){ params.set('sort',_gs.k); params.set('dir',_gs.d); }
+    let data={rows:[],total:0,page:1,limit:25,totalPages:1,totals:{}};try{data=await API.get('/sms/report?'+params.toString())}catch(e){}
+    state.page=data.page||1;state.totalPages=data.totalPages||1;
+    const dimL=sdDims();
+    sdHead.innerHTML='<tr>'+groups.map(g=>`<th>${dimL[g]||g}</th>`).join('')
+      +`<th class="sortable" onclick="amsSdGroupSort('sms')">SMS <span class="sort" id="sdGs_sms">${_gs.k==='sms'?(_gs.d==='asc'?'\u2191':'\u2193'):'\u21C5'}</span></th>`
+      +`<th class="sortable" onclick="amsSdGroupSort('payout')">My Payout <span class="sort">${_gs.k==='payout'?(_gs.d==='asc'?'\u2191':'\u2193'):'\u21C5'}</span></th>`
+      +'<th>Client Payout</th></tr>';
+    const rows=data.rows||[];
+    sdBody.innerHTML=rows.map(r=>'<tr>'+groups.map(g=>`<td>${sdFmtDim(g,r.dims&&r.dims[g])}</td>`).join('')
+      +`<td class="cell-money">${(r.sms||0).toLocaleString()}</td>`
+      +`<td class="cell-money" style="color:#047857">${money(r.my_payout||'0')}</td>`
+      +`<td class="cell-money">${money(r.client_payout||'0')}</td></tr>`).join('')||`<tr><td colspan="${groups.length+3}" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+    const tot=data.totals||{};
+    sdFoot.innerHTML=`<tr><td colspan="${groups.length}"><b>Totals</b></td><td class="cell-money"><b>${(tot.sms||0).toLocaleString()}</b></td><td class="cell-money"><b>${money(tot.my_payout||'0')}</b></td><td class="cell-money"><b>${money(tot.client_payout||'0')}</b></td></tr>`;
+    sdInfo.textContent=`Showing ${shownSrv(data.page,data.limit,rows.length,data.total)} of ${data.total||0} groups`;
+    sdPayoutInfo.textContent=`Total SMS: ${(tot.sms||0).toLocaleString()} · My Payout: ${money(tot.my_payout||'0')} · Client Payout: ${money(tot.client_payout||'0')}`;
+    const pag=sdInfo.closest('.table-foot')?.querySelector('.pagination');if(pag&&window.drawServerPagination)drawServerPagination(pag,state,renderSmsDetail);
+    return;
+  }
+  /* ---- DETAIL MODE: /api/sms/paged ---- */
+  const _sdst=(window.__sdSort=window.__sdSort||{k:'',d:''});
+  const sig=agtSig({mode:'detail',f:base.toString(),len,sk:_sdst.k,sd:_sdst.d});if(state.signature!==sig){state.page=1;state.signature=sig;}
+  const params=new URLSearchParams(base);
+  params.set('page',String(state.page||1));params.set('limit',len);params.set('sort',(_sdst.k||'date'));params.set('dir',(_sdst.k?_sdst.d:'desc'));
+  let data={rows:[],total:0,page:1,limit:25,totalPages:1,totalPayment:'0'};try{data=await API.get('/sms/paged?'+params.toString())}catch(e){}
+  state.page=data.page||1;state.totalPages=data.totalPages||1;
+  sdHead.innerHTML=`<tr><th>Date</th><th class="sortable" onclick="amsSdSort('range')">Range <span class="sort">${amsArr(_sdst,'range')}</span></th><th class="sortable" onclick="amsSdSort('number')">Number <span class="sort">${amsArr(_sdst,'number')}</span></th><th class="sortable" onclick="amsSdSort('cli')">CLI <span class="sort">${amsArr(_sdst,'cli')}</span></th><th>Message Body</th><th>Client</th><th>Currency</th><th class="sortable" onclick="amsSdSort('payout')">My Payout <span class="sort">${amsArr(_sdst,'payout')}</span></th><th>Client Payout</th></tr>`;
+  const rows=data.rows||[];
+  sdBody.innerHTML=rows.map(r=>`<tr><td class="muted">${(r.received_at||'').slice(0,19)}</td><td><b>${r.range_name||'—'}</b></td><td class="mono">${r.number||''}</td><td class="mono">${r.cli||''}</td><td class="msg-body">${r.message||''}</td><td><span class="tag tag-cli">${r.client_name||'—'}</span></td><td>${r.range_currency?'<span class="tag tag-green">'+r.range_currency+'</span>':'—'}</td><td class="cell-money">${cleanDec(r.payout_amount||r.payout_rate||0)}</td><td class="cell-money">${r.number_payout!=null&&r.number_payout!==''?cleanDec(r.number_payout):'—'}</td></tr>`).join('')||`<tr><td colspan="9" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+  sdFoot.innerHTML='';
+  sdInfo.textContent=`Showing ${shownSrv(data.page,data.limit,rows.length,data.total)} of ${data.total||0} rows`;sdPayoutInfo.textContent=`Filtered total payout: ${money(data.totalPayment||'0')}`;const pag=sdInfo.closest('.table-foot')?.querySelector('.pagination');if(pag&&window.drawServerPagination)drawServerPagination(pag,state,renderSmsDetail);}
+
+/* FAST SERVER-SIDE NUMBERS/STATS OVERRIDES */
+let agtNumSeq=0;
+function agtState(key){window.__agtFast=window.__agtFast||{};if(!window.__agtFast[key])window.__agtFast[key]={page:1,totalPages:1,signature:''};return window.__agtFast[key];}
+function agtShown(page,limit,len,total){return total===0?0:Math.min(total,((page-1)*Number(limit||25))+len)}
+async function renderNumbers(){
+  const body=document.getElementById('numBody'); if(!body)return;
+  rangeF=document.getElementById('numRange')?.value||'';clientF=document.getElementById('numClient')?.value||'';
+  const len=document.getElementById('numLen')?.value||'25',q=(document.getElementById('numSearch')?.value||'').trim();
+  const state=agtState('numbers');const sig=JSON.stringify({len,q,rangeF,clientF,cliF,sort:nSort.k,dir:nSort.d});if(state.signature!==sig){state.page=1;state.signature=sig;}
+  const params=new URLSearchParams({paged:'1',page:String(state.page),limit:len});
+  if(q)params.set('search',q); if(rangeF)params.set('range',rangeF); if(clientF)params.set('owner',clientF);
+  if(cliF===1)params.set('allocation','unallocated'); else if(cliF===2)params.set('allocation','allocated');
+  if(nSort.k){params.set('sort',nSort.k==='rate'?'myVal':nSort.k);params.set('dir',nSort.d===-1?'desc':'asc');}
+  const seq=++agtNumSeq;let data={rows:[],total:0,page:1,limit:25,totalPages:1};try{data=await API.get('/numbers?'+params.toString())}catch(e){console.warn(e)}if(seq!==agtNumSeq)return;
+  state.page=data.page||1;state.totalPages=data.totalPages||1;
+  numData=(data.rows||[]).map(r=>({id:r.id,range_id:r.range_id,range:r.range_name||'',number:r.number,rate:r.effective_rate||r.rate||'',client:r.client_name||'',client_id:r.client_id,sd:r.sd_limit||0,sw:r.sw_limit||0}));
+  body.innerHTML=numData.map(r=>`<tr><td><input type="checkbox" class="rc" data-id="${r.id}" onchange="updSel()"/></td><td>${r.range}</td><td><b>${r.number}</b></td><td class="cell-money">${r.rate}</td><td>${r.client?`<span class="tag tag-cli">${r.client}</span>`:'<span class="tag tag-gray">Unallocated</span>'}</td><td class="muted">SD : ${r.sd} | SW : ${r.sw}</td></tr>`).join('')||`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No numbers found</td></tr>`;
+  const currentNumbers = (numData || []).map(r => String(r.number || '').trim()).filter(Boolean);
+  const countEl = document.getElementById('numPageCount');
+  if(countEl) countEl.textContent = currentNumbers.length.toLocaleString();
+  const badgeCount = document.getElementById('numBadgeCount');
+  if(badgeCount) badgeCount.textContent = currentNumbers.length.toLocaleString();
+  numInfo.innerHTML=`Showing ${agtShown(data.page,data.limit,numData.length,data.total)} of ${data.total||0} numbers`;
+  const pag=numInfo.closest('.table-foot')?.querySelector('.pagination');if(pag&&window.drawServerPagination)drawServerPagination(pag,state,renderNumbers);updSel();
+}
+async function copyCurrentPageNumbers(btn){
+  const list = (numData || []).map(r => String(r.number || '').trim()).filter(Boolean);
+  if (!list.length) {
+    alert('No numbers on current page to copy.');
+    return;
+  }
+  const text = list.join('\n');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    const target = btn || null;
+    if (target) {
+      const origHtml = target.innerHTML;
+      target.innerHTML = '<span style="font-size:12px;color:#047857;font-weight:600">Copied ✓</span>';
+      setTimeout(() => { target.innerHTML = origHtml; }, 1500);
+    }
+  } catch (err) {
+    alert('Failed to copy numbers: ' + err.message);
+  }
+}
+window.copyCurrentPageNumbers = copyCurrentPageNumbers;
+function copyNumbersOnly(btn){ return copyCurrentPageNumbers(btn); }
+window.copyNumbersOnly = copyNumbersOnly;
+async function loadNumbers(){return renderNumbers();}
+function agentAllocTargets(){
+  const cls = (clientsData||[]).map(c=>({id:c.id, label:'Client: '+(c.name?c.name+' ('+c.username+')':c.username), username:c.username, role:'client'}));
+  cls.sort((a,b)=>a.label.localeCompare(b.label));
+  return cls;
+}
+function refreshAgentBaRangeDropdown(){
+  const list = (typeof baData !== 'undefined' ? baData : []).map(r=>r.range).filter(Boolean);
+  list.sort((a,b)=>a.localeCompare(b));
+  const cur = document.getElementById('baRange')?.value || '';
+  if (typeof window.renderSearchSelect === 'function') {
+    window.renderSearchSelect('baRangeDropdownContainer', {
+      id: 'baRange',
+      placeholder: 'Select Range',
+      searchPlaceholder: 'Search range...',
+      style: 'min-width:180px',
+      value: cur,
+      items: list.map(r=>({ value: r, label: r }))
+    });
+  }
+}
+function refreshAgentBaClientDropdown(){
+  const opts = agentAllocTargets();
+  const cur = document.getElementById('baClient')?.value || '';
+  if (typeof window.renderSearchSelect === 'function') {
+    window.renderSearchSelect('baClientDropdownContainer', {
+      id: 'baClient',
+      placeholder: 'Select Client',
+      searchPlaceholder: 'Search client...',
+      style: 'min-width:220px',
+      value: cur,
+      items: opts.map(u=>({ value: u.username, label: u.label, search: u.label }))
+    });
+  }
+}
+async function loadNumberSummaryForBulk(){
+  try{
+    const rows=await API.get('/numbers/summary');
+    baData=(rows||[]).map(r=>({id:r.range_id,range:r.range_name,total:r.total||0,alloc:r.allocated||0,avail:r.available||0,rate:r.rate||'0',r1:r.rate_1_1,r2:r.rate_7_1,r3:r.rate_7_7,r4:r.rate_30_45,payment_type:r.payment_type}));
+  }catch(e){baData=[];}
+  refreshAgentBaRangeDropdown();
+  refreshAgentBaClientDropdown();
+  renderBulk();
+}
+
+
+/* FAST SERVER-SIDE SUMMARY STATS OVERRIDES */
+async function renderClientStats(){
+  const body=document.getElementById('csBody'); if(!body)return;
+  setDefaultDates('csFrom','csTo');
+  const len=document.getElementById('csLen')?.value||'25', q=(document.getElementById('csSearch')?.value||'').toLowerCase();
+  const params=new URLSearchParams({from:document.getElementById('csFrom')?.value||todayStr(),to:document.getElementById('csTo')?.value||todayStr()}); if(q)params.set('search',q);
+  let data={rows:[],totalSms:0,totalPayment:'0'}; try{data=await API.get('/stats-summary/client?'+params.toString())}catch(e){console.warn(e)}
+  let rows=(data.rows||[]).map(x=>({name:x.key||'—',sms:+(x.sms||0),pay:x.payment||'0',nums:(numData||[]).filter(n=>n.client===x.key).length})).filter(x=>x.name.toLowerCase().includes(q));
+  const pag=API.paginateRows('agtFastClientStats',rows,len,'csInfo',renderClientStats);rows=pag.rows;
+  body.innerHTML=rows.map(x=>`<tr><td><span class="tag tag-cli">${x.name}</span></td><td><span class="tag tag-blue">${x.nums||'—'}</span></td><td class="cell-money">${x.sms.toLocaleString()}</td><td class="cell-money" style="color:#047857">${money(x.pay)}</td></tr>`).join('')||`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No clients with OTPs found</td></tr>`;
+  csInfo.textContent=`Showing ${rows.length} of ${pag.total} clients`;
+}
+async function renderDrill(kind){
+  const body=document.getElementById(kind+'Body');if(!body)return;
+  setDefaultDates(kind+'From',kind+'To');
+  const len=document.getElementById(kind+'Len')?.value||'25', q=(document.getElementById(kind+'Search')?.value||'').toLowerCase(), c=document.getElementById(kind+'FCli')?.value||'';
+  const by=kind==='range'?'range':'number'; const params=new URLSearchParams({from:document.getElementById(kind+'From')?.value||todayStr(),to:document.getElementById(kind+'To')?.value||todayStr()}); if(c)params.set('client',c); if(q)params.set('search',q);
+  let data={rows:[],totalSms:0,totalPayment:'0'}; try{data=await API.get('/stats-summary/'+by+'?'+params.toString())}catch(e){console.warn(e)}
+  let rows=(data.rows||[]).map(x=>({val:x.key||'—',sms:+(x.sms||0),pay:x.payment||'0'})).filter(x=>x.val.toLowerCase().includes(q));
+  const pag=API.paginateRows('agtFastDrill'+kind,rows,len,kind+'Info',()=>renderDrill(kind));rows=pag.rows;
+  body.innerHTML=rows.map(x=>`<tr><td><b>${kind==='number'?'<span class="mono">'+x.val+'</span>':x.val}</b></td><td><span class="tag tag-cli">${c||'All'}</span></td><td class="cell-money">${x.sms.toLocaleString()}</td><td class="cell-money" style="color:#047857">${money(x.pay)}</td></tr>`).join('')||`<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No records found</td></tr>`;
+  document.getElementById(kind+'Info').textContent=`Showing ${rows.length} of ${pag.total} rows`;
+}
+
+/* ============================================================================
+   P20 LATEST-FIRST AUTO REFRESH - Agent SMS CDR Report + SMS Detail Report
+   A newly received OTP/SMS must reach the TOP of the report on its own; the user must
+   not have to touch a Range/filter first. The backend ordering is already correct
+   (ORDER BY s.received_at DESC, s.id DESC - unchanged, same stored timestamp field);
+   these reports simply never re-fetched after their first paint.
+   A light probe asks for THE newest row of this agent's scope (limit 1). Only when that
+   id changes is the visible report re-loaded through its existing loader (fresh=1 ->
+   cache-bypassing GET), so the new record is really fetched instead of coming from the
+   panel's short GET cache. Columns, filters, sorting, pagination and role scoping are
+   untouched.
+   ========================================================================== */
+const AMS_SMS_REFRESH_MS = 8000;
+let amsSmsTopSeenId = null, amsSmsTotalSeen = null;
+function amsAgentSmsPageVisible(){
+  const vis=(id)=>{ const el=document.getElementById('page-'+id); return !!(el&&el.classList.contains('active')); };
+  if(vis('smsReport')) return 'smsReport';
+  if(vis('smsDetail')) return 'smsDetail';
+  return '';
+}
+async function amsSmsTopProbeId(){
+  /* the newest row of this role's scope + the scoped total: two cheap facts, no row data */
+  try{
+    const d=await API.get('/sms/paged?page=1&limit=1&sort=date&dir=desc&_amsr='+Date.now());
+    const r=d&&d.rows&&d.rows[0];
+    return { id:r?String(r.id):'', total:String(d&&d.total!=null?d.total:'') };
+  }catch(e){ return null; }
+}
+async function amsSmsAutoRefresh(){
+  if(document.hidden) return;
+  const page=amsAgentSmsPageVisible();
+  if(!page) return;
+  const probe=await amsSmsTopProbeId();
+  if(!probe||!probe.id) return;
+  if(amsSmsTopSeenId===null){ amsSmsTopSeenId=probe.id; amsSmsTotalSeen=probe.total; return; } /* first look */
+  /* refresh when a NEW top record appeared, or when the scoped total changed (a new SMS whose
+     carrier timestamp is older still has to show up, in its own date position) */
+  const changed = (probe.id!==amsSmsTopSeenId) || (probe.total!==amsSmsTotalSeen);
+  amsSmsTopSeenId=probe.id; amsSmsTotalSeen=probe.total;
+  if(!changed) return;
+  else await renderSmsDetail(true);                         /* keeps the current page + filters */
+}
+setInterval(amsSmsAutoRefresh, AMS_SMS_REFRESH_MS);
+setTimeout(amsSmsAutoRefresh, 1500);                          /* establish the baseline early */
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(amsSmsAutoRefresh, 200); });
+
+/* FAST PRIORITY INIT */
+loadProfile();loadDashboard();
+buildSmsDetail();
+setTimeout(async()=>{try{await Promise.allSettled([loadRateCard(),loadClients()]);await Promise.allSettled([renderNumbers()]);}catch(e){console.warn('agent critical preload failed',e)}},50);
+
+</script>
+
+<script src="/assets/extapi-ui.js?v=gsms-20261104"></script>
+</body>
+</html>
+
+<script>
+
+/* =========================================================================
+ * PART 7 - 13: AGENT SELF-ALLOCATION JAVASCRIPT
+ * ========================================================================= */
+let saRangesData = [];
+let saManagerName = '';
+let saManagerContact = '';
+
+async function loadSelfAllocRanges(){
+  try {
+    const res = await API.get('/agent/self-allocate/ranges');
+    saRangesData = res.ranges || [];
+    saManagerName = res.manager_name || 'Admin';
+    saManagerContact = res.manager_contact || '';
+    const mInfo = document.getElementById('saMgrName');
+    if (mInfo) mInfo.textContent = saManagerName + (saManagerContact ? ' (' + saManagerContact + ')' : '');
+  } catch(e) {
+    saRangesData = [];
+  }
+  renderSelfAllocTable();
+}
+
+function renderSelfAllocTable(){
+  const tb = document.getElementById('saBody'); if(!tb) return;
+  const q = (document.getElementById('saSearch')?.value || '').toLowerCase();
+  const len = document.getElementById('saLen')?.value || '25';
+  let rows = saRangesData.filter(r => r.name.toLowerCase().includes(q));
+  const pag = API.paginateRows('agtSelfAlloc', rows, len, 'saInfo', renderSelfAllocTable);
+  rows = pag.rows;
+
+  tb.innerHTML = rows.map(r => {
+    const isAvail = r.available_in_pool > 0;
+    const isUnderLimit = r.remaining_limit > 0;
+    const isEnabled = r.self_alloc_enabled;
+    let statusHtml = '';
+    let canAlloc = false;
+
+    if (!isEnabled) {
+      statusHtml = '<span class="tag tag-red">Disabled</span>';
+    } else if (!isUnderLimit) {
+      statusHtml = '<span class="tag tag-amber">Limit Reached</span>';
+    } else if (!isAvail) {
+      statusHtml = '<span class="tag tag-gray">Out of Stock</span>';
+    } else {
+      statusHtml = '<span class="tag tag-green">Available</span>';
+      canAlloc = true;
+    }
+
+    return `<tr>
+      <td><b>${r.name}</b></td>
+      <td class="cell-money">$ ${r.rates.weekly || '0'}</td>
+      <td class="cell-money">$ ${r.rates.monthly || '0'}</td>
+      <td><b>${r.agent_current_count}</b></td>
+      <td class="muted">${r.self_alloc_max}</td>
+      <td><span class="tag ${r.available_in_pool > 0 ? 'tag-green' : 'tag-gray'}">${r.available_in_pool}</span></td>
+      <td>${statusHtml}</td>
+      <td>
+        <button type="button" class="btn ${canAlloc ? 'btn-purple' : 'btn-ghost'} btn-sm"
+          onclick="openSelfAlloc('${String(r.name).replace(/'/g, "\\'")}')"
+          style="padding:5px 12px;font-size:12px;font-weight:600">
+          ${canAlloc ? 'Self Allocate' : 'Request'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:24px">No ranges available</td></tr>';
+}
+
+async function openSelfAlloc(preselectedRangeName){
+  if (!saRangesData.length) await loadSelfAllocRanges();
+  const sel = document.getElementById('saModalRange');
+  if (sel) {
+    sel.innerHTML = saRangesData.map(r => `<option value="${r.id}" ${preselectedRangeName && r.name === preselectedRangeName ? 'selected' : ''}>${r.name} (${r.currency})</option>`).join('');
+  }
+  saOnRangeChange();
+  document.getElementById('selfAllocModal').classList.add('show');
+}
+
+function saGetSelectedRange(){
+  const rangeId = parseInt(document.getElementById('saModalRange')?.value, 10);
+  return saRangesData.find(r => r.id === rangeId);
+}
+
+function saOnRangeChange(){
+  const r = saGetSelectedRange();
+  const alertBox = document.getElementById('saAlertBox');
+  const btn = document.getElementById('btnConfirmSelfAlloc');
+  const qtyInp = document.getElementById('saModalQty');
+  const hint = document.getElementById('saModalQuotaHint');
+
+  if (!r) {
+    /* FINAL POLISH 5B: one concise message when no range can be self-allocated
+       (nothing was shown here before, so the modal opened blank). */
+    const box = document.getElementById('saAlertBox');
+    const confirmBtn = document.getElementById('btnConfirmSelfAlloc');
+    if (box) {
+      box.className = 'ams-ui-sa-alert ams-ui-sa-warn';
+      box.style.display = 'block';
+      box.innerHTML = 'No range is available for self-allocation yet. Your manager will assign ranges to you.';
+    }
+    if (confirmBtn) confirmBtn.disabled = true;
+    const hintEmpty = document.getElementById('saModalQuotaHint');
+    if (hintEmpty) hintEmpty.innerHTML = '';
+    return;
+  }
+
+  const radWeekly = document.getElementById('saRadioWeekly');
+  const radMonthly = document.getElementById('saRadioMonthly');
+  const allowed = r.allowed_periods || ['weekly', 'monthly'];
+
+  if (radWeekly) {
+    radWeekly.disabled = !allowed.includes('weekly');
+    if (!allowed.includes('weekly') && allowed.includes('monthly')) radMonthly.checked = true;
+  }
+  if (radMonthly) {
+    radMonthly.disabled = !allowed.includes('monthly');
+    if (!allowed.includes('monthly') && allowed.includes('weekly')) radWeekly.checked = true;
+  }
+
+  saOnPeriodChange();
+
+  const isAvail = r.available_in_pool > 0;
+  const isUnderLimit = r.remaining_limit > 0;
+  const isEnabled = r.self_alloc_enabled;
+
+  if (alertBox) {
+    if (!isEnabled) {
+      alertBox.className = 'ams-ui-sa-alert ams-ui-sa-danger';   /* FINAL POLISH 2C: theme-safe colours (Light + Dark) */
+      alertBox.style.display = 'block';
+      alertBox.innerHTML = `⚠️ <b>Self-Allocation Disabled:</b> Self-allocation is currently disabled for this range. Please contact your Manager: <b>${saManagerName}</b> ${saManagerContact ? '· ' + saManagerContact : ''}.`;
+      btn.disabled = true;
+    } else if (!isUnderLimit) {
+      alertBox.className = 'ams-ui-sa-alert ams-ui-sa-warn';
+      alertBox.style.display = 'block';
+      alertBox.innerHTML = `⚠️ <b>Limit Reached:</b> You have reached the maximum self-allocation limit for this range (${r.self_alloc_max} numbers). Please contact your Manager: <b>${saManagerName}</b> ${saManagerContact ? '· ' + saManagerContact : ''} for further allocations.`;
+      btn.disabled = true;
+    } else if (!isAvail) {
+      alertBox.className = 'ams-ui-sa-alert ams-ui-sa-danger';
+      alertBox.style.display = 'block';
+      alertBox.innerHTML = `⚠️ <b>No Numbers Available:</b> No numbers are currently available in the pool for this range. Please contact your Manager: <b>${saManagerName}</b> ${saManagerContact ? '· ' + saManagerContact : ''} to request inventory.`;
+      btn.disabled = true;
+    } else {
+      alertBox.className = 'ams-ui-sa-alert';
+      alertBox.style.display = 'none';
+      btn.disabled = false;
+    }
+  }
+
+  if (hint) {
+    hint.innerHTML = `Current allocation in range: <b>${r.agent_current_count}</b> / Limit: <b>${r.self_alloc_max}</b> (Remaining quota: <b>${r.remaining_limit}</b>) · Available in pool: <b>${r.available_in_pool}</b>`;
+  }
+  if (qtyInp) {
+    qtyInp.max = Math.min(r.remaining_limit, r.available_in_pool) || 1;
+    if (parseInt(qtyInp.value, 10) > qtyInp.max) qtyInp.value = qtyInp.max;
+  }
+}
+
+function saOnPeriodChange(){
+  const r = saGetSelectedRange();
+  const rateInp = document.getElementById('saModalRate');
+  if (!r || !rateInp) return;
+  const isMonthly = document.getElementById('saRadioMonthly')?.checked;
+  const rateVal = isMonthly ? (r.rates.monthly || '0') : (r.rates.weekly || '0');
+  rateInp.value = `$ ${rateVal} / SMS (${isMonthly ? 'Monthly 30/45' : 'Weekly 7/1'})`;
+}
+
+async function confirmSelfAlloc(){
+  const r = saGetSelectedRange();
+  if (!r) { alert('Please select a range.'); return; }
+  const qtyInp = document.getElementById('saModalQty');
+  const qty = parseInt(qtyInp?.value, 10);
+  if (!qty || isNaN(qty) || qty <= 0) { alert('Please enter a valid quantity.'); return; }
+
+  const isMonthly = document.getElementById('saRadioMonthly')?.checked;
+  const period = isMonthly ? 'monthly' : 'weekly';
+
+  const btn = document.getElementById('btnConfirmSelfAlloc');
+  btn.disabled = true;
+  btn.textContent = 'Allocating...';
+
+  try {
+    const res = await API.post('/agent/self-allocate', {
+      range_id: r.id,
+      quantity: qty,
+      billing_period: period
+    });
+
+    closeModal('selfAllocModal');
+    alert(`✅ Successfully allocated ${res.allocated} number(s) from "${res.range}"!\nRate: $${res.effective_rate} (${res.billing_period})`);
+
+    await loadSelfAllocRanges();
+    if (typeof loadNumbers === 'function') await loadNumbers();
+  } catch (err) {
+    alert('❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Allocate Numbers';
+  }
+}
+
+</script>

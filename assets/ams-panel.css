@@ -1,0 +1,157 @@
+/* ============================================================================
+ * GLOBAL SMS — GLOBAL-style theme layer (2026-10-24 redesign)
+ * Presentation only. Loaded LAST in admin/manager/agent/client (after
+ * ams*.css and the branding runtime) so these rules win the cascade
+ * without editing or removing any existing stylesheet, class or behaviour.
+ * Visual reference: GLOBAL SMS Agent panel (inspected 2026-10-24 with the
+ * account holder's authorisation — layout values only, no code copied).
+ * ==========================================================================*/
+
+/* ---- GLOBAL page chrome: lavender page, white sidebar/topbar, navy text ---- */
+body.ams-light.ams-panel{--ams-panel-bg:#eef2f9;--ams-panel-navy:#0a2540;--ams-panel-muted:#7186a8;--ams-panel-blue:#155eef;--ams-panel-border:#e4ebf6}
+body.ams-light.ams-panel .content{background:var(--ams-panel-bg)}
+body.ams-light.ams-panel .main{background:var(--ams-panel-bg)}
+body.ams-light.ams-panel :is(.page-head h2,.page-head h1,.tb-title){color:var(--ams-panel-navy);font-weight:500;letter-spacing:.1px}
+body.ams-light.ams-panel .breadcrumb{color:var(--ams-panel-muted)}
+body.ams-light.ams-panel .breadcrumb b{color:var(--ams-panel-blue);font-weight:500}
+body.ams-light.ams-panel :is(.card,.table-wrap,.toolbar,.ams-ui-chart-card,.ams-ui-wcard){background:#fff;border:1px solid var(--ams-panel-border);border-radius:8px;box-shadow:0 10px 28px rgba(23,38,89,.07)}
+body.ams-light.ams-panel :is(.btn-blue,.ams-blue){background:var(--ams-panel-blue)!important;border-color:var(--ams-panel-blue)!important;color:#fff!important}
+body.ams-light.ams-panel table th{color:var(--ams-panel-navy);font-weight:700;letter-spacing:.3px;text-transform:uppercase;font-size:11px}
+body.ams-light.ams-panel table td{border-color:var(--ams-panel-border)}
+/* Official GLOBAL SMS logo (supplied 2026-10-24): shown on its native white
+   ground, GLOBAL-style, centred at the top of the light sidebar. */
+body.ams-panel.ams-light .logo img[data-brand-logo]{background:#fff}
+body.ams-panel .brand-text h1,body.ams-panel .side-brand h1{color:var(--ams-panel-navy)}
+
+/* ---- GLOBAL dashboard meta pill: "● 86 CLIENTS · 33,779 NUMBERS" ---- */
+.ams-panel-meta{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--ams-panel-border,#e4ebf6);border-radius:999px;padding:7px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:2.5px;color:#5b6b8c;text-transform:uppercase}
+.ams-panel-meta .ams-panel-dot{width:8px;height:8px;border-radius:50%;background:#155eef;display:inline-block}
+.ams-panel-dash-meta-row{display:flex;justify-content:flex-end;padding:2px 0 14px;border-bottom:1px solid #e2e8f2;margin-bottom:18px}
+
+/* ---- GLOBAL 4 gradient KPI cards ---- */
+.ams-panel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin:0 0 22px}
+.ams-panel-kpi{position:relative;border-radius:7px;padding:15px 17px 13px;color:#fff;min-height:88px;box-shadow:0 10px 22px rgba(23,38,89,.12);overflow:hidden}
+.ams-panel-kpi-label{margin:0 0 8px;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.ams-panel-kpi-value{margin:0;font-size:23px;line-height:1.15;font-weight:700;color:#fff}
+.ams-panel-kpi-sub{margin:3px 0 0;font-size:11.5px;color:rgba(255,255,255,.75)}
+.ams-panel-kpi .ams-panel-info{position:absolute;right:12px;bottom:11px;width:17px;height:17px;color:#fff;opacity:.95}
+.ams-panel-kpi .ams-panel-info svg{width:17px;height:17px;display:block}
+.ams-panel-blue{background:linear-gradient(90deg,#155eef 0%,#6d9bff 100%)}
+.ams-panel-pink{background:linear-gradient(90deg,#4338ca 0%,#8b8ff5 100%)}
+.ams-panel-green{background:linear-gradient(90deg,#089e93 0%,#45dcc9 100%)}
+.ams-panel-orange{background:linear-gradient(90deg,#d97706 0%,#f7b955 100%)}
+
+/* ---- GLOBAL middle row: Volume chart (left) + icon rail (right) ---- */
+.ams-panel-middle{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:26px;align-items:start;margin:0 0 22px}
+.ams-panel-chart-card{background:#fff;border:1px solid var(--ams-panel-border,#e4ebf6);border-radius:8px;box-shadow:0 10px 28px rgba(23,38,89,.07);padding:22px 26px 16px}
+.ams-panel-chart-head h3{margin:0;font-size:15px;font-weight:700;color:var(--ams-panel-navy,#0a2540)}
+.ams-panel-chart-head p{margin:4px 0 0;font-size:12px;color:var(--ams-panel-muted,#7186a8)}
+.ams-panel-chart-totals{display:flex;gap:34px;flex-wrap:wrap;margin:14px 0 6px;font-size:13px;color:var(--ams-panel-navy,#0a2540)}
+.ams-panel-chart-totals strong{font-size:16px}
+.ams-panel-muted{color:var(--ams-panel-muted,#7186a8);font-size:11.5px}
+.ams-panel-swatch{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}
+.ams-panel-swatch-blue{background:#155eef}.ams-panel-swatch-pink{background:#4f46e5}
+.ams-panel-chart-svg{width:100%;height:auto;display:block}
+.ams-panel-chart-wrap{position:relative}
+.ams-panel-tip{position:absolute;display:none;pointer-events:none;background:#111827;color:#fff;font-size:12px;line-height:1.3;padding:6px 9px;border-radius:8px;white-space:nowrap;max-width:calc(100vw - 24px);box-sizing:border-box;transform:translate(-50%,-115%);z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.ams-panel-bar-hit{cursor:pointer;outline:none}
+.ams-panel-bar-hit:focus{stroke:#0a2540;stroke-width:1.5;fill-opacity:.06}
+.ams-panel-axis{font-size:11px;fill:#5f7396}
+.ams-panel-chart-empty{color:var(--ams-panel-muted,#7186a8);padding:26px 0;text-align:center}
+.ams-panel-chart-values{margin-top:8px;font-size:12px;color:var(--ams-panel-muted,#7186a8)}
+.ams-panel-chart-values table{margin-top:8px}
+.ams-panel-rail{display:flex;flex-direction:column;gap:20px;padding-top:6px}
+.ams-panel-rail-item{display:flex;align-items:center;gap:14px}
+.ams-panel-rail-icon{width:46px;height:46px;flex:0 0 46px;border-radius:50%;background:#fff;border:1px solid var(--ams-panel-border,#e4ebf6);display:flex;align-items:center;justify-content:center;color:#3b82c4}
+.ams-panel-rail-icon svg{width:22px;height:22px}
+.ams-panel-rail-txt{display:flex;flex-direction:column;gap:1px}
+.ams-panel-rail-txt strong{font-size:16px;line-height:1.2;color:#22a447;font-weight:700}
+.ams-panel-rail-txt small{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#f43f5e}
+
+/* ---- GLOBAL top-tables row (existing AMSDashboardCore rankings, restyled only) --- */
+body.ams-light.ams-panel .ams-metric-rankings{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+body.ams-light.ams-panel .ams-metric-ranking table td{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ams-panel-navy,#0a2540)}
+
+/* ---- GLOBAL CLI Search (ranges running a CLI, last 24h) ---- */
+.ams-panel-cli-fields{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.ams-panel-cli-fields .ams-panel-field{display:flex;flex-direction:column;gap:6px;flex:1 1 240px}
+.ams-panel-cli-fields label{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:2px;color:#5b6b8c;text-transform:uppercase}
+.ams-panel-cli-fields input{background:#f2f5fc;border:1px solid var(--ams-panel-border,#e4ebf6);border-radius:4px;padding:9px 12px;font-size:13px;color:var(--ams-panel-navy,#0a2540)}
+.ams-panel-cli-fields button{background:#7babf5;border:1px solid #7babf5;color:#fff;border-radius:4px;padding:9px 18px;font-size:13px;cursor:pointer}
+.ams-panel-cli-fields button:hover{background:#155eef;border-color:#155eef}
+.ams-panel-cli-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ams-panel-cli-head h3{margin:0;font-size:12.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--ams-panel-navy,#0a2540)}
+.ams-panel-cli-pager{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 2px 2px;font-size:12px;color:#5b6b8c}
+.ams-panel-cli-pager .ams-panel-pages{display:flex;gap:5px}
+.ams-panel-cli-pager button{background:#fff;border:1px solid var(--ams-panel-border,#e4ebf6);border-radius:4px;padding:6px 11px;font-size:12px;color:#5b6b8c;cursor:pointer}
+.ams-panel-cli-pager button.active{background:#155eef;border-color:#155eef;color:#fff}
+.ams-panel-cli-pager button:disabled{opacity:.45;cursor:default}
+
+/* ---- Responsive (GLOBAL behaviour: cards stack, chart full width) ---- */
+@media(max-width:1100px){.ams-panel-middle{grid-template-columns:1fr}.ams-panel-rail{flex-direction:row;flex-wrap:wrap;gap:18px 30px}}
+@media(max-width:900px){.ams-panel-kpis{grid-template-columns:repeat(2,1fr)}body.ams-light.ams-panel .ams-metric-rankings{grid-template-columns:1fr}}
+@media(max-width:520px){.ams-panel-kpis{grid-template-columns:1fr}.ams-panel-chart-card{padding:16px 14px 12px}.ams-panel-dash-meta-row{justify-content:flex-start}}
+
+/* ---- GLOBAL white sidebar (light mode only; dark mode keeps the dark rail) ----
+   ams-ds.css forces a navy rail in both modes via `body.ams-ui`. GLOBAL uses a
+   white rail with slate labels, blue active item and small caps section
+   headings. These rules mirror that with higher-specificity light selectors. */
+html body.ams-panel.ams-ui.ams-light :is(.sidebar,.rail,.appbar){background:#fff!important;border-right:1px solid #e6eaf5!important;color:#42506b!important}
+html body.ams-panel.ams-ui.ams-light :is(.sidebar,.rail,.appbar)::before,html body.ams-panel.ams-ui.ams-light :is(.sidebar,.rail,.appbar)::after{display:none!important}
+html body.ams-panel.ams-ui.ams-light .sb-nav{scrollbar-color:#cbd5e1 transparent}
+html body.ams-panel.ams-ui.ams-light :is(.nav-item,.sub-item,.tab,.ritem,.rsubitem){color:#5b6b8c!important;background:transparent!important;box-shadow:none!important;border-bottom:0!important}
+html body.ams-panel.ams-ui.ams-light :is(.nav-item,.sub-item,.tab,.ritem,.rsubitem):hover{background:#f2f6ff!important;color:#155eef!important}
+html body.ams-panel.ams-ui.ams-light :is(.nav-item,.sub-item,.tab,.ritem,.rsubitem).active{background:transparent!important;color:#155eef!important;font-weight:600}
+html body.ams-panel.ams-ui.ams-light :is(.sb-section,.sb-sec,.rsec){color:#0a2540!important;font-size:10.5px!important;font-weight:800!important;letter-spacing:1.2px!important;text-transform:uppercase!important}
+html body.ams-panel.ams-ui.ams-light .rail>.brand-text{padding:14px 12px 16px!important;border-bottom:1px solid #e6eaf5}
+html body.ams-panel.ams-ui.ams-light .brand-text h1{color:#0a2540!important;font-size:19px!important;font-weight:800!important;display:block!important}
+html body.ams-panel.ams-ui.ams-light .brand-text small{color:#7186a8!important}
+html body.ams-panel.ams-ui.ams-light :is(.sb-brand h1,.side-brand h1,.sidebar h1){color:#0a2540!important}
+html body.ams-panel.ams-ui.ams-light :is(.sb-brand small,.sidebar small){color:#7186a8!important}
+
+/* ---- GLOBAL CLI Search layout fixes (inline Search button + per-page) ---- */
+.ams-panel-cli-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:14px;align-items:end;width:100%}
+.ams-panel-cli-fields .ams-panel-field input{width:100%}
+.ams-panel-cli-head select{width:auto!important;display:inline-block!important}
+.ams-panel-cli-head>div{white-space:nowrap}
+body.ams-light .ams-panel-cli-table th{text-transform:uppercase}
+body.ams-light.ams-panel .ams-metric-ranking .card-head h3{text-transform:uppercase;letter-spacing:.7px;font-size:12.5px}
+@media(max-width:640px){.ams-panel-cli-fields{grid-template-columns:1fr}}
+html body.ams-panel.ams-ui.ams-light .ams-metric-ranking .card-head h3{text-transform:uppercase!important;letter-spacing:.7px!important;font-size:12.5px!important}
+html body.ams-panel.ams-ui.ams-light th{text-transform:uppercase!important;letter-spacing:.4px!important}
+html body.ams-panel.ams-ui.ams-light .rail>.brand-text{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:0!important;text-align:left!important}
+html body.ams-panel.ams-ui.ams-light .brand-text small{display:block!important}
+
+/* ---- Official GLOBAL logo presentation (GLOBAL sidebar style) ---- */
+html body.ams-panel.ams-ui.ams-light :is(.rail>.logo,.sidebar .logo,.sb-logo){display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;width:auto!important;height:auto!important;padding:16px 18px 6px!important;margin:0!important;border-radius:0!important}
+html body.ams-panel.ams-ui.ams-light :is(.rail>.logo img,.sidebar .logo img,.sb-logo img,img.ams-sms-logo-img){width:auto!important;height:54px!important;max-width:180px!important;object-fit:contain!important;border-radius:0!important;background:#fff!important}
+html body.ams-panel.ams-ui.ams-light .rail>.brand-text{align-items:center!important;text-align:center!important;padding:0 12px 14px!important}
+html body.ams-panel.ams-ui.ams-light .brand-text h1{display:none!important} /* wordmark is part of the official logo */
+html body.ams-panel.ams-ui.ams-light .brand-text small{font-size:11px!important;letter-spacing:1.6px!important;text-transform:uppercase!important}
+
+/* ---- Shared GLOBAL component pass (all panels, secondary screens) ----
+   GLOBAL tables: white card, uppercase 11px headers, row rules #eef, blue
+   action buttons, monospace data; toolbars: "Show Records" + blue export
+   buttons + right search. Applied as overrides only — no markup/behaviour
+   change on any existing screen. */
+html body.ams-panel.ams-ui.ams-light :is(.exp-btns .ams-btn,.ams-btn.ams-blue,.btn.btn-blue,.btn-blue){background:#155eef!important;border-color:#155eef!important;color:#fff!important;border-radius:5px!important}
+html body.ams-panel.ams-ui.ams-light :is(.btn,.ams-btn){border-radius:5px!important;font-weight:600}
+html body.ams-panel.ams-ui.ams-light :is(input[type="text"],input[type="date"],input[type="number"],select,textarea,input:not([type])){border:1px solid #e0e5f2;border-radius:5px;background:#fff;color:#0a2540}
+html body.ams-panel.ams-ui.ams-light :is(input,select,textarea):focus{border-color:#155eef!important;box-shadow:0 0 0 3px rgba(21,94,239,.13)!important;outline:none!important}
+html body.ams-panel.ams-ui.ams-light table td{color:#16305c}
+html body.ams-panel.ams-ui.ams-light .pagination button.active,html body.ams-panel.ams-ui.ams-light .pager button.active{background:#155eef!important;border-color:#155eef!important;color:#fff!important}
+html body.ams-panel.ams-ui.ams-light :is(.modal,.modal-card,.dialog,.ams-modal-card){border-radius:8px!important;border:1px solid #e4ebf6!important;box-shadow:0 24px 60px rgba(11,36,71,.22)!important}
+html body.ams-panel.ams-ui.ams-light .tag,html body.ams-panel.ams-ui.ams-light .badge{border-radius:5px}
+html body.ams-panel.ams-ui.ams-light .topbar{background:#fff!important}
+html body.ams-panel.ams-ui.ams-light .tb-title{color:#0a2540!important;font-weight:600}
+/* Volume chart — dark theme (image report 2026-10-26: white plot + pale titles on dark) */
+html body.ams-panel.ams-ui.ams-dark .ams-panel-chart-card{background:#101d33!important;border-color:#22345a!important;box-shadow:0 10px 28px rgba(0,0,0,.35)!important}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-chart-head h3{color:#e6eefc!important}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-chart-head p,html body.ams-panel.ams-ui.ams-dark .ams-panel-chart-values,html body.ams-panel.ams-ui.ams-dark .ams-panel-muted,html body.ams-panel.ams-ui.ams-dark .ams-panel-chart-empty{color:#94a9cf!important}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-chart-totals{color:#e6eefc!important}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-tip{background:#e2e8f0;color:#0b1220}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-bar-hit:focus{stroke:#e6eefc}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-plot-bg{fill:#16263f}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-grid{stroke:#26395e}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-baseline{stroke:#33477a}
+html body.ams-panel.ams-ui.ams-dark .ams-panel-axis{fill:#9db1d6}
