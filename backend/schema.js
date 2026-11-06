@@ -1151,6 +1151,82 @@ db.run(`CREATE TABLE IF NOT EXISTS payment_notifications_v2 (
   ensureColumn('chat_lock_prefs', 'chat_pin_hash', 'TEXT');
   ensureColumn('chat_lock_prefs', 'locked', 'INTEGER NOT NULL DEFAULT 0');
 
+  /* ======================================================================
+     ROUTING CONNECTORS  (multi-protocol inbound routing)
+     ----------------------------------------------------------------------
+     ADDITIVE ONLY. Nothing here changes any existing table, and every
+     transport funnels into the SAME ingestion function the carrier webhook
+     and SMPP already use (processIncomingSmsPayload), so allocation, rate
+     cards, OTP extraction, payout rules, daily limits, payment ledger and
+     panel scoping behave identically.
+
+     Supported protocols (one row each, independent of the others):
+       http  - HTTP/HTTPS or REST webhook receiver; GLOBAL SMS exposes
+               POST /api/routing/in/:public_id with token + IP allowlist.
+       tcp   - raw TCP socket listener with JSON / delimited / length-prefix
+               framing for partners that push text over a socket.
+       udp   - datagram listener, same framing/parsing.
+       smpp  - thin link to the existing SMPP engine (smpp_connections row);
+               no second engine, no duplicated logic.
+     ====================================================================== */
+  db.run(`CREATE TABLE IF NOT EXISTS routing_connectors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    protocol TEXT NOT NULL DEFAULT 'http',      -- http | tcp | udp | smpp
+    direction TEXT NOT NULL DEFAULT 'inbound',
+    active INTEGER NOT NULL DEFAULT 0,
+    notes TEXT DEFAULT '',
+
+    -- HTTP / REST receiver
+    public_id TEXT DEFAULT '',                  -- unguessable path segment
+    token TEXT DEFAULT '',                      -- bearer / x-route-token / ?token=
+    allowed_ips TEXT DEFAULT '',                -- comma separated, empty = any
+    response_ack TEXT DEFAULT '',               -- empty = JSON reply
+
+    -- TCP / UDP listener
+    bind_host TEXT DEFAULT '0.0.0.0',
+    listen_port INTEGER DEFAULT 0,
+    framing TEXT DEFAULT 'json',                -- json | newline | delimiter | length4 | raw
+    delimiter TEXT DEFAULT '|',
+    template TEXT DEFAULT '',                   -- e.g. {number}|{cli}|{message}
+    payload_encoding TEXT DEFAULT 'utf8',
+
+    -- field mapping (dot path inside the parsed payload). Empty = auto-detect,
+    -- which already understands number/to/msisdn, from/sender/cli, body/text...
+    map_number TEXT DEFAULT '',
+    map_cli TEXT DEFAULT '',
+    map_message TEXT DEFAULT '',
+    map_id TEXT DEFAULT '',
+    map_date TEXT DEFAULT '',
+
+    -- link to the existing SMPP engine (protocol = smpp)
+    smpp_connection_id INTEGER,
+
+    -- runtime state (written by the service, read by the UI)
+    status TEXT DEFAULT 'stopped',              -- stopped | listening | linked | error
+    last_error TEXT DEFAULT '',
+    last_event_at TEXT DEFAULT '',
+    consecutive_failures INTEGER NOT NULL DEFAULT 0,
+    total_received INTEGER NOT NULL DEFAULT 0,
+    total_rejected INTEGER NOT NULL DEFAULT 0,
+
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_routing_public_id ON routing_connectors(public_id)');
+
+  db.run(`CREATE TABLE IF NOT EXISTS routing_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    connector_id INTEGER,
+    connector_name TEXT DEFAULT '',
+    event TEXT DEFAULT '',                      -- start|stop|message|reject|error
+    level TEXT DEFAULT 'info',                  -- info | warn | error
+    detail TEXT DEFAULT '',
+    peer TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.run('CREATE INDEX IF NOT EXISTS idx_routing_logs_conn ON routing_logs(connector_id, id DESC)');
+
 
 
 }

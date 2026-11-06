@@ -20,6 +20,16 @@ const backup = require('./backup');
 const providerSync = require('./providerSync');
 const smsFts = require('./fts');
 const smppService = require('./smppService');
+const routingService = require('./routingService');
+
+/* PRE-EXISTING BUG (fixed here, one line):
+ * `cleanUrl()` is used by the HTTP sharing forwarder and by
+ * /api/panel-sharing/http/test, but it was never defined or imported in this
+ * file — so every HTTP forward died with "cleanUrl is not defined" and the
+ * message only landed in sharing_forward_logs as a failure. The helper already
+ * exists (and is already battle-tested) in providerSync.js, so reuse it rather
+ * than duplicating the normalisation rules. No other behaviour changes. */
+const cleanUrl = require('./providerSync')._internal.cleanUrl;
 
 const app = express();
 app.set('trust proxy', true);
@@ -223,7 +233,7 @@ const smsIngestLimit = rateLimit({ windowMs: 60000, max: parseInt(process.env.IN
 const heavyWriteLimit = rateLimit({ windowMs: 60000, max: parseInt(process.env.HEAVY_WRITE_RATE_PER_MIN || '120', 10) || 120, keyFn: req => `heavy:${req.ip || 'unknown'}` });
 app.use('/api', (req, res, next) => {
   const p = req.path;
-  if (p === '/health' || p === '/login' || p.startsWith('/incoming-sms')) return next();
+  if (p === '/health' || p === '/login' || p.startsWith('/incoming-sms') || p.startsWith('/routing/in/')) return next();
   return apiRateLimit(req, res, next);
 });
 app.use('/api/numbers', (req, res, next) => {
@@ -872,6 +882,108 @@ app.get('/api/smpp/outbox', authRequired, requireRole('admin'), (req, res) => {
     ? db.all('SELECT * FROM smpp_outbox WHERE connection_id=? ORDER BY id DESC LIMIT 200', [cid])
     : db.all('SELECT * FROM smpp_outbox ORDER BY id DESC LIMIT 200');
   res.json(rows);
+});
+
+/* =====================================================================
+ * ROUTING CONNECTIONS — multi-protocol inbound endpoints
+ * (http / https / rest, tcp socket, udp, and a link to the SMPP engine)
+ * Additive only: every transport calls the same processIncomingSmsPayload.
+ * ===================================================================== */
+function routingPublic(row){
+  if(!row) return null;
+  const st = routingService.statusOf(row.id) || {};
+  return {
+    id: row.id, name: row.name, protocol: row.protocol, direction: row.direction,
+    active: !!row.active, notes: row.notes,
+    public_id: row.public_id, endpoint: '/api/routing/in/'+(row.public_id||''),
+    has_token: !!row.token, allowed_ips: row.allowed_ips, response_ack: row.response_ack,
+    bind_host: row.bind_host, listen_port: row.listen_port, framing: row.framing,
+    delimiter: row.delimiter, template: row.template,
+    map_number: row.map_number, map_cli: row.map_cli, map_message: row.map_message,
+    map_id: row.map_id, map_date: row.map_date,
+    smpp_connection_id: row.smpp_connection_id,
+    status: st.status || row.status, live: st.live || 'stopped',
+    last_error: st.last_error || row.last_error, last_event_at: st.last_event_at || row.last_event_at,
+    total_received: row.total_received, total_rejected: row.total_rejected,
+    created_at: row.created_at, updated_at: row.updated_at,
+  };
+}
+
+app.get('/api/routing/connectors', authRequired, requireRole('admin'), (req,res)=>{
+  res.json(routingService.listConnectors().map(routingPublic));
+});
+
+app.post('/api/routing/connectors', authRequired, requireRole('admin'), (req,res)=>{
+  try {
+    const row = routingService.createConnector(req.body || {});
+    logAction(req, 'routing_connector_create', 'routing_connectors', { id: row.id, name: row.name, protocol: row.protocol });
+    res.json({ ok: true, connector: routingPublic(row) });
+  } catch(e){ res.status(400).json({ error: e.message }); }
+});
+
+app.put('/api/routing/connectors/:id', authRequired, requireRole('admin'), (req,res)=>{
+  try {
+    const row = routingService.updateConnector(+req.params.id, req.body || {});
+    logAction(req, 'routing_connector_update', 'routing_connectors', { id: row.id, name: row.name });
+    res.json({ ok: true, connector: routingPublic(row) });
+  } catch(e){ res.status(400).json({ error: e.message }); }
+});
+
+app.delete('/api/routing/connectors/:id', authRequired, requireRole('admin'), (req,res)=>{
+  try {
+    routingService.deleteConnector(+req.params.id);
+    logAction(req, 'routing_connector_delete', 'routing_connectors', { id: +req.params.id });
+    res.json({ ok: true });
+  } catch(e){ res.status(400).json({ error: e.message }); }
+});
+
+for (const action of ['start','stop','restart']) {
+  app.post(`/api/routing/connectors/:id/${action}`, authRequired, requireRole('admin'), (req,res)=>{
+    const id = +req.params.id;
+    if(!routingService.getConnector(id)) return res.status(404).json({ error: 'Connector not found' });
+    let r;
+    try {
+      r = action === 'start' ? routingService.startConnector(id)
+        : action === 'stop' ? routingService.stopConnector(id)
+        : routingService.restartConnector(id);
+    } catch(e){ r = { ok:false, error: e.message }; }
+    res.json({ ...r, status: routingService.statusOf(id) });
+  });
+}
+
+app.post('/api/routing/connectors/:id/test', authRequired, requireRole('admin'), async (req,res)=>{
+  const id = +req.params.id;
+  if(!routingService.getConnector(id)) return res.status(404).json({ error: 'Connector not found' });
+  try { res.json(await routingService.testConnector(id)); }
+  catch(e){ res.status(400).json({ ok:false, error: e.message }); }
+});
+
+app.get('/api/routing/logs', authRequired, requireRole('admin'), (req,res)=>{
+  res.json(routingService.recentLogs(req.query.connector_id ? +req.query.connector_id : null, req.query.limit || 100));
+});
+
+app.get('/api/routing/status', authRequired, requireRole('admin'), (req,res)=>{
+  const conns = routingService.listConnectors();
+  res.json({
+    enabled: String(process.env.ROUTING_ENABLED || 'true').toLowerCase() !== 'false',
+    protocols: ['http','tcp','udp','smpp'],
+    connectors: conns.map(routingPublic),
+  });
+});
+
+/* Partner-facing receiver. Public by design: the per-connector token and the
+ * optional IP allowlist are the credentials, exactly like the carrier webhook.
+ * Rate limited by the same generous ingest guard as /api/incoming-sms. */
+app.all('/api/routing/in/:publicId', smsIngestLimit, (req,res)=>{
+  let out;
+  try {
+    out = routingService.handleHttp(req.params.publicId, {
+      body: req.body, query: req.query, headers: req.headers, ip: getClientIp(req),
+    });
+  } catch(e){ out = { status: 500, body: { ok:false, error: e.message } }; }
+  if(out.body === undefined) out.body = { ok:false, error:'no response' };
+  if(out.raw) return res.status(out.status).send(out.body);
+  return res.status(out.status).json(out.body);
 });
 
 app.get('/health', (req, res) => res.json({ ok: true, service: 'GLOBAL SMS', time: new Date().toISOString() }));
@@ -7201,6 +7313,16 @@ const PORT = process.env.PORT || 4000;
       clearApiReadCache,
     });
   } catch (e) { console.warn('[SMPP] start failed:', e.message); }
+  // Routing connectors (http/rest/tcp/udp/smpp link). Same ingestion function,
+  // same isolation rules: a bad connector reports its own error and the panel
+  // carries on.
+  try {
+    routingService.start({
+      log: console,
+      processIncomingSmsPayload,
+      clearApiReadCache,
+    });
+  } catch (e) { console.warn('[ROUTING] start failed:', e.message); }
   if (String(process.env.PAYMENT_LEDGER_BACKFILL_ON_STARTUP || 'false').toLowerCase() === 'true') {
     try { backfillPaymentLedger(); } catch(e) { console.warn('[PAYMENT_V2] backfill failed:', e.message); }
   } else {

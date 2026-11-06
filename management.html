@@ -376,6 +376,7 @@ thead th{font-size:11.5px!important;letter-spacing:.25px!important;}
         <div class="sub-item" data-page="providers"><span class="dot"></span> Providers</div>
         <div class="sub-item" data-page="apiProviders"><span class="dot"></span> API Providers</div>
         <div class="sub-item" data-page="smppConnections"><span class="dot"></span> SMPP Connections</div>
+        <div class="sub-item" data-page="routingConnections"><span class="dot"></span> Routing Connections</div>
         <div class="sub-item" data-page="systemLogs"><span class="dot"></span> System Logs</div>
         <div class="sub-item" data-page="backupManagement"><span class="dot"></span> Backups</div>
         <div class="sub-item" data-page="integrationGuide"><span class="dot"></span> Integration Guide</div>
@@ -869,6 +870,40 @@ Nigeria"></textarea><div class="hint">Default rates will be NA. You can edit pay
         </div>
       </section>
 
+      <!-- ========== SYSTEM MASTER: ROUTING CONNECTIONS ========== -->
+      <section class="page" id="page-routingConnections">
+        <div class="page-head"><div><h2>Routing Connections</h2><div class="breadcrumb"><b>System Master</b> › Inbound Routing</div></div>
+          <div class="head-actions"><button class="btn btn-blue" onclick="loadRouting()">Refresh</button><button class="btn btn-purple" onclick="openRoutingModal(-1)">+ Add Connector</button></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card dash-metric d-blue"><div class="stat-info"><p>Connectors</p><h3 id="rtTotal">0</h3><span>Configured</span></div><div class="dash-go">⇄</div></div>
+          <div class="stat-card dash-metric d-green"><div class="stat-info"><p>Live</p><h3 id="rtActive">0</h3><span>Listening / linked</span></div><div class="dash-go">✓</div></div>
+          <div class="stat-card dash-metric d-orange"><div class="stat-info"><p>Messages Received</p><h3 id="rtRecv">0</h3><span>Accepted into SMS records</span></div><div class="dash-go">↓</div></div>
+          <div class="stat-card dash-metric d-pink"><div class="stat-info"><p>Rejected</p><h3 id="rtRej">0</h3><span id="rtRejSub">Bad token, IP or number</span></div><div class="dash-go">!</div></div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div><h3>How this works</h3><div class="sub">A routing connector is one named, credentialed endpoint that an external system or partner uses to deliver SMS into <span data-brand-replace="name">GLOBAL SMS</span>. Every protocol below converges on the same ingestion path, so allocation, rate cards, OTP extraction, payout rules, daily limits and forwarding behave exactly the same whichever protocol the partner prefers — no extra development is needed to onboard another provider.</div></div></div>
+          <div class="hint">
+            <b>HTTP / HTTPS / REST</b> — <span data-brand-replace="name">GLOBAL SMS</span> exposes its own receiver URL. The partner POSTs JSON, form data or query-string fields. Credentials: the generated URL plus a token you set here, and optionally an IP allowlist.<br>
+            <b>TCP socket</b> — the partner opens a raw TCP connection and pushes messages. Credentials: this server's IP, the listen port, and whichever framing they use (JSON, one record per line, a 4-byte length prefix, or a {template}).<br>
+            <b>UDP</b> — same as TCP but connectionless, for partners that only emit datagrams.<br>
+            <b>SMPP</b> — links to a connection you already created on the SMPP Connections screen (client out or server in). Nothing is duplicated: this screen only labels and monitors it.<br>
+            <b>Outbound</b> — to send SMS to a partner, use SMPP Connections (bind out to them) or Panel Sharing → Sharing Users with connection type SMPP / HTTP.
+          </div>
+        </div>
+        <div class="table-wrap"><div class="tscroll"><table>
+          <thead><tr><th>Name</th><th>Protocol</th><th>Endpoint / Listen</th><th>Status</th><th>Received</th><th>Rejected</th><th>Last Event</th><th>Actions</th></tr></thead>
+          <tbody id="rtBody"></tbody>
+        </table></div><div class="table-foot"><div class="info" id="rtInfo"></div></div></div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><div><h3>Recent Routing Activity</h3><div class="sub">Start, stop, accepted message, rejection and error events.</div></div><div class="head-actions"><button class="btn btn-blue" onclick="loadRoutingLogs()">Refresh Logs</button></div></div>
+          <div class="table-wrap"><div class="tscroll"><table>
+            <thead><tr><th>Time</th><th>Connector</th><th>Event</th><th>Level</th><th>Detail</th><th>Peer</th></tr></thead>
+            <tbody id="rtLogBody"></tbody>
+          </table></div></div>
+        </div>
+      </section>
+
       <!-- ========== SYSTEM MASTER: SMS CLI LIMIT ========== -->
       <section class="page" id="page-cliLimit">
         <div class="page-head"><div><h2>SMS CLI Limit</h2><div class="breadcrumb"><b>System Master</b> › CLI Limit</div></div></div>
@@ -981,6 +1016,87 @@ Nigeria"></textarea><div class="hint">Default rates will be NA. You can edit pay
     </div>
   </div>
   <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('rateModal')">Cancel</button><button class="btn btn-purple" onclick="saveRate()">Save Rate</button></div>
+</div></div>
+
+<!-- ============ ROUTING CONNECTOR MODAL ============ -->
+<div class="modal-overlay" id="routingModal"><div class="modal" style="max-width:760px">
+  <div class="modal-head"><h3 id="rtModalTitle">Add Routing Connector</h3><button class="modal-close" onclick="closeModal('routingModal')">×</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Connector Name <span class="req">*</span></label><input type="text" id="rtName" placeholder="e.g. ATX inbound" /></div>
+      <div class="form-group"><label>Status</label><select id="rtActive"><option value="1">Enabled</option><option value="0">Disabled</option></select></div>
+    </div>
+    <div class="form-group"><label>Protocol <span class="req">*</span></label>
+      <select id="rtProtocol" onchange="rtProtocolChange()">
+        <option value="http">HTTP / HTTPS / REST — partner posts to our URL</option>
+        <option value="tcp">TCP Socket — partner pushes over a raw socket</option>
+        <option value="udp">UDP — partner sends datagrams</option>
+        <option value="smpp">SMPP — link to an existing SMPP connection</option>
+      </select>
+      <div class="hint" id="rtProtocolHint"></div>
+    </div>
+
+    <div id="rtHttpBox">
+      <div class="form-group"><label>Receiver URL</label>
+        <div style="display:flex;gap:8px"><input type="text" id="rtEndpoint" readonly placeholder="created automatically after saving" class="mono" style="flex:1"/><button type="button" class="btn btn-blue" onclick="rtCopyEndpoint()">Copy</button></div>
+        <div class="hint">Give this full URL to the partner: it is the address they POST to. Shown here without the host, so it works behind any domain.</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Token</label><input type="text" id="rtToken" placeholder="secret the partner must send" /><div class="hint">Accepted as <span class="mono">Authorization: Bearer …</span>, <span class="mono">x-route-token</span>, <span class="mono">x-api-key</span> or <span class="mono">?token=</span>. Leave blank for open (not recommended).</div></div>
+        <div class="form-group"><label>Allowed IPs</label><input type="text" id="rtAllowedIps" placeholder="e.g. 103.21.44.10, 103.21.44.0/24" /><div class="hint">Comma separated. Blank = accept from anywhere (token still applies).</div></div>
+      </div>
+      <div class="form-group"><label>Reply to partner</label><input type="text" id="rtAck" placeholder="blank = JSON {ok:true,id:…}" /><div class="hint">Optional plain-text acknowledgement, for partners that require a literal "OK".</div></div>
+    </div>
+
+    <div id="rtSocketBox">
+      <div class="form-grid">
+        <div class="form-group"><label>Bind Address</label><input type="text" id="rtBindHost" value="0.0.0.0" /></div>
+        <div class="form-group"><label>Listen Port <span class="req">*</span></label><input type="number" id="rtListenPort" min="1" max="65535" placeholder="e.g. 9911" /><div class="hint">Choose a free port, and give the partner this server's IP and that port. There is no universal default for a socket feed.</div></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Framing</label>
+          <select id="rtFraming">
+            <option value="json">JSON — one object per message</option>
+            <option value="line">Line — one record per line</option>
+            <option value="length4">Length prefixed — 4-byte big-endian size</option>
+            <option value="raw">Raw — one message per connection</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Field Separator</label><input type="text" id="rtDelimiter" value="|" /><div class="hint">Used when no JSON and no template is set — order: number, sender, message.</div></div>
+      </div>
+      <div class="form-group"><label>Message Template</label><input type="text" id="rtTemplate" placeholder="e.g. {number}|{cli}|{message}" /><div class="hint">Optional. Extracts fields from any line format the partner uses. Leave blank to rely on JSON or the separator above.</div></div>
+    </div>
+
+    <div id="rtSmppBox">
+      <div class="form-group"><label>Linked SMPP Connection <span class="req">*</span></label>
+        <select id="rtSmppConn"><option value="">— choose —</option></select>
+        <div class="hint">Create the connection on the SMPP Connections screen first (client mode to bind out, server mode to let the partner bind in), then link it here for labelling and monitoring. Start/Stop on this screen controls that SMPP connection.</div>
+      </div>
+    </div>
+
+    <div class="form-group"><label>Field Mapping <span class="hint-inline">(advanced — leave blank unless the partner uses unusual field names)</span></label>
+      <div class="form-grid">
+        <div class="form-group"><input type="text" id="rtMapNumber" placeholder="number field path" /></div>
+        <div class="form-group"><input type="text" id="rtMapCli" placeholder="sender / CLI field path" /></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><input type="text" id="rtMapMessage" placeholder="message field path" /></div>
+        <div class="form-group"><input type="text" id="rtMapId" placeholder="unique id field (dedup)" /></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><input type="text" id="rtMapDate" placeholder="date / time field" /></div>
+        <div class="form-group"></div>
+      </div>
+      <div class="hint">Dot paths inside the payload, e.g. <span class="mono">data.msisdn</span> or <span class="mono">sms.to</span>. Blank = automatic detection (number/to/msisdn, from/sender/cli, body/text/message…).</div>
+    </div>
+
+    <div class="form-group"><label>Notes</label><input type="text" id="rtNotes" placeholder="optional" /></div>
+    <div class="hint" id="rtTestResult" style="margin-top:6px"></div>
+  </div>
+  <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 18px">
+    <button class="btn btn-blue" id="rtTestBtn" onclick="rtTestCurrent()">Test</button>
+    <button class="btn btn-green" onclick="saveRouting()">Save Connector</button>
+  </div>
 </div></div>
 
 <!-- ============ API PROVIDER MODAL ============ -->
@@ -1171,7 +1287,7 @@ Nigeria"></textarea><div class="hint">Default rates will be NA. You can edit pay
 /* auth guard — management uses admin credentials */
 if(window.API){ API.guard('admin'); }
 window.AMS_PANEL_MODE='management';
-const MANAGEMENT_ALLOWED_PAGES=new Set(['import','testImport','rates','cliLimit','limitManagement','carrierIntegration','apiProviders','smppConnections','systemLogs','backupManagement','providers','integrationGuide']);
+const MANAGEMENT_ALLOWED_PAGES=new Set(['import','testImport','rates','cliLimit','limitManagement','carrierIntegration','apiProviders','smppConnections','routingConnections','systemLogs','backupManagement','providers','integrationGuide']);
 function normalizePanelPage(id){ id=String(id||'rates'); return MANAGEMENT_ALLOWED_PAGES.has(id)?id:'rates'; }
 function applyPanelSplitUi(){ /* Management Panel keeps maintenance/config modules only. */ }
 /* =============== NAV =============== */
@@ -2993,6 +3109,7 @@ async function loadAdminPageData(page){
     if(page==='providers'){ loadProviders(); return; }
     if(page==='apiProviders') return loadApiProviders();
     if(page==='smppConnections') return loadSmpp();
+    if(page==='routingConnections') return loadRouting();
     if(page==='systemLogs') return loadSystemLogs();
     if(page==='backupManagement') return loadBackups();
     if(page==='integrationGuide') return loadIntegrationGuide();
@@ -3243,6 +3360,215 @@ async function loadSmppLogs(){
       <td class="mono muted">${smEsc(r.peer||'')}</td>
     </tr>`).join('');
   }catch(e){ b.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:14px">${smEsc(e.message||e)}</td></tr>`; }
+}
+
+/* ================= ROUTING CONNECTIONS (multi-protocol inbound) =================
+ * One named, credentialed endpoint per external system. Every protocol funnels
+ * into the same ingestion path used by the carrier webhook and SMPP.
+ */
+let routingData=[], routingEditId=-1;
+
+function rtBadge(protocol){
+  const map={http:['#0369a1','HTTP / REST'],tcp:['#7c3aed','TCP'],udp:['#b45309','UDP'],smpp:['#047857','SMPP']};
+  const [col,label]=map[protocol]||['#64748b',String(protocol||'')];
+  return `<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;background:${col}">${label}</span>`;
+}
+function routingStatusTag(c){
+  const st=String(c.live||c.status||'stopped');
+  const map={
+    listening:['#0369a1','Listening'], bound:['#047857','Bound'], linked:['#047857','Linked'],
+    connecting:['#b45309','Connecting'], reconnecting:['#b45309','Reconnecting'],
+    error:['#b42318','Error'], stopped:['#64748b','Stopped']
+  };
+  const [col,label]=map[st]||['#64748b',st];
+  return `<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;background:${col}">${label}</span>`;
+}
+async function loadRouting(){
+  const body=document.getElementById('rtBody');
+  if(!body) return;
+  try{
+    const rows=await API.get('/routing/connectors');
+    routingData=Array.isArray(rows)?rows:[];
+    document.getElementById('rtTotal').textContent=routingData.length;
+    document.getElementById('rtActive').textContent=routingData.filter(c=>['listening','bound','linked'].includes(String(c.live))).length;
+    document.getElementById('rtRecv').textContent=routingData.reduce((a,c)=>a+(+c.total_received||0),0);
+    const rej=routingData.reduce((a,c)=>a+(+c.total_rejected||0),0);
+    document.getElementById('rtRej').textContent=rej;
+    document.getElementById('rtRejSub').textContent=rej?'Check the activity log below':'Bad token, IP or number';
+    if(!routingData.length){
+      body.innerHTML='<tr><td colspan="8" class="muted" style="text-align:center;padding:18px">No routing connectors yet. Click “+ Add Connector” to create an HTTP, TCP, UDP or SMPP inbound endpoint.</td></tr>';
+      document.getElementById('rtInfo').textContent='';
+      return loadRoutingLogs();
+    }
+    body.innerHTML=routingData.map(c=>{
+      const target=c.protocol==='http'
+        ? `<span class="mono">${smEsc(c.endpoint||'')}</span>`
+        : (c.protocol==='smpp'
+            ? `<span class="mono">SMPP #${smEsc(String(c.smpp_connection_id||'—'))}</span>`
+            : `<span class="mono">${smEsc((c.bind_host||'0.0.0.0')+':'+(c.listen_port||'—'))}</span>`);
+      const err=(c.status==='error'&&c.last_error)?`<div class="hint" style="color:var(--ams-danger,#b42318);margin-top:3px">${smEsc(c.last_error)}</div>`:'';
+      return `<tr>
+        <td><b>${smEsc(c.name)}</b>${c.notes?`<div class="hint">${smEsc(c.notes)}</div>`:''}</td>
+        <td>${rtBadge(c.protocol)}${c.has_token?'<div class="hint">token required</div>':''}</td>
+        <td>${target}</td>
+        <td>${routingStatusTag(c)}${err}</td>
+        <td>${c.total_received||0}</td>
+        <td>${c.total_rejected||0}</td>
+        <td class="muted">${c.last_event_at?String(c.last_event_at).slice(0,19):'Never'}</td>
+        <td>
+          <button type="button" class="ams-btn ams-blue" onclick="openRoutingModal(${c.id})" data-tip="Edit" title="Edit" aria-label="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+          <button class="btn ${c.active?'btn-amber':'btn-green'} btn-sm" onclick="toggleRouting(${c.id},${c.active?0:1})">${c.active?'Stop':'Start'}</button>
+          <button class="btn btn-blue btn-sm" onclick="testRouting(${c.id})">Test</button>
+          <button type="button" class="ams-btn danger" onclick="deleteRouting(${c.id},'${smEsc(c.name).replace(/'/g,"\\'")}')" data-tip="Delete" title="Delete" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></svg></button>
+        </td></tr>`;
+    }).join('');
+    document.getElementById('rtInfo').textContent=`${routingData.length} connector(s) · ${routingData.filter(c=>['listening','bound','linked'].includes(String(c.live))).length} live`;
+    loadRoutingLogs();
+  }catch(e){
+    body.innerHTML=`<tr><td colspan="8" class="muted" style="text-align:center;padding:18px">Could not load routing connectors: ${smEsc(e.message||e)}</td></tr>`;
+  }
+}
+async function loadRoutingLogs(){
+  const b=document.getElementById('rtLogBody');
+  if(!b) return;
+  try{
+    const rows=await API.get('/routing/logs');
+    if(!rows.length){ b.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center;padding:14px">No activity yet.</td></tr>'; return; }
+    const col={error:'#b42318',warn:'#b45309',info:'#047857'};
+    b.innerHTML=rows.slice(0,40).map(r=>`<tr>
+      <td class="muted">${smEsc(String(r.created_at||'').slice(0,19))}</td>
+      <td>${smEsc(r.connector_name||'—')}</td>
+      <td>${smEsc(r.event||'')}</td>
+      <td><span style="color:${col[r.level]||'#64748b'};font-weight:700">${smEsc(r.level||'')}</span></td>
+      <td>${smEsc(r.detail||'')}</td>
+      <td class="mono muted">${smEsc(r.peer||'')}</td>
+    </tr>`).join('');
+  }catch(e){ b.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:14px">${smEsc(e.message||e)}</td></tr>`; }
+}
+function rtProtocolChange(){
+  const p=document.getElementById('rtProtocol').value;
+  document.getElementById('rtHttpBox').style.display=p==='http'?'':'none';
+  document.getElementById('rtSocketBox').style.display=(p==='tcp'||p==='udp')?'':'none';
+  document.getElementById('rtSmppBox').style.display=p==='smpp'?'':'none';
+  const hints={
+    http:'You create the receiver; the partner only needs the URL and the token. No port needs to be opened.',
+    tcp:'You listen on a port this server owns. Give the partner the server IP, that port and the framing you agreed.',
+    udp:'Same as TCP but connectionless. Only use this if the partner can only emit datagrams.',
+    smpp:'Link an SMPP connection you already configured. The SMPP engine does the binding, retries and de-duplication.'
+  };
+  document.getElementById('rtProtocolHint').textContent=hints[p]||'';
+}
+async function rtFillSmppSelect(current){
+  const sel=document.getElementById('rtSmppConn');
+  if(!sel) return;
+  let rows=[];
+  try { rows=await API.get('/smpp/connections'); } catch(_) { rows=[]; }
+  if(!Array.isArray(rows)) rows=[];
+  sel.innerHTML='<option value="">— choose —</option>'+rows.map(c=>`<option value="${c.id}">${smEsc(c.name)} — ${smEsc(c.mode)} ${c.mode==='server'?(':'+(c.listen_port||'')):((c.host||'')+':'+(c.port||2775))}</option>`).join('');
+  if(current) sel.value=String(current);
+}
+function openRoutingModal(id){
+  routingEditId=id;
+  const isNew=(id<0);
+  const c=isNew?null:routingData.find(x=>x.id===id);
+  const g=i=>document.getElementById(i);
+  g('rtModalTitle').textContent=isNew?'Add Routing Connector':'Edit Routing Connector: '+(c?c.name:'');
+  g('rtName').value=c?c.name:'';
+  g('rtActive').value=c?(c.active?'1':'0'):'1';
+  g('rtProtocol').value=c?c.protocol:'http';
+  g('rtEndpoint').value=c&&c.endpoint?c.endpoint:'';
+  g('rtToken').value='';
+  g('rtToken').placeholder=c&&c.has_token?'token stored — leave blank to keep':'secret the partner must send';
+  g('rtAllowedIps').value=c?(c.allowed_ips||''):'';
+  g('rtAck').value=c?(c.response_ack||''):'';
+  g('rtBindHost').value=c?(c.bind_host||'0.0.0.0'):'0.0.0.0';
+  g('rtListenPort').value=c?(c.listen_port||''):'';
+  g('rtFraming').value=c?(c.framing||'json'):'json';
+  g('rtDelimiter').value=c?(c.delimiter||'|'):'|';
+  g('rtTemplate').value=c?(c.template||''):'';
+  g('rtMapNumber').value=c?(c.map_number||''):'';
+  g('rtMapCli').value=c?(c.map_cli||''):'';
+  g('rtMapMessage').value=c?(c.map_message||''):'';
+  g('rtMapId').value=c?(c.map_id||''):'';
+  g('rtMapDate').value=c?(c.map_date||''):'';
+  g('rtNotes').value=c?(c.notes||''):'';
+  g('rtTestResult').textContent='';
+  g('rtTestBtn').style.display=isNew?'none':'';
+  rtFillSmppSelect(c?c.smpp_connection_id:null);
+  rtProtocolChange();
+  document.getElementById('routingModal').classList.add('show');
+}
+function rtPayload(){
+  const v=i=>(document.getElementById(i)?.value||'').trim();
+  const name=v('rtName');
+  if(!name){ alert('❌ Connector name is required.'); return null; }
+  const protocol=v('rtProtocol');
+  if((protocol==='tcp'||protocol==='udp')&&!v('rtListenPort')){ alert('❌ Listen port is required for a socket connector.'); return null; }
+  if(protocol==='smpp'&&!v('rtSmppConn')){ alert('❌ Choose the SMPP connection to link.'); return null; }
+  const p={
+    name, protocol,
+    active:v('rtActive')==='1'?1:0,
+    notes:v('rtNotes'),
+    allowed_ips:v('rtAllowedIps'),
+    response_ack:v('rtAck'),
+    bind_host:v('rtBindHost')||'0.0.0.0',
+    listen_port:v('rtListenPort')?parseInt(v('rtListenPort'),10):0,
+    framing:v('rtFraming'),
+    delimiter:v('rtDelimiter')||'|',
+    template:v('rtTemplate'),
+    map_number:v('rtMapNumber'),
+    map_cli:v('rtMapCli'),
+    map_message:v('rtMapMessage'),
+    map_id:v('rtMapId'),
+    map_date:v('rtMapDate'),
+    smpp_connection_id:v('rtSmppConn')?parseInt(v('rtSmppConn'),10):null,
+  };
+  const tok=v('rtToken');
+  if(tok) p.token=tok;                       // blank keeps the stored token on edit
+  else if(routingEditId<0) p.token='';
+  return p;
+}
+async function saveRouting(){
+  const p=rtPayload();
+  if(!p) return;
+  try{
+    if(routingEditId<0) await API.post('/routing/connectors',p);
+    else await API.put('/routing/connectors/'+routingEditId,p);
+    closeModal('routingModal');
+    await loadRouting();
+    if(window.AMS&&AMS.toast) AMS.toast('Connector saved','success');
+  }catch(e){ alert('❌ '+(e.message||e)); }
+}
+async function toggleRouting(id,active){
+  try{
+    await API.post('/routing/connectors/'+id+'/'+(active?'start':'stop'),{});
+    await loadRouting();
+  }catch(e){ alert('❌ '+(e.message||e)); }
+}
+async function testRouting(id){
+  try{
+    const r=await API.post('/routing/connectors/'+id+'/test',{});
+    const msg=(r.ok?'✅ ':'⚠️ ')+(r.error||r.note||(r.endpoint?('Endpoint: '+r.endpoint):'Tested'));
+    alert(msg);
+    return r;
+  }catch(e){ alert('❌ '+(e.message||e)); }
+}
+async function rtTestCurrent(){
+  if(routingEditId<0){ document.getElementById('rtTestResult').textContent='Save the connector first, then use Test.'; return; }
+  const r=await testRouting(routingEditId);
+  if(r&&document.getElementById('rtTestResult')) document.getElementById('rtTestResult').textContent=(r.ok?'✅ ':'⚠️ ')+(r.error||r.note||r.endpoint||'');
+}
+async function deleteRouting(id,name){
+  if(!confirm('Delete connector “'+name+'”? SMS records already received are kept.')) return;
+  try{ await API.del('/routing/connectors/'+id); await loadRouting(); }
+  catch(e){ alert('❌ '+(e.message||e)); }
+}
+function rtCopyEndpoint(){
+  const el=document.getElementById('rtEndpoint');
+  const val=(el&&el.value||'').trim();
+  if(!val){ alert('Save the connector first to generate its receiver URL.'); return; }
+  const full=location.origin+val;
+  try{ navigator.clipboard.writeText(full); alert('Copied:\n'+full); }catch(e){ prompt('Copy this URL:',full); }
 }
 
 function smModeChange(){
